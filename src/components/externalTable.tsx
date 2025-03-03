@@ -5,7 +5,6 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
   ColumnFiltersState,
-  VisibilityState,
   getFilteredRowModel,
   getCoreRowModel,
   useReactTable,
@@ -31,7 +30,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { format } from "date-fns";
 import { Calendar as CalendarIcon, ListFilter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -56,8 +54,6 @@ export function ExternalDataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
 
   const [rowSelection, setRowSelection] = React.useState({});
   const table = useReactTable({
@@ -76,7 +72,7 @@ export function ExternalDataTable<TData, TValue>({
       rowSelection,
     },
   });
-    const [date, setDate] = React.useState<Date>();
+  const [date, setDate] = React.useState<Date>();
 
   return (
     <div className="pl-10 pr-10 pb-10">
@@ -117,8 +113,11 @@ export function ExternalDataTable<TData, TValue>({
           </Popover>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-[30px] justify-center text-center font-normal">
-              <ListFilter className="m-auto h-4 w-4 p-auto"/>
+              <Button
+                variant="outline"
+                className="w-[30px] justify-center text-center font-normal"
+              >
+                <ListFilter className="m-auto h-4 w-4 p-auto" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

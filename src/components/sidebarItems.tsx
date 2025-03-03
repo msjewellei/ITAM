@@ -7,13 +7,13 @@ interface SidebarItemProps {
   sublinks?: SidebarItemProps[];
 }
 
-function SidebarItem({ icon: Icon, label, path, }: SidebarItemProps) {
+function SidebarItem({ icon: Icon, label, path }: SidebarItemProps) {
   return (
     <>
-        <Link to={path} className="flex flex-col items-center">
-          <Icon size={30} color="#ffffff" strokeWidth={1.5} className="mt-8" />
-          <p className="text-white text-xs font-light">{label}</p>
-        </Link>
+      <Link to={path} className="flex flex-col items-center">
+        <Icon size={30} color="#ffffff" strokeWidth={1.5} className="mt-8" />
+        <p className="text-white text-xs font-light">{label}</p>
+      </Link>
     </>
   );
 }

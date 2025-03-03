@@ -41,8 +41,12 @@ import {
 } from "@/components/ui/popover";
 
 import * as React from "react";
-import { DialogTitle, DialogTrigger } from "@radix-ui/react-dialog";
-import { DialogContent, DialogHeader } from "./ui/dialog";
+import {
+  DialogTitle,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+} from "./ui/dialog";
 import IssuanceForm from "./issuanceForm";
 
 interface IssuanceDataTableProps<TData, TValue> {
@@ -146,17 +150,19 @@ export function IssuanceDataTable<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <DialogTrigger>
-            {" "}
+          <DialogTrigger asChild>
             <Button
               variant={"outline"}
-              className={cn("w-[30px] justify-center text-center font-normal")}
+              className={cn(
+                "w-[30px] justify-center text-center font-normal",
+                !date && "text-muted-foreground"
+              )}
             >
               <Plus className="m-auto h-4 w-4 p-auto" />
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
+          <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="pb-2">
               <DialogTitle className="text-center">
                 New Issuance Request
               </DialogTitle>

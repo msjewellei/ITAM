@@ -17,7 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import * as React from "react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
@@ -34,6 +33,10 @@ import { DialogFooter } from "./ui/dialog";
 const formSchema = z.object({
   department: z.string().min(2).max(50),
   name: z.string().min(2).max(50),
+  category: z.string().min(2).max(50),
+  subcategory: z.string().min(2).max(50),
+  type: z.string().min(2).max(50),
+  assetName: z.string().min(2).max(50),
   issue: z.string().min(2).max(100),
   remarks: z.string().min(2).max(100),
   dateReported: z.date(),
@@ -50,6 +53,10 @@ function RepairForm() {
     defaultValues: {
       department: "",
       name: "",
+      category: "",
+      subcategory: "",
+      type: "",
+      assetName: "",
       issue: "",
       remarks: "",
       dateReported: undefined,
@@ -64,7 +71,6 @@ function RepairForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
   }
-  const [date, setDate] = React.useState<Date>();
 
   return (
     <div className="pl-5 pr-5">
@@ -121,6 +127,121 @@ function RepairForm() {
                 )}
               />
             </div>
+          </div>
+          <div className="w-full">
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Internal">Internal</SelectItem>
+                        <SelectItem value="External">External</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="w-full sm:w-1/2 max-w-sm">
+              <FormField
+                control={form.control}
+                name="subcategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Sub Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Laptop">Laptop</SelectItem>
+                          <SelectItem value="Printer">Printer</SelectItem>
+                          <SelectItem value="Access Point">
+                            Access Point
+                          </SelectItem>
+                          <SelectItem value="Routers and Switch">
+                            Routers and Switch
+                          </SelectItem>
+                          <SelectItem value="Stocks">Stocks</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-full sm:w-1/2 max-w-sm">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Type 1">Type 1</SelectItem>
+                          <SelectItem value="Type 2">Type 2</SelectItem>
+                          <SelectItem value="Type 3">Type 3</SelectItem>
+                          <SelectItem value="Type 4">Type 4</SelectItem>
+                          <SelectItem value="Type 5">Type 5</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+          <div className="w-full">
+            <FormField
+              control={form.control}
+              name="assetName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Asset Name" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Asset 1">Asset 1</SelectItem>
+                        <SelectItem value="Asset 2">Asset 2</SelectItem>
+                        <SelectItem value="Asset 3">Asset 3</SelectItem>
+                        <SelectItem value="Asset 4">Asset 4</SelectItem>
+                        <SelectItem value="Asset 5">Asset 5</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <div className="w-full">
             <FormField

@@ -11,7 +11,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { format } from "date-fns";
 import { Calendar as CalendarIcon, ListFilter, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -42,8 +41,12 @@ import {
 import { Button } from "@/components/ui/button";
 
 import * as React from "react";
-import { DialogTitle, DialogTrigger } from "@radix-ui/react-dialog";
-import { DialogContent, DialogHeader } from "./ui/dialog";
+import {
+  DialogTitle,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+} from "./ui/dialog";
 import BorrowForm from "./borrowForm";
 
 interface BorrowedDataTableProps<TData, TValue> {
@@ -158,8 +161,10 @@ export function BorrowedDataTable<TData, TValue>({
             </Button>
           </DialogTrigger>
           <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-center text-medium">New Borrow Transaction</DialogTitle>
+            <DialogHeader className="pb-2">
+              <DialogTitle className="text-center">
+                New Borrow Transaction
+              </DialogTitle>
             </DialogHeader>
             <BorrowForm />
           </DialogContent>

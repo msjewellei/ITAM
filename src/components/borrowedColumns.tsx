@@ -30,7 +30,8 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox className="mr-2"
+      <Checkbox
+        className="mr-2"
         checked={
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
@@ -54,27 +55,23 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
     header: ({ column }) => {
       return (
         <div className="justify-start">
-        <Button className="text-left items-start"
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Asset Name
-          <ArrowUpDown className="ml-2 h-4 w-4 " />
-        </Button>
+          <Button
+            className="text-left items-start"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Asset Name
+            <ArrowUpDown className="ml-2 h-4 w-4 " />
+          </Button>
         </div>
       );
     },
   },
   {
     accessorKey: "userName",
-    header: ({ }) => {
-      return (
-        <p className="">
-          Borrower Name
-        </p>
-      );
+    header: ({}) => {
+      return <p className="">Borrower Name</p>;
     },
-
   },
   {
     accessorKey: "dateBorrowed",

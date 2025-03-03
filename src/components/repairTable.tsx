@@ -160,8 +160,8 @@ export function RepairDataTable<TData, TValue>({
               <Plus className="m-auto h-4 w-4 p-auto" />
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
+          <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="pb-2">
               <DialogTitle className="text-center">
                 New Repair Request
               </DialogTitle>

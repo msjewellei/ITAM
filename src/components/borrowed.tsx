@@ -133,7 +133,8 @@ export default function Borrowed() {
       duration: "100 days",
       condition: "Good",
       remarks: "None",
-    },{
+    },
+    {
       id: "6",
       userId: 6,
       userName: "Jewel Lei 6",

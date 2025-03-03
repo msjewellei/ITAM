@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 
-
-
 export type IssuanceAsset = {
   id: string;
   userId: number;
