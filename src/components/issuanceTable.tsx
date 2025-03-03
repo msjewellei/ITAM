@@ -31,7 +31,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { format } from "date-fns";
 import { Calendar as CalendarIcon, ListFilter, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -86,7 +85,7 @@ export function IssuanceDataTable<TData, TValue>({
       <div className="flex justify-between">
         <div className="flex items-center py-4 justify-start">
           <Input
-            placeholder="Search Name"
+            placeholder="Search Employee Name"
             value={
               (table.getColumn("userName")?.getFilterValue() as string) ?? ""
             }
@@ -166,9 +165,9 @@ export function IssuanceDataTable<TData, TValue>({
           </DialogContent>
         </div>
       </div>
-      <div className="rounded-md border-1px-gray">
-        <Table>
-          <TableHeader>
+      <div className="flex flex-col min-h-[calc(100vh-22rem)] max-h-[calc(100vh-22rem)] overflow-auto">
+        <Table className="justify-start text-left">
+          <TableHeader className="justify-start text-left">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

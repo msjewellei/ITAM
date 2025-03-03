@@ -165,7 +165,7 @@ export function BorrowedDataTable<TData, TValue>({
           </DialogContent>
         </div>
       </div>
-      <div className="rounded-md border-1px-gray justify-start text-left">
+      <div className="flex flex-col min-h-[calc(100vh-22rem)] max-h-[calc(100vh-22rem)] overflow-auto">
         <Table className="justify-start text-left">
           <TableHeader className="justify-start text-left">
             {table.getHeaderGroups().map((headerGroup) => (

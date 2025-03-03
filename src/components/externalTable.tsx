@@ -32,7 +32,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, ListFilter, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, ListFilter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -141,18 +141,9 @@ export function ExternalDataTable<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-[30px] justify-center text-center font-normal",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <Plus className="m-auto h-4 w-4 p-auto" />
-          </Button>
         </div>
       </div>
-      <div className="rounded-md border-1px-gray">
+      <div className="flex flex-col min-h-[calc(100vh-25rem)] max-h-[calc(100vh-25rem)] overflow-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
