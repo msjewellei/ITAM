@@ -7,7 +7,7 @@ export default function Issuance() {
     {
       id: "2",
       userId: 2,
-      userName: "Jewel Lei 2",
+      employeeName: "Jewel Lei 2",
       assetId: 2,
       assetName: "Issued Asset 2",
       issuanceDate: "02/25/2025",
@@ -16,7 +16,7 @@ export default function Issuance() {
     {
       id: "1",
       userId: 1,
-      userName: "Jewel Lei",
+      employeeName: "Jewel Lei",
       assetId: 1,
       assetName: "Issued Asset 1",
       issuanceDate: "02/25/2025",
@@ -25,7 +25,7 @@ export default function Issuance() {
     {
       id: "3",
       userId: 3,
-      userName: "Jewel Lei 3",
+      employeeName: "Jewel Lei 3",
       assetId: 3,
       assetName: "Issued Asset 3",
       issuanceDate: "02/25/2025",
@@ -34,7 +34,7 @@ export default function Issuance() {
     {
       id: "4",
       userId: 4,
-      userName: "Jewel Lei 4",
+      employeeName: "Jewel Lei 4",
       assetId: 4,
       assetName: "Issued Asset 4",
       issuanceDate: "02/25/2025",
@@ -43,7 +43,7 @@ export default function Issuance() {
     {
       id: "5",
       userId: 5,
-      userName: "Jewel Lei 5",
+      employeeName: "Jewel Lei 5",
       assetId: 5,
       assetName: "Issued Asset 5",
       issuanceDate: "02/25/2025",
@@ -52,7 +52,7 @@ export default function Issuance() {
     {
       id: "7",
       userId: 7,
-      userName: "Jewel Lei 7",
+      employeeName: "Jewel Lei 7",
       assetId: 7,
       assetName: "Issued Asset 7",
       issuanceDate: "02/25/2025",
@@ -61,7 +61,7 @@ export default function Issuance() {
     {
       id: "6",
       userId: 6,
-      userName: "Jewel Lei 6",
+      employeeName: "Jewel Lei 6",
       assetId: 6,
       assetName: "Issued Asset 6",
       issuanceDate: "02/25/2025",
@@ -70,7 +70,7 @@ export default function Issuance() {
     {
       id: "9",
       userId: 9,
-      userName: "Jewel Lei 9",
+      employeeName: "Jewel Lei 9",
       assetId: 9,
       assetName: "Issued Asset 9",
       issuanceDate: "02/25/2025",
@@ -79,7 +79,7 @@ export default function Issuance() {
     {
       id: "8",
       userId: 8,
-      userName: "Jewel Lei 8",
+      employeeName: "Jewel Lei 8",
       assetId: 8,
       assetName: "Issued Asset 8",
       issuanceDate: "02/25/2025",
@@ -88,7 +88,7 @@ export default function Issuance() {
     {
       id: "11",
       userId: 11,
-      userName: "Jewel Lei 11",
+      employeeName: "Jewel Lei 11",
       assetId: 11,
       assetName: "Issued Asset 11",
       issuanceDate: "02/25/2025",
@@ -97,7 +97,7 @@ export default function Issuance() {
     {
       id: "10",
       userId: 10,
-      userName: "Jewel Lei 10",
+      employeeName: "Jewel Lei 10",
       assetId: 10,
       assetName: "Issued Asset 10",
       issuanceDate: "02/25/2025",

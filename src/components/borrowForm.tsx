@@ -31,7 +31,9 @@ import {
 import { DialogFooter } from "./ui/dialog";
 
 const formSchema = z.object({
+  company: z.string().min(2).max(50),
   department: z.string().min(2).max(50),
+  unit: z.string().min(2).max(50),
   borrowerName: z.string().min(2).max(50),
   category: z.string().min(2).max(50),
   subcategory: z.string().min(2).max(50),
@@ -47,7 +49,9 @@ function BorrowForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      company: "",
       department: "",
+      unit: "",
       borrowerName: "",
       category: "",
       subcategory: "",
@@ -68,6 +72,61 @@ function BorrowForm() {
     <div className="pl-5 pr-5">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="w-full">
+            <FormField
+              control={form.control}
+              name="company"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Company" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="United Neon Advertising, Inc.">
+                          United Neon Advertising, Inc.
+                        </SelectItem>
+                        <SelectItem value="Breakthrough Leadership Management Consultancy, In">
+                          Breakthrough Leadership Management Consultancy, In
+                        </SelectItem>
+                        <SelectItem value="InnovationOne Inc.">
+                          InnovationOne Inc.
+                        </SelectItem>
+                        <SelectItem value="Inspire Leadership Consultancy Inc.">
+                          Inspire Leadership Consultancy Inc.
+                        </SelectItem>
+                        <SelectItem value="Media Display Solutions">
+                          Media Display Solutions
+                        </SelectItem>
+                        <SelectItem value="Onion Bulb Production">
+                          Onion Bulb Production
+                        </SelectItem>
+                        <SelectItem value="PLUS Media">PLUS Media</SelectItem>
+                        <SelectItem value="SeeWorthy International/LinkOD">
+                          SeeWorthy International/LinkOD
+                        </SelectItem>
+                        <SelectItem value="TapAds Media Corp">
+                          TapAds Media Corp
+                        </SelectItem>
+                        <SelectItem value="United Neon Foundation Inc.">
+                          United Neon Foundation Inc.
+                        </SelectItem>
+                        <SelectItem value="United Transit Ads System Inc.">
+                          United Transit Ads System Inc.
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
@@ -104,21 +163,43 @@ function BorrowForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="borrowerName"
+                name="unit"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input
-                        type="name"
-                        placeholder="Borrower Name"
-                        {...field}
-                      />
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Unit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Unit 1">Unit 1</SelectItem>
+                          <SelectItem value="Unit 2">Unit 2</SelectItem>
+                          <SelectItem value="Unit 3">Unit 3</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+          </div>
+          <div className="w-full">
+            <FormField
+              control={form.control}
+              name="borrowerName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input type="name" placeholder="Borrower Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <div className="w-full">
             <FormField

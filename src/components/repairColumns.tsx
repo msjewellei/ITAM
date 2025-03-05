@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import {
@@ -11,11 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DialogTrigger } from "./ui/dialog";
 
 export type RepairAsset = {
   id: string;
   userId: number;
-  userName: string;
+  requesterName: string;
   assetId: number;
   assetName: string;
   issue: string;
@@ -66,8 +67,8 @@ export const columns: ColumnDef<RepairAsset>[] = [
     },
   },
   {
-    accessorKey: "userName",
-    header: "User Name",
+    accessorKey: "requesterName",
+    header: "Requester Name",
   },
   {
     accessorKey: "issue",
@@ -92,7 +93,22 @@ export const columns: ColumnDef<RepairAsset>[] = [
   {
     accessorKey: "repairCompletionDate",
     header: "End Date",
+    cell: ({ row }) => {
+      const endDate = row.getValue("repairCompletionDate") as string | null;
+
+      return (
+        <>
+          <DialogTrigger>
+            <div className="relative group flex items-center">
+              <span>{endDate ?? "N/A"}</span>
+              <SquarePen className="ml-2 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity duration-200" />
+            </div>
+          </DialogTrigger>
+        </>
+      );
+    },
   },
+
   {
     accessorKey: "status",
     header: "Status",

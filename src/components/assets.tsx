@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import AssetForm from "./assetForm";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "./ui/tooltip";
 
 export default function Assets() {
   return (
@@ -27,15 +28,24 @@ export default function Assets() {
                   External
                 </TabsTrigger>
               </TabsList>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <DialogTrigger asChild>
+                      <Button className="justify-items-center h-11 w-fit bg-[#233345] text-white">
+                        <Plus />
+                        <p>Add Assets</p>
+                      </Button>
+                    </DialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Add Assets</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-              <DialogTrigger asChild>
-                <Button className=" justify-items-center h-11 w-fit bg-[#233345] text-white">
-                  <Plus></Plus>
-                  <p>Add Assets</p>
-                </Button>
-              </DialogTrigger>
               <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
-                <DialogHeader className="pb-2">
+                <DialogHeader>
                   <DialogTitle className="text-center">
                     Add New Asset
                   </DialogTitle>

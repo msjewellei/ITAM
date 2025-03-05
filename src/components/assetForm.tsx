@@ -72,8 +72,9 @@ function AssetForm() {
   return (
     <div className="pl-5 pr-5">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+  <div className="flex flex-col sm:flex-row gap-4">
+
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}

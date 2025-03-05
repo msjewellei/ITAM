@@ -39,6 +39,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import React from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface AssetDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -88,65 +94,81 @@ export function AssetDataTable<TData, TValue>({
           />
         </div>
         <div className="flex justify-end gap-2 items-center">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-[30px] justify-center text-center font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="m-auto h-4 w-4 p-auto" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-[30px] justify-center text-center font-normal"
-              >
-                <ListFilter className="m-auto h-4 w-4 p-auto" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[30px] justify-center text-center font-normal",
+                        !date && "text-muted-foreground"
+                      )}
                     >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                      <CalendarIcon className="m-auto h-4 w-4 p-auto" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </TooltipTrigger>
+              <TooltipContent>Filter by Date</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-[30px] justify-center text-center font-normal"
+                    >
+                      <ListFilter className="m-auto h-4 w-4 p-auto" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {table
+                      .getAllColumns()
+                      .filter((column) => column.getCanHide())
+                      .map((column) => {
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={column.id}
+                            className="capitalize"
+                            checked={column.getIsVisible()}
+                            onCheckedChange={(value) =>
+                              column.toggleVisibility(!!value)
+                            }
+                          >
+                            {column.id}
+                          </DropdownMenuCheckboxItem>
+                        );
+                      })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Filter Columns</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
       <div className="flex flex-col min-h-[calc(100vh-25rem)] max-h-[calc(100vh-25rem)] overflow-auto">
         <Table>
-          <TableHeader className="bg-white">
+          <TableHeader className="bg-[#f0f1f3]">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-gray-300">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="py-2">
+                  <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -162,6 +184,7 @@ export function AssetDataTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                  className="border-gray-300"
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
@@ -176,7 +199,7 @@ export function AssetDataTable<TData, TValue>({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="border-gray-300">
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"

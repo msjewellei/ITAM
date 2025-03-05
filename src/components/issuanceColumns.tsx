@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 export type IssuanceAsset = {
   id: string;
   userId: number;
-  userName: string;
+  employeeName: string;
   assetId: number;
   assetName: string;
   issuanceDate: string;
@@ -60,8 +60,8 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
     },
   },
   {
-    accessorKey: "userName",
-    header: "User Name",
+    accessorKey: "employeeName",
+    header: "Employee Name",
   },
   {
     accessorKey: "issuanceDate",

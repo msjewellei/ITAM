@@ -7,7 +7,7 @@ export default function Repair() {
     {
       id: "1",
       userId: 1,
-      userName: "Jewel Lei",
+      requesterName: "Jewel Lei",
       assetId: 1,
       assetName: "Repair Asset 1",
       issue: "Secret",
@@ -22,7 +22,7 @@ export default function Repair() {
     {
       id: "3",
       userId: 3,
-      userName: "Jewel Lei 3",
+      requesterName: "Jewel Lei 3",
       assetId: 3,
       assetName: "Repair Asset 3",
       issue: "Secret",
@@ -37,7 +37,7 @@ export default function Repair() {
     {
       id: "2",
       userId: 2,
-      userName: "Jewel Lei 2",
+      requesterName: "Jewel Lei 2",
       assetId: 2,
       assetName: "Repair Asset 2",
       issue: "Secret",
@@ -52,7 +52,7 @@ export default function Repair() {
     {
       id: "7",
       userId: 7,
-      userName: "Jewel Lei 7",
+      requesterName: "Jewel Lei 7",
       assetId: 7,
       assetName: "Repair Asset 7",
       issue: "Secret",
@@ -67,7 +67,7 @@ export default function Repair() {
     {
       id: "5",
       userId: 5,
-      userName: "Jewel Lei 5",
+      requesterName: "Jewel Lei 5",
       assetId: 5,
       assetName: "Repair Asset 5",
       issue: "Secret",
@@ -82,7 +82,7 @@ export default function Repair() {
     {
       id: "6",
       userId: 6,
-      userName: "Jewel Lei 6",
+      requesterName: "Jewel Lei 6",
       assetId: 6,
       assetName: "Repair Asset 6",
       issue: "Secret",
@@ -97,7 +97,7 @@ export default function Repair() {
     {
       id: "4",
       userId: 4,
-      userName: "Jewel Lei 4",
+      requesterName: "Jewel Lei 4",
       assetId: 4,
       assetName: "Repair Asset 4",
       issue: "Secret",
@@ -112,7 +112,7 @@ export default function Repair() {
     {
       id: "8",
       userId: 8,
-      userName: "Jewel Lei 8",
+      requesterName: "Jewel Lei 8",
       assetId: 8,
       assetName: "Repair Asset 8",
       issue: "Secret",
@@ -127,7 +127,7 @@ export default function Repair() {
     {
       id: "9",
       userId: 9,
-      userName: "Jewel Lei 9",
+      requesterName: "Jewel Lei 9",
       assetId: 9,
       assetName: "Repair Asset 9",
       issue: "Secret",
@@ -142,7 +142,7 @@ export default function Repair() {
     {
       id: "11",
       userId: 11,
-      userName: "Jewel Lei 11",
+      requesterName: "Jewel Lei 11",
       assetId: 11,
       assetName: "Repair Asset 11",
       issue: "Secret",
@@ -157,7 +157,7 @@ export default function Repair() {
     {
       id: "10",
       userId: 10,
-      userName: "Jewel Lei 10",
+      requesterName: "Jewel Lei 10",
       assetId: 10,
       assetName: "Repair Asset 10",
       issue: "Secret",

@@ -48,6 +48,12 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import RepairForm from "./repairForm";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface RepairDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -90,91 +96,122 @@ export function RepairDataTable<TData, TValue>({
           <Input
             placeholder="Search Requester"
             value={
-              (table.getColumn("userName")?.getFilterValue() as string) ?? ""
+              (table.getColumn("requesterName")?.getFilterValue() as string) ??
+              ""
             }
             onChange={(event) =>
-              table.getColumn("userName")?.setFilterValue(event.target.value)
+              table
+                .getColumn("requesterName")
+                ?.setFilterValue(event.target.value)
             }
             className="max-w-md min-w-sm"
           />
         </div>
         <div className="flex justify-end gap-2 items-center">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-[30px] justify-center text-center font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="m-auto h-4 w-4 p-auto" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-[30px] justify-center text-center font-normal"
-              >
-                <ListFilter className="m-auto h-4 w-4 p-auto" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[30px] justify-center text-center font-normal",
+                        !date && "text-muted-foreground"
+                      )}
                     >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DialogTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-[30px] justify-center text-center font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <Plus className="m-auto h-4 w-4 p-auto" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader className="pb-2">
-              <DialogTitle className="text-center">
-                New Repair Request
-              </DialogTitle>
-            </DialogHeader>
-            <RepairForm />
-          </DialogContent>
+                      <CalendarIcon className="m-auto h-4 w-4 p-auto" />
+                    </Button>
+                  </PopoverTrigger>
+
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <TooltipContent>
+                  <p>Filter by Date</p>
+                </TooltipContent>
+              </TooltipTrigger>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-[30px] justify-center text-center font-normal"
+                    >
+                      <ListFilter className="m-auto h-4 w-4 p-auto" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {table
+                      .getAllColumns()
+                      .filter((column) => column.getCanHide())
+                      .map((column) => {
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={column.id}
+                            className="capitalize"
+                            checked={column.getIsVisible()}
+                            onCheckedChange={(value) =>
+                              column.toggleVisibility(!!value)
+                            }
+                          >
+                            {column.id}
+                          </DropdownMenuCheckboxItem>
+                        );
+                      })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Filter Columns</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <DialogTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[30px] justify-center text-center font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <Plus className="m-auto h-4 w-4 p-auto" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
+                  <DialogHeader className="pb-2">
+                    <DialogTitle className="text-center">
+                      New Repair Request
+                    </DialogTitle>
+                  </DialogHeader>
+                  <RepairForm />
+                </DialogContent>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add New Request</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
       <div className="flex flex-col min-h-[calc(100vh-22rem)] max-h-[calc(100vh-22rem)] overflow-auto">
         <Table className="justify-start text-left">
-          <TableHeader className="justify-start text-left">
+          <TableHeader className="justify-start text-left bg-[#f0f1f3]">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-gray-300">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -194,6 +231,7 @@ export function RepairDataTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                  className="border-gray-300"
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
@@ -208,7 +246,7 @@ export function RepairDataTable<TData, TValue>({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="border-gray-300">
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
