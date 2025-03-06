@@ -13,32 +13,36 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 
 export type ExternalAsset = {
-  id: string;
-  assetName: string;
-  category: "External" | "Internal";
-  subCategory:
+  asset_id: string;
+  asset_name: string;
+  category_id: number;
+  category_name: "External" | "Internal";
+  sub_category_id: number;
+  sub_category_name:
     | "Gantry Routers"
     | "Laptop"
     | "Printers"
     | "Access Point"
     | "Routers and Switch"
     | "Stocks";
-  type:
+  type_id: number;
+  type_name:
     | "None"
     | "Mouse"
     | "Keyboard"
     | "Printers"
     | "UPS Battery"
     | "Numeric Keypad";
-  condition: "Good" | "Slightly Damaged" | "Damaged";
+  asset_condition_id: number;
+  asset_condition_name: "Good" | "Slightly Damaged" | "Damaged";
   location: string;
-  availabilityStatus: "Available" | "Not Available";
-  serialNumber: string;
+  availability_status: "Available" | "Not Available";
+  serial_number: string;
   specifications: string;
-  amount: number;
-  warrantyDuration: number;
-  warrantyDueDate: string;
-  purchaseDate: string;
+  asset_amount: number;
+  warranty_duration: number;
+  warranty_due_date: string;
+  purchase_date: string;
   aging: number;
   notes: string;
 };
@@ -67,7 +71,7 @@ export const columns: ColumnDef<ExternalAsset>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "assetName",
+    accessorKey: "asset_name",
     header: ({ column }) => {
       return (
         <Button
@@ -81,7 +85,7 @@ export const columns: ColumnDef<ExternalAsset>[] = [
     },
   },
   {
-    accessorKey: "condition",
+    accessorKey: "asset_condition_name",
     header: "Condition",
   },
   {
@@ -89,11 +93,11 @@ export const columns: ColumnDef<ExternalAsset>[] = [
     header: "Location",
   },
   {
-    accessorKey: "availabilityStatus",
+    accessorKey: "availability_status",
     header: "Status",
   },
   {
-    accessorKey: "serialNumber",
+    accessorKey: "serial_number",
     header: "Serial Number",
   },
   {
@@ -101,10 +105,10 @@ export const columns: ColumnDef<ExternalAsset>[] = [
     header: "Specifications",
   },
   {
-    accessorKey: "amount",
+    accessorKey: "asset_amount",
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
+      const amount = parseFloat(row.getValue("asset_amount"));
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "Php",
@@ -114,15 +118,15 @@ export const columns: ColumnDef<ExternalAsset>[] = [
     },
   },
   {
-    accessorKey: "warrantyDuration",
+    accessorKey: "warranty_duration",
     header: "Warranty Duration",
   },
   {
-    accessorKey: "warrantyDueDate",
+    accessorKey: "warranty_due_date",
     header: "Warranty Due Date",
   },
   {
-    accessorKey: "purchaseDate",
+    accessorKey: "purchase_date",
     header: "Purchase Date",
   },
   {
@@ -149,7 +153,7 @@ export const columns: ColumnDef<ExternalAsset>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(external.id)}
+              onClick={() => navigator.clipboard.writeText(external.asset_id)}
             >
               Copy External Asset ID
             </DropdownMenuItem>

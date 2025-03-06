@@ -31,44 +31,62 @@ import {
 import { DialogFooter } from "./ui/dialog";
 
 const formSchema = z.object({
-  company: z.string().min(2).max(50),
-  department: z.string().min(2).max(50),
-  unit: z.string().min(2).max(50),
-  requesterName: z.string().min(2).max(50),
-  category: z.string().min(2).max(50),
-  subcategory: z.string().min(2).max(50),
-  type: z.string().min(2).max(50),
-  assetName: z.string().min(2).max(50),
+  company_id: z.number().min(1),
+  company_name: z.string().min(2).max(50),
+  department_id: z.number().min(1),
+  department_name: z.string().min(2).max(50),
+  unit_id: z.number().min(1),
+  unit_name: z.string().min(2).max(50),
+  user_id: z.number().min(1),
+  employee_name: z.string().min(2).max(50),
+  category_id: z.number().min(1),
+  category_name: z.string().min(2).max(50),
+  sub_category_id: z.number().min(1),
+  sub_category_name: z.string().min(2).max(50),
+  type_id: z.number().min(1),
+  type_name: z.string().min(2).max(50),
+  asset_id: z.number().min(1),
+  asset_name: z.string().min(2).max(50),
   issue: z.string().min(2).max(100),
   remarks: z.string().min(2).max(100),
-  dateReported: z.date(),
-  urgencyLevel: z.string().min(2).max(100),
-  repairStartDate: z.date(),
-  repairEndDate: z.date(),
-  status: z.string().min(2).max(50),
-  repairCost: z.number().min(0),
+  date_reported: z.date(),
+  urgency_level: z.string().min(2).max(100),
+  repair_start_date: z.date(),
+  repair_end_date: z.date(),
+  status_id: z.number().min(1),
+  status_name: z.string().min(2).max(50),
+  repair_cost: z.number().min(1),
 });
 
 function RepairForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      company: "",
-      department: "",
-      unit: "",
-      requesterName: "",
-      category: "",
-      subcategory: "",
-      type: "",
-      assetName: "",
+      company_id: undefined,
+      company_name: "",
+      department_id: undefined,
+      department_name: "",
+      unit_id: undefined,
+      unit_name: "",
+      user_id: undefined,
+      employee_name: "",
+      category_id: undefined,
+      category_name: "",
+      sub_category_id: undefined,
+      sub_category_name: "",
+      type_id: undefined,
+      type_name: "",
+      asset_id: undefined,
+      asset_name: "",
       issue: "",
       remarks: "",
-      dateReported: undefined,
-      urgencyLevel: "",
-      repairStartDate: undefined,
-      repairEndDate: undefined,
-      status: "",
-      repairCost: undefined,
+      date_reported: undefined,
+      urgency_level: "",
+      repair_start_date: undefined,
+      repair_end_date: undefined,
+      status_id: undefined,
+      status_name: "",
+      repair_cost: undefined,
     },
   });
 
@@ -83,7 +101,7 @@ function RepairForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="company"
+              name="company_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -138,7 +156,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="department"
+                name="department_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -170,7 +188,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="unit"
+                name="unit_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -197,7 +215,7 @@ function RepairForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="requesterName"
+              name="employee_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -215,7 +233,7 @@ function RepairForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="category"
+              name="category_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -241,7 +259,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="subcategory"
+                name="sub_category_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -273,7 +291,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="type"
+                name="type_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -302,7 +320,7 @@ function RepairForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="assetName"
+              name="asset_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -363,7 +381,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="dateReported"
+                name="date_reported"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -404,7 +422,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="urgencyLevel"
+                name="urgency_level"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -433,7 +451,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="repairStartDate"
+                name="repair_start_date"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -474,7 +492,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="repairEndDate"
+                name="repair_end_date"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -517,7 +535,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="status"
+                name="status_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -547,7 +565,7 @@ function RepairForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="repairCost"
+                name="repair_cost"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>

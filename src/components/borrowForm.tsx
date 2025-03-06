@@ -31,17 +31,26 @@ import {
 import { DialogFooter } from "./ui/dialog";
 
 const formSchema = z.object({
-  company: z.string().min(2).max(50),
-  department: z.string().min(2).max(50),
-  unit: z.string().min(2).max(50),
-  borrowerName: z.string().min(2).max(50),
-  category: z.string().min(2).max(50),
-  subcategory: z.string().min(2).max(50),
-  type: z.string().min(2).max(50),
-  assetName: z.string().min(2).max(50),
-  dateBorrowed: z.date(),
-  dueDate: z.date(),
-  condition: z.string().min(2).max(50),
+  company_id: z.number().min(1),
+  company_name: z.string().min(2).max(50),
+  department_id: z.number().min(1),
+  department_name: z.string().min(2).max(50),
+  unit_id: z.number().min(1),
+  unit_name: z.string().min(2).max(50),
+  user_id: z.number().min(1),
+  employee_name: z.string().min(2).max(50),
+  category_id: z.number().min(1),
+  category_name: z.string().min(2).max(50),
+  sub_category_id: z.number().min(1),
+  sub_category_name: z.string().min(2).max(50),
+  type_id: z.number().min(1),
+  type_name: z.string().min(2).max(50),
+  asset_id: z.number().min(1),
+  asset_name: z.string().min(2).max(50),
+  date_borrowed: z.date(),
+  due_date: z.date(),
+  asset_condition_id: z.number().min(1),
+  asset_condition_name: z.string().min(2).max(50),
   remarks: z.string().min(2).max(100),
 });
 
@@ -49,17 +58,26 @@ function BorrowForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      company: "",
-      department: "",
-      unit: "",
-      borrowerName: "",
-      category: "",
-      subcategory: "",
-      type: "",
-      assetName: "",
-      dateBorrowed: undefined,
-      dueDate: undefined,
-      condition: "",
+      company_id: undefined,
+      company_name: "",
+      department_id: undefined,
+      department_name: "",
+      unit_id: undefined,
+      unit_name: "",
+      user_id: undefined,
+      employee_name: "",
+      category_id: undefined,
+      category_name: "",
+      sub_category_id: undefined,
+      sub_category_name: "",
+      type_id: undefined,
+      type_name: "",  
+      asset_id: undefined,
+      asset_name: "",
+      date_borrowed: undefined,
+      due_date: undefined,
+      asset_condition_id: undefined,
+      asset_condition_name: "",
       remarks: "",
     },
   });
@@ -75,7 +93,7 @@ function BorrowForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="company"
+              name="company_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -131,7 +149,7 @@ function BorrowForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="department"
+                name="department_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -163,7 +181,7 @@ function BorrowForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="unit"
+                name="unit_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -190,7 +208,7 @@ function BorrowForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="borrowerName"
+              name="employee_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -204,7 +222,7 @@ function BorrowForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="category"
+              name="category_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -230,7 +248,7 @@ function BorrowForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="subcategory"
+                name="sub_category_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -262,7 +280,7 @@ function BorrowForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="type"
+                name="type_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -291,7 +309,7 @@ function BorrowForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="assetName"
+              name="asset_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -320,7 +338,7 @@ function BorrowForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="dateBorrowed"
+                name="date_borrowed"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -361,7 +379,7 @@ function BorrowForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="dueDate"
+                name="due_date"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -401,7 +419,7 @@ function BorrowForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="condition"
+              name="asset_condition_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>

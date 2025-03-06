@@ -13,16 +13,23 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 
 export type BorrowedAsset = {
-  id: string;
-  userId: number;
-  userName: string;
-  assetId: number;
-  assetName: string;
-  dateBorrowed: string;
-  dueDate: string;
-  returnDate: string;
+  borrow_transaction_id: string;
+  company_id: number;
+  company_name: string;
+  department_id: number;
+  department_name: string;
+  unit_id: number;
+  unit_name: string
+  user_id: number;
+  employee_name: string;
+  asset_id: number;
+  asset_name: string;
+  date_borrowed: string;
+  due_date: string;
+  return_date: string;
   duration: string;
-  condition: string;
+  asset_condition_id: string;
+  asset_condition_name: string;
   remarks: string;
 };
 
@@ -51,7 +58,7 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "assetName",
+    accessorKey: "asset_name",
     header: ({ column }) => {
       return (
         <div className="justify-start">
@@ -68,21 +75,21 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
     },
   },
   {
-    accessorKey: "userName",
+    accessorKey: "employee_name",
     header: ({}) => {
       return <p className="">Borrower Name</p>;
     },
   },
   {
-    accessorKey: "dateBorrowed",
+    accessorKey: "date_borrowed",
     header: "Date Borrowed",
   },
   {
-    accessorKey: "dueDate",
+    accessorKey: "due_date",
     header: "Due Date",
   },
   {
-    accessorKey: "returnDate",
+    accessorKey: "return_date",
     header: "Return Date",
   },
   {
@@ -90,7 +97,7 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
     header: "Duration",
   },
   {
-    accessorKey: "condition",
+    accessorKey: "asset_condition_name",
     header: "Condition",
   },
   {
@@ -113,7 +120,7 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(borrow.id)}
+              onClick={() => navigator.clipboard.writeText(borrow.borrow_transaction_id)}
             >
               Copy Borrow ID
             </DropdownMenuItem>

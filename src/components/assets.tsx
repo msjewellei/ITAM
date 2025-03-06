@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import AssetForm from "./assetForm";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "./ui/tooltip";
+import { Toaster } from "./ui/sonner";
 
 export default function Assets() {
   return (
@@ -61,6 +62,7 @@ export default function Assets() {
             </TabsContent>
           </Tabs>
         </div>
+        <Toaster />
       </Dialog>
     </>
   );

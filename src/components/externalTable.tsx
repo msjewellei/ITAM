@@ -81,10 +81,10 @@ export function ExternalDataTable<TData, TValue>({
           <Input
             placeholder="Search Asset"
             value={
-              (table.getColumn("assetName")?.getFilterValue() as string) ?? ""
+              (table.getColumn("asset_name")?.getFilterValue() as string) ?? ""
             }
             onChange={(event) =>
-              table.getColumn("assetName")?.setFilterValue(event.target.value)
+              table.getColumn("asset_name")?.setFilterValue(event.target.value)
             }
             className="max-w-md min-w-sm"
           />

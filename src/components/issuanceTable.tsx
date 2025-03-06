@@ -95,12 +95,12 @@ export function IssuanceDataTable<TData, TValue>({
       <div className="flex justify-between">
         <div className="flex items-center py-4 justify-start">
           <Input
-            placeholder="Search Employee Name"
+            placeholder="Search Employee"
             value={
-              (table.getColumn("userName")?.getFilterValue() as string) ?? ""
+              (table.getColumn("employee_name")?.getFilterValue() as string) ?? ""
             }
             onChange={(event) =>
-              table.getColumn("userName")?.setFilterValue(event.target.value)
+              table.getColumn("employee_name")?.setFilterValue(event.target.value)
             }
             className="max-w-md min-w-sm"
           />

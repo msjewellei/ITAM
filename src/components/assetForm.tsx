@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -30,18 +31,25 @@ import {
 } from "@/components/ui/popover";
 
 const formSchema = z.object({
-  name: z.string().min(2).max(50),
-  serialNumber: z.string().min(2).max(50),
-  category: z.string().min(2).max(50),
-  subCategory: z.string().min(2).max(50),
-  type: z.string().min(2).max(50),
-  condition: z.string().min(2).max(50),
+  asset_id: z.number().min(1),
+  asset_name: z.string().min(2).max(50),
+  category_id: z.number().min(1),
+  category_name: z.string().min(2).max(50),
+  sub_category_id: z.number().min(1),
+  sub_category_name: z.string().min(2).max(50),
+  type_id: z.number().min(1),
+  type_name: z.string().min(2).max(50),
   location: z.string().min(2).max(50),
-  specification: z.string().min(2).max(100),
-  warrantyDuration: z.string().min(2).max(50),
-  aging: z.number().min(0),
-  warrantyDueDate: z.date(),
-  purchaseDate: z.date(),
+  asset_condition_id: z.number().min(1),
+  asset_condition_name: z.string().min(2).max(50),
+  availability_status: z.string().min(2).max(50),
+  serial_number: z.string().min(2).max(50),
+  specifications: z.string().min(2).max(100),
+  asset_amount: z.number().min(1),
+  warranty_duration: z.string().min(2).max(50),
+  warranty_due_date: z.date(),
+  purchase_date: z.date(),
+  aging: z.number().min(1),
   notes: z.string().min(2).max(100),
 });
 
@@ -49,18 +57,25 @@ function AssetForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      serialNumber: "",
-      category: "",
-      subCategory: "",
-      type: "",
-      condition: "",
+      asset_id: undefined,
+      asset_name: "",
+      category_id: undefined,
+      category_name: "",
+      sub_category_id: undefined,
+      sub_category_name: "",
+      type_id: undefined,
+      type_name: "",
       location: "",
-      specification: "",
-      warrantyDuration: "",
+      asset_condition_id: undefined,
+      asset_condition_name: "",
+      availability_status: "",
+      serial_number: "",
+      specifications: "",
+      asset_amount: undefined,
+      warranty_duration: "",
+      warranty_due_date: undefined,
+      purchase_date: undefined,
       aging: undefined,
-      warrantyDueDate: undefined,
-      purchaseDate: undefined,
       notes: "",
     },
   });
@@ -72,17 +87,24 @@ function AssetForm() {
   return (
     <div className="pl-5 pr-5">
       <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-  <div className="flex flex-col sm:flex-row gap-4">
-
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-4"
+        >
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="name"
+                name="asset_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="text" placeholder="Asset Name" {...field} />
+                      <Input
+                        type="text"
+                        placeholder="Asset Name"
+                        {...field}
+                        className="text-sm sm:text-base"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -92,13 +114,14 @@ function AssetForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="serialNumber"
+                name="serial_number"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
                       <Input
                         type="text"
                         placeholder="Serial Number"
+                        className="text-sm sm:text-base"
                         {...field}
                       />
                     </FormControl>
@@ -112,7 +135,7 @@ function AssetForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="category"
+              name="category_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -139,7 +162,7 @@ function AssetForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="subCategory"
+                name="sub_category_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -172,7 +195,7 @@ function AssetForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="type"
+                name="type_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -219,7 +242,7 @@ function AssetForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="condition"
+                name="asset_condition_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -244,14 +267,20 @@ function AssetForm() {
               />
             </div>
 
-            <div className="w-full sm:w-1/2 max-w-sm">
+            <div className="w-full sm:w-1/2">
               <FormField
                 control={form.control}
-                name="location"
+                name="aging"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="text" placeholder="Location" {...field} />
+                      <Input
+                        type="number"
+                        placeholder="Aging"
+                        {...field}
+                        className="text-sm sm:text-base"
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -259,15 +288,66 @@ function AssetForm() {
               />
             </div>
           </div>
-
           <div className="w-full max-w-md">
             <FormField
               control={form.control}
-              name="specification"
+              name="availability_status"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea {...field} placeholder="Specifications" />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Availability Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Available">Available</SelectItem>
+                        <SelectItem value="Borrowed">Borrowed</SelectItem>
+                        <SelectItem value="Issued">Issued</SelectItem>
+                        <SelectItem value="Under Repair">
+                          Under Repair
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="w-full max-w-md">
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Location"
+                      {...field}
+                      className="text-sm sm:text-base"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="w-full max-w-md">
+            <FormField
+              control={form.control}
+              name="specifications"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Specifications"
+                      className="text-sm sm:text-base"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -279,34 +359,15 @@ function AssetForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="warrantyDuration"
+                name="warranty_duration"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
                       <Input
                         type="text"
                         placeholder="Warranty Duration"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="w-full sm:w-1/2">
-              <FormField
-                control={form.control}
-                name="aging"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        type="name"
-                        placeholder="Aging"
-                        {...field}
                         className="text-sm sm:text-base"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -314,13 +375,10 @@ function AssetForm() {
                 )}
               />
             </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <div className="w-full sm:w-1/2">
               <FormField
                 control={form.control}
-                name="warrantyDueDate"
+                name="warranty_due_date"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -329,7 +387,7 @@ function AssetForm() {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full justify-start text-left font-normal text-sm sm:text-base",
+                              "w-full justify-start text-left font-normal text-sm ",
                               !field.value && "text-muted-foreground"
                             )}
                           >
@@ -358,11 +416,33 @@ function AssetForm() {
                 )}
               />
             </div>
+          </div>
 
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <div className="w-full sm:w-1/2">
               <FormField
                 control={form.control}
-                name="purchaseDate"
+                name="aging"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Aging"
+                        {...field}
+                        className="text-sm sm:text-base"
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-full sm:w-1/2">
+              <FormField
+                control={form.control}
+                name="purchase_date"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -371,7 +451,7 @@ function AssetForm() {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full justify-start text-left font-normal text-sm sm:text-base",
+                              "w-full justify-start text-left font-normal text-sm ",
                               !field.value && "text-muted-foreground"
                             )}
                           >
@@ -422,7 +502,18 @@ function AssetForm() {
           </div>
 
           <div>
-            <Button className="w-full text-sm sm:text-base" type="submit">
+            <Button
+              className="w-full text-sm sm:text-base"
+              type="submit"
+              onClick={() =>
+                toast("Asset __________ has been added to inventory!", {
+                  action: {
+                    label: "Undo",
+                    onClick: () => console.log("Undo"),
+                  },
+                })
+              }
+            >
               Submit
             </Button>
           </div>

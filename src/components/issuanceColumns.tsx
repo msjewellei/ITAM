@@ -13,13 +13,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 
 export type IssuanceAsset = {
-  id: string;
-  userId: number;
-  employeeName: string;
-  assetId: number;
-  assetName: string;
-  issuanceDate: string;
-  status: string;
+  issuance_id: string;
+  user_id: number;
+  employee_name: string;
+  asset_id: number;
+  asset_name: string;
+  issuance_date: string;
+  status_id: number;
+  status_name: string;
 };
 
 export const columns: ColumnDef<IssuanceAsset>[] = [
@@ -46,7 +47,7 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "assetName",
+    accessorKey: "asset_name",
     header: ({ column }) => {
       return (
         <Button
@@ -60,15 +61,15 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
     },
   },
   {
-    accessorKey: "employeeName",
+    accessorKey: "employee_name",
     header: "Employee Name",
   },
   {
-    accessorKey: "issuanceDate",
+    accessorKey: "issuance_date",
     header: "Issuance Date",
   },
   {
-    accessorKey: "status",
+    accessorKey: "status_name",
     header: "Status",
   },
   {
@@ -87,7 +88,7 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(issuance.id)}
+              onClick={() => navigator.clipboard.writeText(issuance.issuance_id)}
             >
               Copy Issuance ID
             </DropdownMenuItem>

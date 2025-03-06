@@ -96,12 +96,12 @@ export function RepairDataTable<TData, TValue>({
           <Input
             placeholder="Search Requester"
             value={
-              (table.getColumn("requesterName")?.getFilterValue() as string) ??
+              (table.getColumn("employee_name")?.getFilterValue() as string) ??
               ""
             }
             onChange={(event) =>
               table
-                .getColumn("requesterName")
+                .getColumn("employee_name")
                 ?.setFilterValue(event.target.value)
             }
             className="max-w-md min-w-sm"

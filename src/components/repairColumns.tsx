@@ -14,19 +14,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DialogTrigger } from "./ui/dialog";
 
 export type RepairAsset = {
-  id: string;
-  userId: number;
-  requesterName: string;
-  assetId: number;
-  assetName: string;
+  repair_request_id: string;
+  user_id: number;
+  employee_name: string;
+  asset_id: number;
+  asset_name: string;
   issue: string;
   remarks: string;
-  dateReported: string;
-  urgencyLevel: string;
-  repairStartDate: string;
-  repairCompletionDate: string;
-  status: string;
-  repairCost: number;
+  date_reported: string;
+  urgency_id: number;
+  urgency_level: string;
+  repair_start_date: string;
+  repair_completion_date: string;
+  status_id: number;
+  status_name: string;
+  repair_cost: number;
 };
 
 export const columns: ColumnDef<RepairAsset>[] = [
@@ -53,7 +55,7 @@ export const columns: ColumnDef<RepairAsset>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "assetName",
+    accessorKey: "asset_name",
     header: ({ column }) => {
       return (
         <Button
@@ -67,7 +69,7 @@ export const columns: ColumnDef<RepairAsset>[] = [
     },
   },
   {
-    accessorKey: "requesterName",
+    accessorKey: "employee_name",
     header: "Requester Name",
   },
   {
@@ -79,22 +81,22 @@ export const columns: ColumnDef<RepairAsset>[] = [
     header: "Remarks",
   },
   {
-    accessorKey: "dateReported",
+    accessorKey: "date_reported",
     header: "Date Reported",
   },
   {
-    accessorKey: "urgencyLevel",
+    accessorKey: "urgency_level",
     header: "Urgency Level",
   },
   {
-    accessorKey: "repairStartDate",
+    accessorKey: "repair_start_date",
     header: "Start Date",
   },
   {
-    accessorKey: "repairCompletionDate",
+    accessorKey: "repair_completion_date",
     header: "End Date",
     cell: ({ row }) => {
-      const endDate = row.getValue("repairCompletionDate") as string | null;
+      const endDate = row.getValue("repair_completion_date") as string | null;
 
       return (
         <>
@@ -114,10 +116,10 @@ export const columns: ColumnDef<RepairAsset>[] = [
     header: "Status",
   },
   {
-    accessorKey: "repairCost",
+    accessorKey: "repair_cost",
     header: () => <div className="text-right">Cost</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("repairCost"));
+      const amount = parseFloat(row.getValue("repair_cost"));
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "Php",
@@ -142,7 +144,9 @@ export const columns: ColumnDef<RepairAsset>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(repair.id)}
+              onClick={() =>
+                navigator.clipboard.writeText(repair.repair_request_id)
+              }
             >
               Copy Repair ID
             </DropdownMenuItem>

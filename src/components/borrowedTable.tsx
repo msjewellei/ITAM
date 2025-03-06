@@ -95,10 +95,10 @@ export function BorrowedDataTable<TData, TValue>({
           <Input
             placeholder="Search Borrower"
             value={
-              (table.getColumn("userName")?.getFilterValue() as string) ?? ""
+              (table.getColumn("employee_name")?.getFilterValue() as string) ?? ""
             }
             onChange={(event) =>
-              table.getColumn("userName")?.setFilterValue(event.target.value)
+              table.getColumn("employee_name")?.setFilterValue(event.target.value)
             }
             className="max-w-md min-w-sm"
           />

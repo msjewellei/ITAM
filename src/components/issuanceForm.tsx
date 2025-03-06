@@ -30,32 +30,50 @@ import {
 } from "./ui/select";
 
 const formSchema = z.object({
-  company: z.string().min(2).max(50),
-  department: z.string().min(2).max(50),
-  unit: z.string().min(2).max(50),
-  employeeName: z.string().min(2).max(50),
-  category: z.string().min(2).max(50),
-  subcategory: z.string().min(2).max(50),
-  type: z.string().min(2).max(50),
-  assetName: z.string().min(2).max(50),
-  issuanceDate: z.date(),
-  status: z.string().min(2).max(50),
+  company_id: z.number().min(2),
+  company_name: z.string().min(2).max(50),
+  department_id: z.number().min(2),
+  department_name: z.string().min(2).max(50),
+  unit_id: z.number().min(2),
+  unit_name: z.string().min(2).max(50),
+  user_id: z.number().min(2),
+  employee_name: z.string().min(2).max(50),
+  category_id: z.number().min(2),
+  category_name: z.string().min(2).max(50),
+  sub_category_id: z.number().min(2),
+  sub_category_name: z.string().min(2).max(50),
+  type_id: z.number().min(2),
+  type_name: z.string().min(2).max(50),
+  asset_id: z.number().min(2),
+  asset_name: z.string().min(2).max(50),
+  issuance_date: z.date(),
+  status_id: z.number().min(2),
+  status_name: z.string().min(2).max(50),
 });
 
 function IssuanceForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      company: "",
-      department: "",
-      unit: "",
-      employeeName: "",
-      category: "",
-      subcategory: "",
-      type: "",
-      assetName: "",
-      issuanceDate: undefined,
-      status: "",
+      company_id: undefined,
+      company_name: "",
+      department_id: undefined,
+      department_name: "",
+      unit_id: undefined,
+      unit_name: "",
+      user_id: undefined,
+      employee_name: "",
+      category_id: undefined,
+      category_name: "",
+      sub_category_id: undefined,
+      sub_category_name: "",
+      type_id: undefined,
+      type_name: "",
+      asset_id: undefined,
+      asset_name: "",
+      issuance_date: undefined,
+      status_id: undefined,
+      status_name: "",
     },
   });
 
@@ -67,10 +85,10 @@ function IssuanceForm() {
     <div className="pl-5 pr-5">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="w-full">
+          <div className="w-full">
             <FormField
               control={form.control}
-              name="company"
+              name="company_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -126,7 +144,7 @@ function IssuanceForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="department"
+                name="department_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -158,7 +176,7 @@ function IssuanceForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="unit"
+                name="unit_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -185,7 +203,7 @@ function IssuanceForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="employeeName"
+              name="employee_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -199,7 +217,7 @@ function IssuanceForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="category"
+              name="category_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -225,7 +243,7 @@ function IssuanceForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="subcategory"
+                name="sub_category_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -257,7 +275,7 @@ function IssuanceForm() {
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
                 control={form.control}
-                name="type"
+                name="type_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -286,7 +304,7 @@ function IssuanceForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="assetName"
+              name="asset_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -314,7 +332,7 @@ function IssuanceForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="issuanceDate"
+              name="issuance_date"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -355,7 +373,7 @@ function IssuanceForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="status"
+              name="status_name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
