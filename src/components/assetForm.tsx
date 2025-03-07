@@ -29,6 +29,26 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+
+interface Asset {
+  id: number;
+  name: string;
+  category: {
+    id: number;
+    name: string;
+    subcategory?: {
+      id: number;
+      name: string;
+      type?: {
+        id: number;
+        name: string;
+      };
+    };
+  };
+}
 
 const formSchema = z.object({
   asset_id: z.number().min(1),
@@ -54,6 +74,17 @@ const formSchema = z.object({
 });
 
 function AssetForm() {
+  const { id } = useParams();
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [category, setCategory] = useState<{ id: number; name: string }[]>([]);
+  const [subcategory, setSubCategory] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const [type, setType] = useState<{ id: number; name: string }[]>([]);
+  const [categoryID, setCategoryID] = useState<string | null>(null);
+  const [subCategoryID, setSubCategoryID] = useState<string | null>(null);
+  const [typeID, setTypeID] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -79,6 +110,121 @@ function AssetForm() {
       notes: "",
     },
   });
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await axios.get("/categoryData.json");
+      console.log("API Response:", response.data);
+
+      const uniqueCategories: { id: number; name: string }[] = Array.from(
+        new Map<number, { id: number; name: string }>(
+          response.data.asset.map((asset: Asset) => [
+            asset.category.id,
+            { id: asset.category.id, name: asset.category.name },
+          ])
+        ).values()
+      );
+
+      setCategory(uniqueCategories);
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const setup = async () => {
+      const response = await axios.get("/categoryData.json");
+      console.log(response.data);
+      setAssets(response.data.asset);
+    };
+    setup();
+  }, []);
+
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      const response = await axios.get("/categoryData.json");
+      const uniqueSubCategories: { id: number; name: string }[] = Array.from(
+        new Map<number, { id: number; name: string }>(
+          response.data.asset
+            .filter((asset: Asset) => asset.category.id === Number(categoryID))
+            .map((asset: Asset) => [
+              asset.category.subcategory?.id!,
+              {
+                id: asset.category.subcategory?.id!,
+                name: asset.category.subcategory?.name!,
+              },
+            ])
+        ).values()
+      );
+
+      setSubCategory(uniqueSubCategories);
+    };
+
+    if (categoryID) {
+      fetchSubCategories();
+      console.log(fetchSubCategories);
+    }
+  }, [categoryID]);
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      const response = await axios.get("/categoryData.json");
+      const uniqueTypes: { id: number; name: string }[] = Array.from(
+        new Map<number, { id: number; name: string }>(
+          response.data.asset
+            .filter((asset: Asset) => asset.category.id === Number(categoryID))
+            .map((asset: Asset) => [
+              asset.category.subcategory?.type?.id!,
+              {
+                id: asset.category.subcategory?.type?.id!,
+                name: asset.category.subcategory?.type?.name!,
+              },
+            ])
+        ).values()
+      );
+
+      setType(uniqueTypes);
+    };
+
+    if (categoryID && subCategoryID) {
+      fetchTypes();
+    }
+  }, [categoryID, subCategoryID]);
+
+  const filteredAssets = useMemo(() => {
+    let currentAssets = assets;
+    if (categoryID) {
+      currentAssets = currentAssets.filter(
+        (asset) => asset.category.id === Number(categoryID) // Compare by ID
+      );
+    }
+    if (subCategoryID) {
+      currentAssets = currentAssets.filter(
+        (asset) => asset.category.subcategory?.name === subCategoryID
+      );
+    }
+    if (typeID) {
+      currentAssets = currentAssets.filter(
+        (asset) => asset.category.subcategory?.type?.name === typeID
+      );
+    }
+
+    return currentAssets;
+  }, [categoryID, subCategoryID, typeID, assets]);
+
+  const assetCategory = useMemo(() => {
+    return category.find((cat) => cat.id === Number(categoryID)) || null;
+  }, [categoryID, category]);
+
+  const assetSubCategory = useMemo(() => {
+    if (!subCategoryID) return [];
+    return assets
+      .filter((asset) => asset.category.subcategory)
+      .map((asset) => asset.category.subcategory!)
+      .filter(
+        (subcategory) => subcategory && subcategory.id === Number(subCategoryID)
+      );
+  }, [subCategoryID]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -135,20 +281,31 @@ function AssetForm() {
           <div className="w-full">
             <FormField
               control={form.control}
-              name="category_name"
+              name="category_id"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(
+                          value === "reset" ? undefined : Number(value)
+                        );
+                        setCategoryID(value === "reset" ? null : value);
+                      }}
+                      value={field.value ? field.value.toString() : undefined}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Category" />
+                        <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="External">External</SelectItem>
-                        <SelectItem value="Internal">Internal</SelectItem>
+                        <SelectItem value="reset">Select a category</SelectItem>
+                        {category
+                          .filter((cat) => cat.id && cat.name) // Ensure valid data
+                          .map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -158,85 +315,89 @@ function AssetForm() {
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="sub_category_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Sub Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Laptop">Laptop</SelectItem>
-                          <SelectItem value="Printer">Printer</SelectItem>
-                          <SelectItem value="Access Point">
-                            Access Point
-                          </SelectItem>
-                          <SelectItem value="Routers and Switches">
-                            Routers and Switches
-                          </SelectItem>
-                          <SelectItem value="Stocks">Stocks</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+          {Number(categoryID) === 2 && (
+            <div className={`flex flex-col sm:flex-row gap-4`}>
+              <div
+                className={`transition-all duration-200 ${
+                  subCategoryID === "6" ? "sm:w-1/2" : "sm:w-full"
+                }`}
+              >
+                <FormField
+                  control={form.control}
+                  name="sub_category_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setSubCategoryID(value);
+                          }}
+                          value={field.value || ""}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Sub Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {subcategory
+                              .filter((sub) => sub.id && sub.name)
+                              .map((sub) => (
+                                <SelectItem
+                                  key={sub.id}
+                                  value={sub.id.toString()}
+                                >
+                                  {sub.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="type_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="None">None</SelectItem>
-                          <SelectItem value="Mouse">Mouse</SelectItem>
-                          <SelectItem value="Keyboard">Keyboard</SelectItem>
-                          <SelectItem value="Ups Battery">
-                            Ups Battery
-                          </SelectItem>
-                          <SelectItem value="Numeric Keypad">
-                            Numeric Keypad
-                          </SelectItem>
-                          <SelectItem value="USB Dongle LAN">
-                            USB Dongle LAN
-                          </SelectItem>
-                          <SelectItem value="Video Capture">
-                            Video Capture
-                          </SelectItem>
-                          <SelectItem value="USB-C Adapter 4 in 1">
-                            USB-C Adapter 4 in 1
-                          </SelectItem>
-                          <SelectItem value="HDMI to VGA Adapter">
-                            HDMI to VGA Adapter
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {subCategoryID === "6" && (
+                <div className="w-full sm:w-1/2 transition-all duration-200">
+                  <FormField
+                    control={form.control}
+                    name="type_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setTypeID(value);
+                            }}
+                            value={field.value || ""}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {type
+                                .filter((type) => type.id && type.name)
+                                .map((type) => (
+                                  <SelectItem
+                                    key={type.id}
+                                    value={type.id.toString()}
+                                  >
+                                    {type.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="w-full sm:w-1/2 max-w-sm">

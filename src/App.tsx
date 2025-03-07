@@ -4,9 +4,9 @@ import { Route, Routes } from "react-router-dom";
 import Dashboard from "./components/dashboard";
 import Borrowed from "./components/borrowed";
 import Repair from "./components/repair";
-import Issuance from "./components/issuance";
 import External from "./components/externalAssets";
 import Assets from "./components/assets";
+import Issuance from "./components/issuance";
 
 const routes = [
   { path: "/", element: <Dashboard /> },

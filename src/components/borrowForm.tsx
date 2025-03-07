@@ -29,6 +29,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { DialogFooter } from "./ui/dialog";
+import axios from "axios";
+import { useEffect, useMemo, useState } from "react";
+import { Route, Routes, useParams } from "react-router-dom";
+
+interface User {
+  id: number;
+  name: string;
+  company: {
+    id: number;
+    name: string;
+    department?: {
+      id: number;
+      name: string;
+      unit?: {
+        id: number;
+        name: string;
+      };
+    };
+  };
+}
 
 const formSchema = z.object({
   company_id: z.number().min(1),
@@ -55,6 +75,151 @@ const formSchema = z.object({
 });
 
 function BorrowForm() {
+  const { id } = useParams();
+  const [users, setUsers] = useState<User[]>([]);
+  const [company, setCompany] = useState<{ id: number; name: string }[]>([]);
+  const [department, setDepartment] = useState<
+  { id: number; name: string; unit?: { id: number; name: string }[] }[]
+>([]);
+
+  const [unit, setUnit] = useState<{ id: number; name: string }[]>([]);
+  const [companyID, setCompanyID] = useState<string | null>(null);
+  const [departmentID, setDepartmentID] = useState<string | null>(null);
+  const [unitID, setUnitID] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      const response = await axios.get("/usersData.json");
+      const uniqueCompanies: { id: number; name: string }[] = Array.from(
+        new Map<number, { id: number; name: string }>(
+          response.data.user.map((user: User) => [
+            user.company.id,
+            { id: user.company.id, name: user.company.name },
+          ])
+        ).values()
+      );
+
+      setCompany(uniqueCompanies);
+    };
+
+    fetchCompany();
+  }, []);
+
+  useEffect(() => {
+    const setup = async () => {
+      const response = await axios.get("/usersData.json");
+      setUsers(response.data.user);
+    };
+    setup();
+  }, []);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      const response = await axios.get("/usersData.json");
+  
+      const departmentMap = new Map<number, { id: number; name: string; unit: { id: number; name: string }[] }>();
+  
+      response.data.user
+        .filter((user: User) => user.company.id === Number(companyID) && user.company.department)
+        .forEach((user: User) => {
+          const dept = user.company.department!;
+          const unit = user.company.department?.unit;
+  
+          if (!departmentMap.has(dept.id)) {
+            departmentMap.set(dept.id, {
+              id: dept.id,
+              name: dept.name,
+              unit: [],
+            });
+          }
+  
+          if (unit) {
+            const deptEntry = departmentMap.get(dept.id)!;
+            if (!deptEntry.unit.some((u) => u.id === unit.id)) {
+              deptEntry.unit.push({ id: unit.id, name: unit.name });
+            }
+          }
+        });
+  
+      const uniqueDepartments = Array.from(departmentMap.values());
+  
+      console.log("Processed Departments with Units:", uniqueDepartments);
+      setDepartment(uniqueDepartments);
+    };
+  
+    if (companyID) {
+      fetchDepartments();
+    }
+  }, [companyID]);
+  
+
+  useEffect(() => {
+    const fetchUnits = async () => {
+      const response = await axios.get("/usersData.json");
+  
+      const units = response.data.user
+        .filter(
+          (user: User) =>
+            user.company.id === Number(companyID) &&
+            user.company.department?.id === Number(departmentID) &&
+            user.company.department.unit
+        )
+        .map((user: { company: { department: any; }; }) => user.company.department!.unit!)
+        .filter(
+          (unit: { id: any; }, index: any, self: any[]) =>
+            unit && self.findIndex((u: { id: any; }) => u?.id === unit.id) === index
+        );
+  
+      if (units.length > 0) {
+        setUnit(units);
+      } else {
+        setUnit([]); // Ensures the dropdown won't have stale data
+      }
+    };
+  
+    if (companyID && departmentID) {
+      fetchUnits();
+    } else {
+      setUnit([]); // Reset unit if no department is selected
+    }
+  }, [companyID, departmentID]);
+  
+
+  const filteredUser = useMemo(() => {
+    let currentUsers = users;
+    if (companyID) {
+      currentUsers = currentUsers.filter(
+        (user) => user.company.id === Number(companyID)
+      );
+    }
+    if (departmentID) {
+      currentUsers = currentUsers.filter(
+        (user) => user.company.department?.name === departmentID
+      );
+    }
+    if (unitID) {
+      currentUsers = currentUsers.filter(
+        (user) => user.company.department?.unit?.name === unitID
+      );
+    }
+
+    return currentUsers;
+  }, [companyID, departmentID, unitID, users]);
+
+    const userCompany = useMemo(() => {
+      return company.find((company) => company.id === Number(companyID)) || null;
+    }, [companyID, company]);
+  
+    const userDepartment = useMemo(() => {
+      if (!departmentID) return [];
+      return users
+        .filter((user) => user.company.department)
+        .map((user) => user.company.department!)
+        .filter(
+          (department) => department && department.id === Number(departmentID)
+        );
+    }, [departmentID]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,7 +236,7 @@ function BorrowForm() {
       sub_category_id: undefined,
       sub_category_name: "",
       type_id: undefined,
-      type_name: "",  
+      type_name: "",
       asset_id: undefined,
       asset_name: "",
       date_borrowed: undefined,
@@ -81,6 +246,8 @@ function BorrowForm() {
       remarks: "",
     },
   });
+
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -98,44 +265,27 @@ function BorrowForm() {
                 <FormItem>
                   <FormControl>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(
+                          value === "reset" ? undefined : Number(value)
+                        );
+                        setCompanyID(value === "reset" ? null : value);
+                      }}
+                      value={field.value ? field.value.toString() : undefined}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select Company" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="United Neon Advertising, Inc.">
-                          United Neon Advertising, Inc.
-                        </SelectItem>
-                        <SelectItem value="Breakthrough Leadership Management Consultancy, In">
-                          Breakthrough Leadership Management Consultancy, In
-                        </SelectItem>
-                        <SelectItem value="InnovationOne Inc.">
-                          InnovationOne Inc.
-                        </SelectItem>
-                        <SelectItem value="Inspire Leadership Consultancy Inc.">
-                          Inspire Leadership Consultancy Inc.
-                        </SelectItem>
-                        <SelectItem value="Media Display Solutions">
-                          Media Display Solutions
-                        </SelectItem>
-                        <SelectItem value="Onion Bulb Production">
-                          Onion Bulb Production
-                        </SelectItem>
-                        <SelectItem value="PLUS Media">PLUS Media</SelectItem>
-                        <SelectItem value="SeeWorthy International/LinkOD">
-                          SeeWorthy International/LinkOD
-                        </SelectItem>
-                        <SelectItem value="TapAds Media Corp">
-                          TapAds Media Corp
-                        </SelectItem>
-                        <SelectItem value="United Neon Foundation Inc.">
-                          United Neon Foundation Inc.
-                        </SelectItem>
-                        <SelectItem value="United Transit Ads System Inc.">
-                          United Transit Ads System Inc.
-                        </SelectItem>
+                      <SelectItem value="reset">Select a Company</SelectItem>
+                        {company
+                          .filter((company) => company.id && company.name)
+                          .map((company) => (
+                            <SelectItem key={company.id} value={company.id.toString()}>
+                              {company.name}
+                            </SelectItem>
+                          ))}
+                        
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -144,67 +294,84 @@ function BorrowForm() {
               )}
             />
           </div>
+          {companyID && (
+  <div className="flex flex-col sm:flex-row gap-4">
+    {/* Department Dropdown (Only appears if the company has departments) */}
+    {department.length > 0 && (
+      <div
+        className={`transition-all duration-200 ${
+          unit.length > 0 ? "sm:w-1/2" : "sm:w-full"
+        }`}
+      >
+        <FormField
+          control={form.control}
+          name="department_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setDepartmentID(value);
+                  }}
+                  value={field.value || ""}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {department.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id.toString()}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    )}
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="department_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Department" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Department 1">
-                            Department 1
-                          </SelectItem>
-                          <SelectItem value="Department 2">
-                            Department 2
-                          </SelectItem>
-                          <SelectItem value="Department 3">
-                            Department 3
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="unit_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Unit 1">Unit 1</SelectItem>
-                          <SelectItem value="Unit 2">Unit 2</SelectItem>
-                          <SelectItem value="Unit 3">Unit 3</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+    {/* Unit Dropdown */}
+    {unit.length > 0 && (
+      <div className={`${department.length > 0 ? "sm:w-1/2" : "sm:w-full"}`}>
+        <FormField
+          control={form.control}
+          name="unit_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setUnitID(value);
+                  }}
+                  value={field.value || ""}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Unit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {unit.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id.toString()}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    )}
+  </div>
+)}
+
           <div className="w-full">
             <FormField
               control={form.control}

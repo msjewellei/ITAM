@@ -1,0 +1,203 @@
+{
+  "user": [
+    {
+      "id": 1,
+      "firstname": "Jewel lei",
+      "lastname": "Jewel lei",
+      "company": {
+        "id": 1,
+        "name": "United Neon Advertising, Inc.",
+        "department": {
+          "id": 1,
+          "name": "ISTI"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "firstname": "Vincent Kyle",
+      "lastname": "Rinoza",
+      "company": {
+        "id": 1,
+        "name": "United Neon Advertising, Inc.",
+        "department": {
+          "id": 2,
+          "name": "Finance",
+          "unit": {
+            "id": 1,
+            "name": "Taxation"
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "firstname": "Christopher",
+      "lastname": "Leynes",
+      "company": {
+        "id": 1,
+        "name": "United Neon Advertising, Inc.",
+        "department": {
+          "id": 3,
+          "name": "Human Resources",
+          "unit": {
+            "id": 2,
+            "name": "Talent Acquisition"
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "firstname": "Justine",
+      "lastname": "Dimaunahan",
+      "company": {
+        "id": 1,
+        "name": "United Neon Advertising, Inc.",
+        "department": {
+          "id": 3,
+          "name": "Human Resources",
+          "unit": {
+            "id": 3,
+            "name": "Training"
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "firstname": "Ameer",
+      "lastname": "Rojo",
+      "company": {
+        "id": 2,
+        "name": "Media Display Solutions",
+        "department": {
+          "id": 0,
+          "name": "None",
+          "unit": {
+            "id": 4,
+            "name": "Unit 1"
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "firstname": "Ameer",
+      "lastname": "Rojo",
+      "company": {
+        "id": 2,
+        "name": "Media Display Solutions",
+        "department": {
+          "id": 0,
+          "name": "None",
+          "unit": {
+            "id": 5,
+            "name": "Unit 1"
+          }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "firstname": "Eme 1",
+      "lastname": "Eme 1",
+      "company": {
+        "id": 3,
+        "name": "Breakthrough Leadership Management Consultancy, Inc",
+        "department": {
+          "id": 1,
+          "name": "Department 1",
+          "unit": {
+            "id": 6,
+            "name": "Unit 1"
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "firstname": "Eme 2",
+      "lastname": "Eme 2",
+      "company": {
+        "id": 3,
+        "name": "Breakthrough Leadership Management Consultancy, Inc",
+        "department": {
+          "id": 2,
+          "name": "Department 2",
+          "unit": {
+            "id": 7,
+            "name": "Unit 1"
+          }
+        }
+      }
+    },
+    {
+      "id": 8,
+      "firstname": "Eme 3",
+      "lastname": "Eme 3",
+      "company": {
+        "id": 3,
+        "name": "Breakthrough Leadership Management Consultancy, Inc",
+        "department": {
+          "id": 2,
+          "name": "Department 2",
+          "unit": {
+            "id": 8,
+            "name": "Unit 1"
+          }
+        }
+      }
+    },
+    {
+      "id": 9,
+      "firstname": "Eme 4",
+      "lastname": "Eme 4",
+      "company": {
+        "id": 3,
+        "name": "Breakthrough Leadership Management Consultancy, Inc",
+        "department": {
+          "id": 1,
+          "name": "BDepartment 1",
+          "unit": {
+            "id": 9,
+            "name": "BUnit 2"
+          }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "firstname": "Eme 5",
+      "lastname": "Eme 5",
+      "company": {
+        "id": 4,
+        "name": "InnovationOne Inc.",
+        "department": {
+          "id": 1,
+          "name": "IDepartment 1",
+          "unit": {
+            "id": 10,
+            "name": "IUnit 1"
+          }
+        }
+      }
+    },{
+      "id": 11,
+      "firstname": "Eme 6",
+      "lastname": "Eme 6",
+      "company": {
+        "id": 1,
+        "name": "United Neon Advertising, Inc.",
+        "department": {
+          "id": 2,
+          "name": "Finance",
+          "unit": {
+            "id": 4,
+            "name": "Billing"
+          }
+        }
+      }
+    }
+  ]
+}

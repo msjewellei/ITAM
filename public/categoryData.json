@@ -1,0 +1,112 @@
+{
+  "asset": [
+    {
+      "id": 1,
+      "name": "Asset 1",
+      "category": {
+        "id": 1,
+        "name": "External",
+        "subcategory": {
+          "id": 0,
+          "name": "None"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "Asset 2",
+      "category": {
+        "id": 2,
+        "name": "Internal",
+        "subcategory": {
+          "id": 1,
+          "name": "Laptop"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "name": "Asset 3",
+      "category": {
+        "id": 2,
+        "name": "Internal",
+        "subcategory": {
+          "id": 2,
+          "name": "Printer"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "name": "Asset 4",
+      "category": {
+        "id": 2,
+        "name": "Internal",
+        "subcategory": {
+          "id": 3,
+          "name": "Access Points"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "name": "Asset 5",
+      "category": {
+        "id": 2,
+        "name": "Internal",
+        "subcategory": {
+          "id": 4,
+          "name": "Routers and Switch"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "name": "Asset 6",
+      "category": {
+        "id": 2,
+        "name": "Internal",
+        "subcategory": {
+          "id": 6,
+          "name": "Stocks",
+          "type": {
+            "id": 1,
+            "name": "Mouse"
+          }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "name": "Asset 7",
+      "category": {
+        "id": 2,
+        "name": "Internal",
+        "subcategory": {
+          "id": 6,
+          "name": "Stocks",
+          "type": {
+            "id": 2,
+            "name": "Keyboard"
+          }
+        }
+      }
+    },
+    {
+      "id": 8,
+      "name": "Asset 8",
+      "category": {
+        "id": 2,
+        "name": "Internal",
+        "subcategory": {
+          "id": 6,
+          "name": "Stocks",
+          "type": {
+            "id": 3,
+            "name": "UPS Battery"
+          }
+        }
+      }
+    }
+  ]
+}
