@@ -50,6 +50,23 @@ interface User {
   };
 }
 
+interface Asset {
+  id: number;
+  name: string;
+  category: {
+    id: number;
+    name: string;
+    subcategory?: {
+      id: number;
+      name: string;
+      type?: {
+        id: number;
+        name: string;
+      };
+    };
+  };
+}
+
 const formSchema = z.object({
   company_id: z.number().min(1),
   company_name: z.string().min(2).max(50),
@@ -79,13 +96,134 @@ function BorrowForm() {
   const [users, setUsers] = useState<User[]>([]);
   const [company, setCompany] = useState<{ id: number; name: string }[]>([]);
   const [department, setDepartment] = useState<
-  { id: number; name: string; unit?: { id: number; name: string }[] }[]
->([]);
-
+    { id: number; name: string; unit?: { id: number; name: string }[] }[]
+  >([]);
   const [unit, setUnit] = useState<{ id: number; name: string }[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [category, setCategory] = useState<{ id: number; name: string }[]>([]);
+  const [subcategory, setSubCategory] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const [type, setType] = useState<{ id: number; name: string }[]>([]);
   const [companyID, setCompanyID] = useState<string | null>(null);
   const [departmentID, setDepartmentID] = useState<string | null>(null);
   const [unitID, setUnitID] = useState<string | null>(null);
+  const [categoryID, setCategoryID] = useState<string | null>(null);
+  const [subCategoryID, setSubCategoryID] = useState<string | null>(null);
+  const [typeID, setTypeID] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await axios.get("/categoryData.json");
+
+      const uniqueCategories: { id: number; name: string }[] = Array.from(
+        new Map<number, { id: number; name: string }>(
+          response.data.asset.map((asset: Asset) => [
+            asset.category.id,
+            { id: asset.category.id, name: asset.category.name },
+          ])
+        ).values()
+      );
+
+      setCategory(uniqueCategories);
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const setup = async () => {
+      const response = await axios.get("/categoryData.json");
+      setAssets(response.data.asset);
+    };
+    setup();
+  }, []);
+
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      const response = await axios.get("/categoryData.json");
+      const uniqueSubCategories: { id: number; name: string }[] = Array.from(
+        new Map<number, { id: number; name: string }>(
+          response.data.asset
+            .filter((asset: Asset) => asset.category.id === Number(categoryID))
+            .map((asset: Asset) => [
+              asset.category.subcategory?.id!,
+              {
+                id: asset.category.subcategory?.id!,
+                name: asset.category.subcategory?.name!,
+              },
+            ])
+        ).values()
+      );
+
+      setSubCategory(uniqueSubCategories);
+    };
+
+    if (categoryID) {
+      fetchSubCategories();
+    }
+  }, [categoryID]);
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      const response = await axios.get("/categoryData.json");
+      const uniqueTypes: { id: number; name: string }[] = Array.from(
+        new Map<number, { id: number; name: string }>(
+          response.data.asset
+            .filter((asset: Asset) => asset.category.id === Number(categoryID))
+            .map((asset: Asset) => [
+              asset.category.subcategory?.type?.id!,
+              {
+                id: asset.category.subcategory?.type?.id!,
+                name: asset.category.subcategory?.type?.name!,
+              },
+            ])
+        ).values()
+      );
+
+      setType(uniqueTypes);
+    };
+
+    if (categoryID && subCategoryID) {
+      fetchTypes();
+    }
+  }, [categoryID, subCategoryID]);
+
+  const filteredAssets = useMemo(() => {
+    let currentAssets = assets;
+
+    if (categoryID) {
+      currentAssets = currentAssets.filter(
+        (asset) => asset.category.id === Number(categoryID)
+      );
+    }
+    if (subCategoryID) {
+      currentAssets = currentAssets.filter(
+        (asset) => asset.category.subcategory?.id === Number(subCategoryID)
+      );
+    }
+    if (typeID) {
+      currentAssets = currentAssets.filter(
+        (asset) => asset.category.subcategory?.type?.id === Number(typeID)
+      );
+    }
+
+    return currentAssets;
+  }, [categoryID, subCategoryID, typeID, assets]);
+
+  const assetCategory = useMemo(() => {
+    return category.find((cat) => cat.id === Number(categoryID)) || null;
+  }, [categoryID, category]);
+
+  const assetSubCategory = useMemo(() => {
+    if (!subCategoryID) return [];
+    return assets
+      .filter((asset) => asset.category.subcategory)
+      .map((asset) => asset.category.subcategory!)
+      .filter(
+        (subcategory) => subcategory && subcategory.id === Number(subCategoryID)
+      );
+  }, [subCategoryID]);
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -116,15 +254,21 @@ function BorrowForm() {
   useEffect(() => {
     const fetchDepartments = async () => {
       const response = await axios.get("/usersData.json");
-  
-      const departmentMap = new Map<number, { id: number; name: string; unit: { id: number; name: string }[] }>();
-  
+
+      const departmentMap = new Map<
+        number,
+        { id: number; name: string; unit: { id: number; name: string }[] }
+      >();
+
       response.data.user
-        .filter((user: User) => user.company.id === Number(companyID) && user.company.department)
+        .filter(
+          (user: User) =>
+            user.company.id === Number(companyID) && user.company.department
+        )
         .forEach((user: User) => {
           const dept = user.company.department!;
           const unit = user.company.department?.unit;
-  
+
           if (!departmentMap.has(dept.id)) {
             departmentMap.set(dept.id, {
               id: dept.id,
@@ -132,7 +276,7 @@ function BorrowForm() {
               unit: [],
             });
           }
-  
+
           if (unit) {
             const deptEntry = departmentMap.get(dept.id)!;
             if (!deptEntry.unit.some((u) => u.id === unit.id)) {
@@ -140,23 +284,21 @@ function BorrowForm() {
             }
           }
         });
-  
+
       const uniqueDepartments = Array.from(departmentMap.values());
-  
-      console.log("Processed Departments with Units:", uniqueDepartments);
+
       setDepartment(uniqueDepartments);
     };
-  
+
     if (companyID) {
       fetchDepartments();
     }
   }, [companyID]);
-  
 
   useEffect(() => {
     const fetchUnits = async () => {
       const response = await axios.get("/usersData.json");
-  
+
       const units = response.data.user
         .filter(
           (user: User) =>
@@ -164,26 +306,29 @@ function BorrowForm() {
             user.company.department?.id === Number(departmentID) &&
             user.company.department.unit
         )
-        .map((user: { company: { department: any; }; }) => user.company.department!.unit!)
+        .map(
+          (user: { company: { department: any } }) =>
+            user.company.department!.unit!
+        )
         .filter(
-          (unit: { id: any; }, index: any, self: any[]) =>
-            unit && self.findIndex((u: { id: any; }) => u?.id === unit.id) === index
+          (unit: { id: any }, index: any, self: any[]) =>
+            unit &&
+            self.findIndex((u: { id: any }) => u?.id === unit.id) === index
         );
-  
+
       if (units.length > 0) {
         setUnit(units);
       } else {
         setUnit([]); // Ensures the dropdown won't have stale data
       }
     };
-  
+
     if (companyID && departmentID) {
       fetchUnits();
     } else {
       setUnit([]); // Reset unit if no department is selected
     }
   }, [companyID, departmentID]);
-  
 
   const filteredUser = useMemo(() => {
     let currentUsers = users;
@@ -206,19 +351,19 @@ function BorrowForm() {
     return currentUsers;
   }, [companyID, departmentID, unitID, users]);
 
-    const userCompany = useMemo(() => {
-      return company.find((company) => company.id === Number(companyID)) || null;
-    }, [companyID, company]);
-  
-    const userDepartment = useMemo(() => {
-      if (!departmentID) return [];
-      return users
-        .filter((user) => user.company.department)
-        .map((user) => user.company.department!)
-        .filter(
-          (department) => department && department.id === Number(departmentID)
-        );
-    }, [departmentID]);
+  const userCompany = useMemo(() => {
+    return company.find((company) => company.id === Number(companyID)) || null;
+  }, [companyID, company]);
+
+  const userDepartment = useMemo(() => {
+    if (!departmentID) return [];
+    return users
+      .filter((user) => user.company.department)
+      .map((user) => user.company.department!)
+      .filter(
+        (department) => department && department.id === Number(departmentID)
+      );
+  }, [departmentID]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -246,8 +391,6 @@ function BorrowForm() {
       remarks: "",
     },
   });
-
-
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -277,15 +420,17 @@ function BorrowForm() {
                         <SelectValue placeholder="Select Company" />
                       </SelectTrigger>
                       <SelectContent>
-                      <SelectItem value="reset">Select a Company</SelectItem>
+                        <SelectItem value="reset">Select a Company</SelectItem>
                         {company
                           .filter((company) => company.id && company.name)
                           .map((company) => (
-                            <SelectItem key={company.id} value={company.id.toString()}>
+                            <SelectItem
+                              key={company.id}
+                              value={company.id.toString()}
+                            >
                               {company.name}
                             </SelectItem>
                           ))}
-                        
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -295,82 +440,90 @@ function BorrowForm() {
             />
           </div>
           {companyID && (
-  <div className="flex flex-col sm:flex-row gap-4">
-    {/* Department Dropdown (Only appears if the company has departments) */}
-    {department.length > 0 && (
-      <div
-        className={`transition-all duration-200 ${
-          unit.length > 0 ? "sm:w-1/2" : "sm:w-full"
-        }`}
-      >
-        <FormField
-          control={form.control}
-          name="department_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    setDepartmentID(value);
-                  }}
-                  value={field.value || ""}
+            <div className="flex flex-col sm:flex-row gap-4">
+              {department.length > 0 && (
+                <div
+                  className={`transition-all duration-200 ${
+                    unit.length > 0 ? "sm:w-1/2" : "sm:w-full"
+                  }`}
                 >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {department.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id.toString()}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-    )}
+                  <FormField
+                    control={form.control}
+                    name="department_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setDepartmentID(value);
+                            }}
+                            value={field.value || ""}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Department" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {department.map((dept) => (
+                                <SelectItem
+                                  key={dept.id}
+                                  value={dept.id.toString()}
+                                >
+                                  {dept.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
-    {/* Unit Dropdown */}
-    {unit.length > 0 && (
-      <div className={`${department.length > 0 ? "sm:w-1/2" : "sm:w-full"}`}>
-        <FormField
-          control={form.control}
-          name="unit_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    setUnitID(value);
-                  }}
-                  value={field.value || ""}
+              {unit.length > 0 && (
+                <div
+                  className={`${
+                    department.length > 0 ? "sm:w-1/2" : "sm:w-full"
+                  }`}
                 >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {unit.map((unit) => (
-                      <SelectItem key={unit.id} value={unit.id.toString()}>
-                        {unit.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="unit_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setUnitID(value);
+                            }}
+                            value={field.value || ""}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {unit.map((unit) => (
+                                <SelectItem
+                                  key={unit.id}
+                                  value={unit.id.toString()}
+                                >
+                                  {unit.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+            </div>
           )}
-        />
-      </div>
-    )}
-  </div>
-)}
 
           <div className="w-full">
             <FormField
@@ -386,23 +539,35 @@ function BorrowForm() {
               )}
             />
           </div>
+
           <div className="w-full">
             <FormField
               control={form.control}
-              name="category_name"
+              name="category_id"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(
+                          value === "reset" ? undefined : Number(value)
+                        );
+                        setCategoryID(value === "reset" ? null : value);
+                      }}
+                      value={field.value ? field.value.toString() : undefined}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Category" />
+                        <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Internal">Internal</SelectItem>
-                        <SelectItem value="External">External</SelectItem>
+                        <SelectItem value="reset">Select a category</SelectItem>
+                        {category
+                          .filter((cat) => cat.id && cat.name) // Ensure valid data
+                          .map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -411,68 +576,105 @@ function BorrowForm() {
               )}
             />
           </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="sub_category_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Sub Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Laptop">Laptop</SelectItem>
-                          <SelectItem value="Printer">Printer</SelectItem>
-                          <SelectItem value="Access Point">
-                            Access Point
-                          </SelectItem>
-                          <SelectItem value="Routers and Switch">
-                            Routers and Switch
-                          </SelectItem>
-                          <SelectItem value="Stocks">Stocks</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
+          {Number(categoryID) === 2 && (
+            <div className={`flex flex-col sm:flex-row gap-4`}>
+              <div
+                className={`transition-all duration-200 ${
+                  subCategoryID === "6" ? "sm:w-1/2" : "sm:w-full"
+                }`}
+              >
+                <FormField
+                  control={form.control}
+                  name="sub_category_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(
+                              value === "reset" ? undefined : Number(value)
+                            );
+                            setSubCategoryID(value === "reset" ? null : value);
+                          }}
+                          value={
+                            field.value ? field.value.toString() : undefined
+                          }
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Sub Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="reset">
+                              Select a subcategory
+                            </SelectItem>
+                            {subcategory
+                              .filter((sub) => sub.id && sub.name)
+                              .map((sub) => (
+                                <SelectItem
+                                  key={sub.id}
+                                  value={sub.id.toString()}
+                                >
+                                  {sub.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {subCategoryID === "6" && (
+                <div className="w-full sm:w-1/2 transition-all duration-200">
+                  <FormField
+                    control={form.control}
+                    name="type_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(
+                                value === "reset" ? undefined : Number(value)
+                              );
+                              setTypeID(value === "reset" ? null : value);
+                            }}
+                            value={
+                              field.value ? field.value.toString() : undefined
+                            }
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="reset">
+                                Select a type
+                              </SelectItem>
+                              {type
+                                .filter((type) => type.id && type.name)
+                                .map((type) => (
+                                  <SelectItem
+                                    key={type.id}
+                                    value={type.id.toString()}
+                                  >
+                                    {type.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
             </div>
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="type_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Type 1">Type 1</SelectItem>
-                          <SelectItem value="Type 2">Type 2</SelectItem>
-                          <SelectItem value="Type 3">Type 3</SelectItem>
-                          <SelectItem value="Type 4">Type 4</SelectItem>
-                          <SelectItem value="Type 5">Type 5</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+          )}
+
           <div className="w-full">
             <FormField
               control={form.control}
@@ -488,11 +690,20 @@ function BorrowForm() {
                         <SelectValue placeholder="Asset Name" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Asset 1">Asset 1</SelectItem>
-                        <SelectItem value="Asset 2">Asset 2</SelectItem>
-                        <SelectItem value="Asset 3">Asset 3</SelectItem>
-                        <SelectItem value="Asset 4">Asset 4</SelectItem>
-                        <SelectItem value="Asset 5">Asset 5</SelectItem>
+                        {filteredAssets.length > 0 ? (
+                          filteredAssets.map((asset) => (
+                            <SelectItem
+                              key={asset.id}
+                              value={asset.id.toString()}
+                            >
+                              {asset.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="none" disabled>
+                            No assets available
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </FormControl>

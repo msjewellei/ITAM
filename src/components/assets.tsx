@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import AssetForm from "./assetForm";
+import AssetForm from "./assetForm.copy";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "./ui/tooltip";
 import { Toaster } from "./ui/sonner";
 

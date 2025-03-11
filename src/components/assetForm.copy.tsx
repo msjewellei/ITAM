@@ -29,40 +29,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-
-interface Asset {
-  id: number;
-  name: string;
-  category: {
-    id: number;
-    name: string;
-    subcategory?: {
-      id: number;
-      name: string;
-      type?: {
-        id: number;
-        name: string;
-      };
-    };
-  };
-}
+import { useMisc } from "@/context/miscellaneousContext";
 
 const formSchema = z.object({
-  asset_id: z.number().min(1).optional(),
   asset_name: z.string().min(2).max(50),
-  category_id: z.number().min(1).optional(),
-  category_name: z.string(),
-  sub_category_id: z.number().min(1).optional(),
-  sub_category_name: z.string().optional(),
-  type_id: z.number().min(1).optional(),
-  type_name: z.string().optional(),
+  category_id: z.number(),
+  sub_category_id: z.number(),
+  type_id: z.number(),
   location: z.string().min(2).max(50),
-  asset_condition_id: z.number().min(1).optional(),
-  asset_condition_name: z.string().min(2).max(50),
-  availability_status: z.string().min(2).max(50),
+  asset_condition_id: z.number(),
+  availability_status_id: z.number(),
   serial_number: z.string().min(2).max(50),
   specifications: z.string().min(2).max(100),
   asset_amount: z.number(),
@@ -70,179 +46,51 @@ const formSchema = z.object({
   warranty_due_date: z.date(),
   purchase_date: z.date(),
   aging: z.number(),
-  notes: z.string(),
+  notes: z.string().min(2).max(50),
 });
 
 function AssetForm() {
-  const { id } = useParams();
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [category, setCategory] = useState<{ id: number; name: string }[]>([]);
-  const [subcategory, setSubCategory] = useState<
-    { id: number; name: string }[]
-  >([]);
-  const [type, setType] = useState<{ id: number; name: string }[]>([]);
-  const [categoryID, setCategoryID] = useState<string | null>(null);
-  const [subCategoryID, setSubCategoryID] = useState<string | null>(null);
-  const [typeID, setTypeID] = useState<string | null>(null);
-
+  const {
+    category,
+    subcategory,
+    type,
+    filteredSubcategories,
+    setCategoryID,
+    setSubCategoryID,
+    subCategoryID,
+  } = useMisc();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      asset_id: undefined,
       asset_name: "",
-      category_id: undefined,
-      category_name: "",
-      sub_category_id: undefined,
-      sub_category_name: "",
-      type_id: undefined,
-      type_name: "",
+      category_id: 0,
+      sub_category_id: 0,
+      type_id: 0,
       location: "",
-      asset_condition_id: undefined,
-      asset_condition_name: "",
-      availability_status: "",
+      asset_condition_id: 0,
+      availability_status_id: 0,
       serial_number: "",
       specifications: "",
-      asset_amount: undefined,
+      asset_amount: 0,
       warranty_duration: "",
       warranty_due_date: new Date(),
       purchase_date: new Date(),
-      aging: undefined,
+      aging: 0,
       notes: "",
     },
   });
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await axios.get("/categoryData.json");
-
-      const uniqueCategories: { id: number; name: string }[] = Array.from(
-        new Map<number, { id: number; name: string }>(
-          response.data.asset.map((asset: Asset) => [
-            asset.category.id,
-            { id: asset.category.id, name: asset.category.name },
-          ])
-        ).values()
-      );
-
-      setCategory(uniqueCategories);
-    };
-
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const setup = async () => {
-      const response = await axios.get("/categoryData.json");
-      setAssets(response.data.asset);
-    };
-    setup();
-  }, []);
-
-  useEffect(() => {
-    const fetchSubCategories = async () => {
-      const response = await axios.get("/categoryData.json");
-      const uniqueSubCategories: { id: number; name: string }[] = Array.from(
-        new Map<number, { id: number; name: string }>(
-          response.data.asset
-            .filter((asset: Asset) => asset.category.id === Number(categoryID))
-            .map((asset: Asset) => [
-              asset.category.subcategory?.id!,
-              {
-                id: asset.category.subcategory?.id!,
-                name: asset.category.subcategory?.name!,
-              },
-            ])
-        ).values()
-      );
-
-      setSubCategory(uniqueSubCategories);
-    };
-
-    if (categoryID) {
-      fetchSubCategories();
-    }
-  }, [categoryID]);
-
-  useEffect(() => {
-    const fetchTypes = async () => {
-      const response = await axios.get("/categoryData.json");
-      const uniqueTypes: { id: number; name: string }[] = Array.from(
-        new Map<number, { id: number; name: string }>(
-          response.data.asset
-            .filter((asset: Asset) => asset.category.id === Number(categoryID))
-            .map((asset: Asset) => [
-              asset.category.subcategory?.type?.id!,
-              {
-                id: asset.category.subcategory?.type?.id!,
-                name: asset.category.subcategory?.type?.name!,
-              },
-            ])
-        ).values()
-      );
-
-      setType(uniqueTypes);
-    };
-
-    if (categoryID && subCategoryID) {
-      fetchTypes();
-    }
-  }, [categoryID, subCategoryID]);
-
-  const filteredAssets = useMemo(() => {
-    let currentAssets = assets;
-    if (categoryID) {
-      currentAssets = currentAssets.filter(
-        (asset) => asset.category.id === Number(categoryID) // Compare by ID
-      );
-    }
-    if (subCategoryID) {
-      currentAssets = currentAssets.filter(
-        (asset) => asset.category.subcategory?.name === subCategoryID
-      );
-    }
-    if (typeID) {
-      currentAssets = currentAssets.filter(
-        (asset) => asset.category.subcategory?.type?.name === typeID
-      );
-    }
-
-    return currentAssets;
-  }, [categoryID, subCategoryID, typeID, assets]);
-
-  const assetCategory = useMemo(() => {
-    return category.find((cat) => cat.id === Number(categoryID)) || null;
-  }, [categoryID, category]);
-
-  const assetSubCategory = useMemo(() => {
-    if (!subCategoryID) return [];
-    return assets
-      .filter((asset) => asset.category.subcategory)
-      .map((asset) => asset.category.subcategory!)
-      .filter(
-        (subcategory) => subcategory && subcategory.id === Number(subCategoryID)
-      );
-  }, [subCategoryID]);
-
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("hehe");
     console.log(values);
   }
-
-  const {
-    handleSubmit,
-    formState: { errors },
-  } = form;
-  
-  useEffect(() => {
-    console.log("Form Errors:", errors);
-  }, [errors]);
-  
 
   return (
     <div className="pl-5 pr-5">
       <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-4"
+        >
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="w-full sm:w-1/2 max-w-sm">
               <FormField
@@ -292,27 +140,29 @@ function AssetForm() {
                 <FormItem>
                   <FormControl>
                     <Select
-                    {...field}
+                      {...field}
                       onValueChange={(value) => {
-                        field.onChange(
-                          value === "reset" ? undefined : Number(value)
-                        );
-                        setCategoryID(value === "reset" ? null : value);
+                        field.onChange(Number(value));
+                        setCategoryID(Number(value));
                       }}
-                      value={field.value ? field.value.toString() : undefined}
+                      value={field.value.toString()}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="reset">Select a category</SelectItem>
-                        {category
-                          .filter((cat) => cat.id && cat.name) // Ensure valid data
-                          .map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id.toString()}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
+                        <SelectItem value="-1">
+                          Select a category
+                        </SelectItem>
+                        {console.log(category)}
+                        {category.map((cat) => (
+                          <SelectItem
+                            key={cat.category_id}
+                            value={cat.category_id}
+                          >
+                            {cat.category_name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -322,13 +172,9 @@ function AssetForm() {
             />
           </div>
 
-          {Number(categoryID) === 2 && (
+          {filteredSubcategories.length > 0 && (
             <div className={`flex flex-col sm:flex-row gap-4`}>
-              <div
-                className={`transition-all duration-200 ${
-                  subCategoryID === "6" ? "sm:w-1/2" : "sm:w-full"
-                }`}
-              >
+              <div className={`transition-all duration-200`}>
                 <FormField
                   control={form.control}
                   name="sub_category_name"
@@ -336,7 +182,7 @@ function AssetForm() {
                     <FormItem>
                       <FormControl>
                         <Select
-                        {...field}
+                          {...field}
                           onValueChange={(value) => {
                             field.onChange(value);
                             setSubCategoryID(value);
@@ -348,13 +194,16 @@ function AssetForm() {
                           </SelectTrigger>
                           <SelectContent>
                             {subcategory
-                              .filter((sub) => sub.id && sub.name)
+                              .filter(
+                                (sub) =>
+                                  sub.sub_category_id && sub.sub_category_name
+                              )
                               .map((sub) => (
                                 <SelectItem
-                                  key={sub.id}
-                                  value={sub.id.toString()}
+                                  key={sub.sub_category_id}
+                                  value={sub.sub_category_id.toString()}
                                 >
-                                  {sub.name}
+                                  {sub.sub_category_name}
                                 </SelectItem>
                               ))}
                           </SelectContent>
@@ -366,7 +215,7 @@ function AssetForm() {
                 />
               </div>
 
-              {subCategoryID === "6" && (
+              {subCategoryID === 6 && (
                 <div className="w-full sm:w-1/2 transition-all duration-200">
                   <FormField
                     control={form.control}
@@ -375,7 +224,7 @@ function AssetForm() {
                       <FormItem>
                         <FormControl>
                           <Select
-                          {...field}
+                            {...field}
                             onValueChange={(value) => {
                               field.onChange(value);
                               setTypeID(value);
@@ -387,13 +236,15 @@ function AssetForm() {
                             </SelectTrigger>
                             <SelectContent>
                               {type
-                                .filter((type) => type.id && type.name)
+                                .filter(
+                                  (type) => type.type_id && type.type_name
+                                )
                                 .map((type) => (
                                   <SelectItem
-                                    key={type.id}
-                                    value={type.id.toString()}
+                                    key={type.type_id}
+                                    value={type.type_id.toString()}
                                   >
-                                    {type.name}
+                                    {type.type_name}
                                   </SelectItem>
                                 ))}
                             </SelectContent>
@@ -466,7 +317,7 @@ function AssetForm() {
                 <FormItem>
                   <FormControl>
                     <Select
-                    {...field}
+                      {...field}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
@@ -592,13 +443,17 @@ function AssetForm() {
 
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <div className="w-full sm:w-1/2">
-            <FormField
+              <FormField
                 control={form.control}
                 name="asset_amount"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input type="name" placeholder="Asset Amount" {...field} />
+                      <Input
+                        type="name"
+                        placeholder="Asset Amount"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -669,10 +524,7 @@ function AssetForm() {
           </div>
 
           <div>
-            <Button
-              className="w-full text-sm sm:text-base"
-              type="submit"
-            >
+            <Button className="w-full text-sm sm:text-base" type="submit">
               Submit
             </Button>
           </div>
