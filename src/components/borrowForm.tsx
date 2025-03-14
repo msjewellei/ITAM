@@ -6,6 +6,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ChevronLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,444 +32,182 @@ import {
 import { DialogFooter } from "./ui/dialog";
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
-import { Route, Routes, useParams } from "react-router-dom";
-
-interface User {
-  id: number;
-  name: string;
-  company: {
-    id: number;
-    name: string;
-    department?: {
-      id: number;
-      name: string;
-      unit?: {
-        id: number;
-        name: string;
-      };
-    };
-  };
-}
-
-interface Asset {
-  id: number;
-  name: string;
-  category: {
-    id: number;
-    name: string;
-    subcategory?: {
-      id: number;
-      name: string;
-      type?: {
-        id: number;
-        name: string;
-      };
-    };
-  };
-}
+import { useMisc } from "@/context/miscellaneousContext";
+import { useAsset } from "@/context/assetContext";
+import { Link } from "react-router-dom";
+import { useBorrow } from "@/context/borrowContext";
 
 const formSchema = z.object({
-  company_id: z.number().min(1),
-  company_name: z.string().min(2).max(50),
-  department_id: z.number().min(1),
-  department_name: z.string().min(2).max(50),
-  unit_id: z.number().min(1),
-  unit_name: z.string().min(2).max(50),
-  user_id: z.number().min(1),
-  employee_name: z.string().min(2).max(50),
-  category_id: z.number().min(1),
-  category_name: z.string().min(2).max(50),
-  sub_category_id: z.number().min(1),
-  sub_category_name: z.string().min(2).max(50),
-  type_id: z.number().min(1),
-  type_name: z.string().min(2).max(50),
-  asset_id: z.number().min(1),
-  asset_name: z.string().min(2).max(50),
+  company_id: z.string(),
+  department_id: z.string().optional(),
+  unit_id: z.string().optional(),
+  user_id: z.string(),
+  category_id: z.string(),
+  sub_category_id: z.string().optional(),
+  type_id: z.string().optional(),
+  asset_id: z.string(),
   date_borrowed: z.date(),
   due_date: z.date(),
-  asset_condition_id: z.number().min(1),
-  asset_condition_name: z.string().min(2).max(50),
+  duration: z.number(),
+  asset_condition_id: z.string(),
   remarks: z.string().min(2).max(100),
 });
 
 function BorrowForm() {
-  const { id } = useParams();
-  const [users, setUsers] = useState<User[]>([]);
-  const [company, setCompany] = useState<{ id: number; name: string }[]>([]);
-  const [department, setDepartment] = useState<
-    { id: number; name: string; unit?: { id: number; name: string }[] }[]
-  >([]);
-  const [unit, setUnit] = useState<{ id: number; name: string }[]>([]);
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [category, setCategory] = useState<{ id: number; name: string }[]>([]);
-  const [subcategory, setSubCategory] = useState<
-    { id: number; name: string }[]
-  >([]);
-  const [type, setType] = useState<{ id: number; name: string }[]>([]);
-  const [companyID, setCompanyID] = useState<string | null>(null);
-  const [departmentID, setDepartmentID] = useState<string | null>(null);
-  const [unitID, setUnitID] = useState<string | null>(null);
-  const [categoryID, setCategoryID] = useState<string | null>(null);
-  const [subCategoryID, setSubCategoryID] = useState<string | null>(null);
-  const [typeID, setTypeID] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await axios.get("/categoryData.json");
-
-      const uniqueCategories: { id: number; name: string }[] = Array.from(
-        new Map<number, { id: number; name: string }>(
-          response.data.asset.map((asset: Asset) => [
-            asset.category.id,
-            { id: asset.category.id, name: asset.category.name },
-          ])
-        ).values()
-      );
-
-      setCategory(uniqueCategories);
-    };
-
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const setup = async () => {
-      const response = await axios.get("/categoryData.json");
-      setAssets(response.data.asset);
-    };
-    setup();
-  }, []);
-
-  useEffect(() => {
-    const fetchSubCategories = async () => {
-      const response = await axios.get("/categoryData.json");
-      const uniqueSubCategories: { id: number; name: string }[] = Array.from(
-        new Map<number, { id: number; name: string }>(
-          response.data.asset
-            .filter((asset: Asset) => asset.category.id === Number(categoryID))
-            .map((asset: Asset) => [
-              asset.category.subcategory?.id!,
-              {
-                id: asset.category.subcategory?.id!,
-                name: asset.category.subcategory?.name!,
-              },
-            ])
-        ).values()
-      );
-
-      setSubCategory(uniqueSubCategories);
-    };
-
-    if (categoryID) {
-      fetchSubCategories();
-    }
-  }, [categoryID]);
-
-  useEffect(() => {
-    const fetchTypes = async () => {
-      const response = await axios.get("/categoryData.json");
-      const uniqueTypes: { id: number; name: string }[] = Array.from(
-        new Map<number, { id: number; name: string }>(
-          response.data.asset
-            .filter((asset: Asset) => asset.category.id === Number(categoryID))
-            .map((asset: Asset) => [
-              asset.category.subcategory?.type?.id!,
-              {
-                id: asset.category.subcategory?.type?.id!,
-                name: asset.category.subcategory?.type?.name!,
-              },
-            ])
-        ).values()
-      );
-
-      setType(uniqueTypes);
-    };
-
-    if (categoryID && subCategoryID) {
-      fetchTypes();
-    }
-  }, [categoryID, subCategoryID]);
-
-  const filteredAssets = useMemo(() => {
-    let currentAssets = assets;
-
-    if (categoryID) {
-      currentAssets = currentAssets.filter(
-        (asset) => asset.category.id === Number(categoryID)
-      );
-    }
-    if (subCategoryID) {
-      currentAssets = currentAssets.filter(
-        (asset) => asset.category.subcategory?.id === Number(subCategoryID)
-      );
-    }
-    if (typeID) {
-      currentAssets = currentAssets.filter(
-        (asset) => asset.category.subcategory?.type?.id === Number(typeID)
-      );
-    }
-
-    return currentAssets;
-  }, [categoryID, subCategoryID, typeID, assets]);
-
-  const assetCategory = useMemo(() => {
-    return category.find((cat) => cat.id === Number(categoryID)) || null;
-  }, [categoryID, category]);
-
-  const assetSubCategory = useMemo(() => {
-    if (!subCategoryID) return [];
-    return assets
-      .filter((asset) => asset.category.subcategory)
-      .map((asset) => asset.category.subcategory!)
-      .filter(
-        (subcategory) => subcategory && subcategory.id === Number(subCategoryID)
-      );
-  }, [subCategoryID]);
-
-  useEffect(() => {
-    const fetchCompany = async () => {
-      const response = await axios.get("/usersData.json");
-      const uniqueCompanies: { id: number; name: string }[] = Array.from(
-        new Map<number, { id: number; name: string }>(
-          response.data.user.map((user: User) => [
-            user.company.id,
-            { id: user.company.id, name: user.company.name },
-          ])
-        ).values()
-      );
-
-      setCompany(uniqueCompanies);
-    };
-
-    fetchCompany();
-  }, []);
-
-  useEffect(() => {
-    const setup = async () => {
-      const response = await axios.get("/usersData.json");
-      setUsers(response.data.user);
-    };
-    setup();
-  }, []);
-
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      const response = await axios.get("/usersData.json");
-
-      const departmentMap = new Map<
-        number,
-        { id: number; name: string; unit: { id: number; name: string }[] }
-      >();
-
-      response.data.user
-        .filter(
-          (user: User) =>
-            user.company.id === Number(companyID) && user.company.department
-        )
-        .forEach((user: User) => {
-          const dept = user.company.department!;
-          const unit = user.company.department?.unit;
-
-          if (!departmentMap.has(dept.id)) {
-            departmentMap.set(dept.id, {
-              id: dept.id,
-              name: dept.name,
-              unit: [],
-            });
-          }
-
-          if (unit) {
-            const deptEntry = departmentMap.get(dept.id)!;
-            if (!deptEntry.unit.some((u) => u.id === unit.id)) {
-              deptEntry.unit.push({ id: unit.id, name: unit.name });
-            }
-          }
-        });
-
-      const uniqueDepartments = Array.from(departmentMap.values());
-
-      setDepartment(uniqueDepartments);
-    };
-
-    if (companyID) {
-      fetchDepartments();
-    }
-  }, [companyID]);
-
-  useEffect(() => {
-    const fetchUnits = async () => {
-      const response = await axios.get("/usersData.json");
-
-      const units = response.data.user
-        .filter(
-          (user: User) =>
-            user.company.id === Number(companyID) &&
-            user.company.department?.id === Number(departmentID) &&
-            user.company.department.unit
-        )
-        .map(
-          (user: { company: { department: any } }) =>
-            user.company.department!.unit!
-        )
-        .filter(
-          (unit: { id: any }, index: any, self: any[]) =>
-            unit &&
-            self.findIndex((u: { id: any }) => u?.id === unit.id) === index
-        );
-
-      if (units.length > 0) {
-        setUnit(units);
-      } else {
-        setUnit([]); // Ensures the dropdown won't have stale data
-      }
-    };
-
-    if (companyID && departmentID) {
-      fetchUnits();
-    } else {
-      setUnit([]); // Reset unit if no department is selected
-    }
-  }, [companyID, departmentID]);
-
-  const filteredUser = useMemo(() => {
-    let currentUsers = users;
-    if (companyID) {
-      currentUsers = currentUsers.filter(
-        (user) => user.company.id === Number(companyID)
-      );
-    }
-    if (departmentID) {
-      currentUsers = currentUsers.filter(
-        (user) => user.company.department?.name === departmentID
-      );
-    }
-    if (unitID) {
-      currentUsers = currentUsers.filter(
-        (user) => user.company.department?.unit?.name === unitID
-      );
-    }
-
-    return currentUsers;
-  }, [companyID, departmentID, unitID, users]);
-
-  const userCompany = useMemo(() => {
-    return company.find((company) => company.id === Number(companyID)) || null;
-  }, [companyID, company]);
-
-  const userDepartment = useMemo(() => {
-    if (!departmentID) return [];
-    return users
-      .filter((user) => user.company.department)
-      .map((user) => user.company.department!)
-      .filter(
-        (department) => department && department.id === Number(departmentID)
-      );
-  }, [departmentID]);
-
+  const {
+    user,
+    company,
+    department,
+    unit,
+    filteredDepartments,
+    filteredUnits,
+    setCompanyID,
+    setDepartmentID,
+    setUnitID,
+    category,
+    subcategory,
+    type,
+    condition,
+    filteredUsers,
+    setUserID,
+  } = useMisc();
+  const {
+    filteredAssets,
+    setCategoryID,
+    setSubCategoryID,
+    setTypeID,
+    categoryID,
+    subCategoryID,
+  } = useAsset();
+  const { insertTransaction } = useBorrow();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      company_id: undefined,
-      company_name: "",
-      department_id: undefined,
-      department_name: "",
-      unit_id: undefined,
-      unit_name: "",
-      user_id: undefined,
-      employee_name: "",
-      category_id: undefined,
-      category_name: "",
-      sub_category_id: undefined,
-      sub_category_name: "",
-      type_id: undefined,
-      type_name: "",
-      asset_id: undefined,
-      asset_name: "",
-      date_borrowed: undefined,
-      due_date: undefined,
-      asset_condition_id: undefined,
-      asset_condition_name: "",
+      company_id: "",
+      department_id: "",
+      unit_id: "",
+      user_id: "",
+      category_id: "",
+      sub_category_id: "",
+      type_id: "",
+      asset_id: "",
+      date_borrowed: new Date(),
+      due_date: new Date(),
+      duration: 0,
+      asset_condition_id: "",
       remarks: "",
     },
   });
+  console.log(filteredUsers);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    values.asset_id = filteredAssets.find(
+      (cat) => cat.asset_name === values.asset_id
+    )?.asset_id;
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    values.user_id = users.find(
+      (cat) => cat.asset_name === values.asset_id
+    )?.asset_id;
+
+    values.asset_condition_id = condition.find(
+      (cat) => cat.asset_condition_name === values.asset_condition_id
+    )?.asset_condition_id;
+
+    const response = await insertTransaction(values);
   }
 
   return (
-    <div className="pl-5 pr-5">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="company_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(
-                          value === "reset" ? undefined : Number(value)
-                        );
-                        setCompanyID(value === "reset" ? null : value);
-                      }}
-                      value={field.value ? field.value.toString() : undefined}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Company" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="reset">Select a Company</SelectItem>
-                        {company
-                          .filter((company) => company.id && company.name)
-                          .map((company) => (
-                            <SelectItem
-                              key={company.id}
-                              value={company.id.toString()}
-                            >
-                              {company.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          {companyID && (
-            <div className="flex flex-col sm:flex-row gap-4">
-              {department.length > 0 && (
-                <div
-                  className={`transition-all duration-200 ${
-                    unit.length > 0 ? "sm:w-1/2" : "sm:w-full"
-                  }`}
-                >
+    <div className="flex flex-col ml-[calc(7rem+10px)] mt-15px mr-[calc(2.5rem)] h-full">
+      <div className="flex flex-row items-center justify-between">
+        <p className="pl-1 pt-5 mb-4 text-lg">New Borrow Transaction</p>
+        <Link to="/borrowed">
+          <Button variant="link">
+            <ChevronLeft />
+            <p>Back</p>
+          </Button>
+        </Link>
+      </div>
+      <div className="w-[calc(100vw-10rem)] rounded-xl bg-white min-h-[calc(100vh-13.10rem)] h-auto p-5 mb-5">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="company_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setCompanyID(() => {
+                              const item = company.find(
+                                (c) => c.name === value
+                              );
+
+                              console.log(item);
+
+                              if (item) {
+                                return Number(item.company_id);
+                              }
+                              return null;
+                            });
+                          }}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Company" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {company.map((comp) => (
+                              <SelectItem
+                                key={comp.company_id}
+                                value={comp.name}
+                              >
+                                {comp.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {filteredDepartments.length > 0 && (
                   <FormField
                     control={form.control}
-                    name="department_name"
+                    name="department_id"
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel>Department/Business Unit</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={(value) => {
                               field.onChange(value);
-                              setDepartmentID(value);
+                              setDepartmentID(() => {
+                                const dept = department.find(
+                                  (dep) => dep.name === value
+                                );
+
+                                console.log(dept);
+
+                                if (dept) {
+                                  return Number(dept.department_id);
+                                }
+                                return null;
+                              });
                             }}
-                            value={field.value || ""}
+                            value={field.value}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select Department" />
+                              <SelectValue placeholder="Select Department/Business Unit" />
                             </SelectTrigger>
                             <SelectContent>
-                              {department.map((dept) => (
-                                <SelectItem
-                                  key={dept.id}
-                                  value={dept.id.toString()}
-                                >
+                              {filteredDepartments.map((dept) => (
+                                <SelectItem key={dept.name} value={dept.name}>
                                   {dept.name}
                                 </SelectItem>
                               ))}
@@ -479,38 +218,41 @@ function BorrowForm() {
                       </FormItem>
                     )}
                   />
-                </div>
-              )}
+                )}
 
-              {unit.length > 0 && (
-                <div
-                  className={`${
-                    department.length > 0 ? "sm:w-1/2" : "sm:w-full"
-                  }`}
-                >
+                {filteredUnits.length > 0 && (
                   <FormField
                     control={form.control}
-                    name="unit_name"
+                    name="unit_id"
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel>Unit</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={(value) => {
                               field.onChange(value);
-                              setUnitID(value);
+                              setUnitID(() => {
+                                const uni = unit.find(
+                                  (un) => un.name === value
+                                );
+
+                                console.log(uni);
+
+                                if (uni) {
+                                  return Number(uni.unit_id);
+                                }
+                                return null;
+                              });
                             }}
-                            value={field.value || ""}
+                            value={field.value}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select Unit" />
                             </SelectTrigger>
                             <SelectContent>
-                              {unit.map((unit) => (
-                                <SelectItem
-                                  key={unit.id}
-                                  value={unit.id.toString()}
-                                >
-                                  {unit.name}
+                              {filteredUnits.map((un) => (
+                                <SelectItem key={un.name} value={un.name}>
+                                  {un.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -520,104 +262,43 @@ function BorrowForm() {
                       </FormItem>
                     )}
                   />
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="employee_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input type="name" placeholder="Borrower Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(
-                          value === "reset" ? undefined : Number(value)
-                        );
-                        setCategoryID(value === "reset" ? null : value);
-                      }}
-                      value={field.value ? field.value.toString() : undefined}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="reset">Select a category</SelectItem>
-                        {category
-                          .filter((cat) => cat.id && cat.name) // Ensure valid data
-                          .map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id.toString()}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {Number(categoryID) === 2 && (
-            <div className={`flex flex-col sm:flex-row gap-4`}>
-              <div
-                className={`transition-all duration-200 ${
-                  subCategoryID === "6" ? "sm:w-1/2" : "sm:w-full"
-                }`}
-              >
+                )}
                 <FormField
                   control={form.control}
-                  name="sub_category_name"
+                  name="user_id"
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel>Borrower Name</FormLabel>
                       <FormControl>
                         <Select
                           onValueChange={(value) => {
-                            field.onChange(
-                              value === "reset" ? undefined : Number(value)
-                            );
-                            setSubCategoryID(value === "reset" ? null : value);
+                            field.onChange(value);
+                            setUserID(() => {
+                              const users = user.find(
+                                (u) =>
+                                  `${u.first_name} ${u.last_name}` === value
+                              );
+
+                              if (users) {
+                                return Number(users.user_id);
+                              }
+                              return null;
+                            });
                           }}
-                          value={
-                            field.value ? field.value.toString() : undefined
-                          }
+                          value={field.value}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Sub Category" />
+                            <SelectValue placeholder="Select Company" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="reset">
-                              Select a subcategory
-                            </SelectItem>
-                            {subcategory
-                              .filter((sub) => sub.id && sub.name)
-                              .map((sub) => (
-                                <SelectItem
-                                  key={sub.id}
-                                  value={sub.id.toString()}
-                                >
-                                  {sub.name}
-                                </SelectItem>
-                              ))}
+                            {filteredUsers.map((users) => (
+                              <SelectItem
+                                key={users.user_id}
+                                value={`${users.first_name} ${users.last_name}`}
+                              >
+                                {`${users.first_name} ${users.last_name}`}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -625,44 +306,88 @@ function BorrowForm() {
                     </FormItem>
                   )}
                 />
-              </div>
+                <FormField
+                  control={form.control}
+                  name="category_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setCategoryID(() => {
+                              const item = category.find(
+                                (c) => c.category_name === value
+                              );
 
-              {subCategoryID === "6" && (
-                <div className="w-full sm:w-1/2 transition-all duration-200">
+                              console.log(item);
+
+                              if (item) {
+                                return Number(item.category_id);
+                              }
+                              return null;
+                            });
+                          }}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {category.map((cat) => (
+                              <SelectItem
+                                key={cat.category_name}
+                                value={cat.category_name}
+                              >
+                                {cat.category_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {categoryID === 2 && (
                   <FormField
                     control={form.control}
-                    name="type_name"
+                    name="sub_category_id"
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel>Subcategory</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={(value) => {
-                              field.onChange(
-                                value === "reset" ? undefined : Number(value)
-                              );
-                              setTypeID(value === "reset" ? null : value);
+                              field.onChange(value);
+                              setSubCategoryID(() => {
+                                const sub = subcategory.find(
+                                  (c) => c.sub_category_name === value
+                                );
+
+                                console.log(sub);
+
+                                if (sub) {
+                                  return Number(sub.sub_category_id);
+                                }
+                                return null;
+                              });
                             }}
-                            value={
-                              field.value ? field.value.toString() : undefined
-                            }
+                            value={field.value}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Type" />
+                              <SelectValue placeholder="Sub Category" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="reset">
-                                Select a type
-                              </SelectItem>
-                              {type
-                                .filter((type) => type.id && type.name)
-                                .map((type) => (
-                                  <SelectItem
-                                    key={type.id}
-                                    value={type.id.toString()}
-                                  >
-                                    {type.name}
-                                  </SelectItem>
-                                ))}
+                              {subcategory.map((sub) => (
+                                <SelectItem
+                                  key={sub.sub_category_name}
+                                  value={sub.sub_category_name}
+                                >
+                                  {sub.sub_category_name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -670,181 +395,244 @@ function BorrowForm() {
                       </FormItem>
                     )}
                   />
-                </div>
-              )}
-            </div>
-          )}
+                )}
+                {subCategoryID === 5 && categoryID === 2 && (
+                  <FormField
+                    control={form.control}
+                    name="type_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Type</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setTypeID(() => {
+                                const ty = type.find(
+                                  (typ) => typ.type_name === value
+                                );
 
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="asset_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Asset Name" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredAssets.length > 0 ? (
-                          filteredAssets.map((asset) => (
-                            <SelectItem
-                              key={asset.id}
-                              value={asset.id.toString()}
+                                console.log(ty);
+
+                                if (ty) {
+                                  return Number(ty.type_id);
+                                }
+                                return null;
+                              });
+                            }}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {type.map((type) => (
+                                <SelectItem
+                                  key={type.type_name}
+                                  value={type.type_name}
+                                >
+                                  {type.type_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                {filteredAssets.length > 0 && (
+                  <FormField
+                    control={form.control}
+                    name="asset_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Asset Name</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Asset Name" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredAssets.map((asset) => (
+                                <SelectItem
+                                  key={asset.asset_name}
+                                  value={asset.asset_name}
+                                >
+                                  {asset.asset_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="date_borrowed"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date Borrowed</FormLabel>
+                      <FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
                             >
-                              {asset.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="none" disabled>
-                            No assets available
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="date_borrowed"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span className="text-[#737373]">
-                                Date Borrowed
-                              </span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                              <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span className="text-[#737373]">
+                                  Date Borrowed
+                                </span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="due_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span className="text-[#737373]">Due Date</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="Duration"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="asset_condition_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Condition</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Condition" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {condition.map((con) => (
+                              <SelectItem
+                                key={con.asset_condition_name}
+                                value={con.asset_condition_name}
+                              >
+                                {con.asset_condition_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="remarks"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Remarks</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Type your remarks here."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="col-span-2 flex justify-end align-end">
+                <Button className="w-fit text-sm sm:text-base" type="submit">
+                  Submit
+                </Button>
+              </div>
             </div>
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="due_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span className="text-[#737373]">Due Date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="asset_condition_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Condition" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Damaged">Damaged</SelectItem>
-                        <SelectItem value="Defective">Defective</SelectItem>
-                        <SelectItem value="Good">Good</SelectItem>
-                        <SelectItem value="New">New</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="remarks"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Type your remarks here."
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <DialogFooter>
-            <Button className="w-full" type="submit">
-              Submit
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }

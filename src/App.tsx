@@ -7,21 +7,29 @@ import Repair from "./components/repair";
 import External from "./components/externalAssets";
 import Assets from "./components/assets";
 import Issuance from "./components/issuance";
+import AssetForm from "./components/assetForm.copy";
+import BorrowForm from "./components/borrowForm";
+import RepairForm from "./components/repairForm";
+import IssuanceForm from "./components/issuanceForm";
 
 const routes = [
   { path: "/", element: <Dashboard /> },
-  { path: "/Assets", element: <Assets /> },
-  { path: "/External", element: <External /> },
-  { path: "/Borrowed", element: <Borrowed /> },
-  { path: "/Repair", element: <Repair /> },
-  { path: "/Issuance", element: <Issuance /> },
+  { path: "/assets/*", element: <Assets /> },
+  { path: "/external", element: <External /> },
+  { path: "/borrowed", element: <Borrowed /> },
+  { path: "/repair", element: <Repair /> },
+  { path: "/issuance", element: <Issuance /> },
+  { path: "/assets/add", element: <AssetForm /> },
+  { path: "/borrowed/add", element: <BorrowForm /> },
+  { path: "/repair/add", element: <RepairForm /> },
+  { path: "/issuance/add", element: <IssuanceForm /> },
 ];
 
 function App() {
   return (
     <>
       <Header />
-      <div className="flex flex-row bg-slate-200">
+      <div className="flex flex-row bg-slate-200 min-h-[calc(100dvh-85px)] h-full">
         <Sidebar />
         <Routes>
           {routes.map(({ path, element }) => (

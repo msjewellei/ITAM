@@ -1,0 +1,317 @@
+[
+    {
+        "company_id": 1,
+        "department_id": 3,
+        "unit_id": 1,
+        "name": "Affiliates Finance and Accounting",
+        "alias": "Affi"
+    },
+    {
+        "company_id": 1,
+        "department_id": 3,
+        "unit_id": 2,
+        "name": "Billing and Collection Unit",
+        "alias": "AR"
+    },
+    {
+        "company_id": 1,
+        "department_id": 3,
+        "unit_id": 3,
+        "name": "UNAI Finance and Accounting",
+        "alias": "AP"
+    },
+    {
+        "company_id": 1,
+        "department_id": 2,
+        "unit_id": 4,
+        "name": "Building Admin",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 2,
+        "unit_id": 5,
+        "name": "Logistics",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 2,
+        "unit_id": 6,
+        "name": "Office Admin",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 2,
+        "unit_id": 7,
+        "name": "Procurement",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 2,
+        "unit_id": 8,
+        "name": "Warehouse",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 12,
+        "unit_id": 9,
+        "name": "LED Tech Support",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 12,
+        "unit_id": 10,
+        "name": "MDS Products",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 4,
+        "unit_id": 11,
+        "name": "Art Production",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 4,
+        "unit_id": 12,
+        "name": "Creatives",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 5,
+        "unit_id": 29,
+        "name": "People Development",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 5,
+        "unit_id": 30,
+        "name": "People Operations",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "unit_id": 31,
+        "name": "Sales Unit 1",
+        "alias": "SU1"
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "unit_id": 32,
+        "name": "Sales Unit 2",
+        "alias": "SU2"
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "unit_id": 33,
+        "name": "Sales Unit 3",
+        "alias": "SU3"
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "unit_id": 34,
+        "name": "Sales Unit 4",
+        "alias": "SU4"
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "unit_id": 35,
+        "name": "Sales Unit 5",
+        "alias": "SU5"
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "unit_id": 36,
+        "name": "Sales Unit 6",
+        "alias": "SU6"
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "unit_id": 37,
+        "name": "Sales Unit 7",
+        "alias": "SU7"
+    },
+    {
+        "company_id": 1,
+        "department_id": 10,
+        "unit_id": 38,
+        "name": "Site Management",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 10,
+        "unit_id": 39,
+        "name": "Site Logistics",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 11,
+        "unit_id": 40,
+        "name": "Cebu Unit",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 11,
+        "unit_id": 41,
+        "name": "Davao Unit",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 6,
+        "unit_id": 44,
+        "name": "Support",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 6,
+        "unit_id": 45,
+        "name": "System Development",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 12,
+        "unit_id": 46,
+        "name": "Operations",
+        "alias": "MDS Ops"
+    },
+    {
+        "company_id": 13,
+        "department_id": 13,
+        "unit_id": 47,
+        "name": "Sales and Account",
+        "alias": "OBP Sales"
+    },
+    {
+        "company_id": 13,
+        "department_id": 13,
+        "unit_id": 48,
+        "name": "Administrative Support",
+        "alias": "OBP Admin"
+    },
+    {
+        "company_id": 1,
+        "department_id": 7,
+        "unit_id": 49,
+        "name": "Project Compliance",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 12,
+        "unit_id": 51,
+        "name": "Administrative Office",
+        "alias": "MDS Admin"
+    },
+    {
+        "company_id": 1,
+        "department_id": 10,
+        "unit_id": 52,
+        "name": "Site Development 2",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 13,
+        "unit_id": 53,
+        "name": "Executive Office",
+        "alias": "OBP EO"
+    },
+    {
+        "company_id": 13,
+        "department_id": 13,
+        "unit_id": 54,
+        "name": "Creatives",
+        "alias": "OBP Creatives"
+    },
+    {
+        "company_id": 1,
+        "department_id": 7,
+        "unit_id": 55,
+        "name": "Property Management",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 1,
+        "unit_id": 56,
+        "name": "IBIDA Office",
+        "alias": "IBIDA"
+    },
+    {
+        "company_id": 13,
+        "department_id": 1,
+        "unit_id": 57,
+        "name": "Executive Committee",
+        "alias": "EXECOM"
+    },
+    {
+        "company_id": 13,
+        "department_id": 14,
+        "unit_id": 58,
+        "name": "Administration and SALT",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 12,
+        "unit_id": 59,
+        "name": "Business Development",
+        "alias": "MDS BD"
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "unit_id": 60,
+        "name": "Sales Support",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 13,
+        "unit_id": 61,
+        "name": "Content and Communications",
+        "alias": null
+    },
+    {
+        "company_id": 1,
+        "department_id": 10,
+        "unit_id": 62,
+        "name": "Site Development 1",
+        "alias": null
+    },
+    {
+        "company_id": 13,
+        "department_id": 13,
+        "unit_id": 63,
+        "name": "Productions",
+        "alias": "OBP Prod"
+    },
+    {
+        "company_id": 13,
+        "department_id": 14,
+        "unit_id": 64,
+        "name": "Production and Content",
+        "alias": null
+    }
+]

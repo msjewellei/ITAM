@@ -1,0 +1,57 @@
+[
+    {
+        "company_id": 1,
+        "name": "United Neon Advertising, Inc.",
+        "alias": "UNAI"
+    },
+    {
+        "company_id": 2,
+        "name": "Breakthrough Leadership Management Consultancy, In",
+        "alias": "BLMCI"
+    },
+    {
+        "company_id": 3,
+        "name": "InnovationOne Inc.",
+        "alias": "IOI"
+    },
+    {
+        "company_id": 4,
+        "name": "Inspire Leadership Consultancy Inc.",
+        "alias": "ILCI"
+    },
+    {
+        "company_id": 8,
+        "name": "SeeWorthy International/LinkOD",
+        "alias": "SeeWorthy"
+    },
+    {
+        "company_id": 9,
+        "name": "TapAds Media Corp",
+        "alias": "TAMC"
+    },
+    {
+        "company_id": 10,
+        "name": "United Neon Foundation Inc.",
+        "alias": "UNFI"
+    },
+    {
+        "company_id": 11,
+        "name": "United Transit Ads System Inc.",
+        "alias": "UTASI"
+    },
+    {
+        "company_id": 12,
+        "name": "Lighthouse Education Center",
+        "alias": "LEC"
+    },
+    {
+        "company_id": 13,
+        "name": "Ever Corporation",
+        "alias": "EVER"
+    },
+    {
+        "company_id": 14,
+        "name": "Gateway Bizads Inc.",
+        "alias": "GBI"
+    }
+]

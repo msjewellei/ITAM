@@ -14,22 +14,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export type BorrowedAsset = {
   borrow_transaction_id: string;
-  company_id: number;
-  company_name: string;
-  department_id: number;
-  department_name: string;
-  unit_id: number;
-  unit_name: string
-  user_id: number;
-  employee_name: string;
-  asset_id: number;
-  asset_name: string;
-  date_borrowed: string;
-  due_date: string;
-  return_date: string;
-  duration: string;
+  company_id: string;
+  department_id: string;
+  unit_id: string;
+  user_id: string;
+  category_id: string;
+  sub_category_id: string;
+  type_id: string;
+  asset_id: string;
+  date_borrowed: Date;
+  due_date: Date;
   asset_condition_id: string;
-  asset_condition_name: string;
   remarks: string;
 };
 
@@ -63,7 +58,7 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
       return (
         <div className="justify-start">
           <Button
-            className="text-left items-start"
+            className="text-left w-full flex justify-start p-0"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >

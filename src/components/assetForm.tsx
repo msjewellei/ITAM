@@ -74,7 +74,6 @@ const formSchema = z.object({
 });
 
 function AssetForm() {
-  const { id } = useParams();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [category, setCategory] = useState<{ id: number; name: string }[]>([]);
   const [subcategory, setSubCategory] = useState<

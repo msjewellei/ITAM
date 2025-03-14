@@ -202,7 +202,7 @@ export function AssetDataTable<TData, TValue>({
               <TableRow className="border-gray-300">
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-left"
                 >
                   No results.
                 </TableCell>

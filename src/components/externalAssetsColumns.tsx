@@ -13,37 +13,18 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 
 export type ExternalAsset = {
-  asset_id: string;
-  asset_name: string;
-  category_id: number;
-  category_name: "External" | "Internal";
-  sub_category_id: number;
-  sub_category_name:
-    | "Gantry Routers"
-    | "Laptop"
-    | "Printers"
-    | "Access Point"
-    | "Routers and Switch"
-    | "Stocks";
-  type_id: number;
-  type_name:
-    | "None"
-    | "Mouse"
-    | "Keyboard"
-    | "Printers"
-    | "UPS Battery"
-    | "Numeric Keypad";
-  asset_condition_id: number;
-  asset_condition_name: "Good" | "Slightly Damaged" | "Damaged";
-  location: string;
-  availability_status: "Available" | "Not Available";
+   asset_name: string;
+  category_id: string;
+  sub_category_id: string | null;
+  type_id: string | null;
+  location: string | null;
+  availability_status_id: string;
   serial_number: string;
   specifications: string;
   asset_amount: number;
-  warranty_duration: number;
-  warranty_due_date: string;
-  purchase_date: string;
-  aging: number;
+  warranty_duration: string;
+  warranty_due_date: Date;
+  purchase_date: Date;
   notes: string;
 };
 
@@ -77,6 +58,7 @@ export const columns: ColumnDef<ExternalAsset>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-left w-full flex justify-start p-0"
         >
           Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -106,7 +88,7 @@ export const columns: ColumnDef<ExternalAsset>[] = [
   },
   {
     accessorKey: "asset_amount",
-    header: () => <div className="text-right">Amount</div>,
+    header: () => <div className="text-left">Amount</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("asset_amount"));
       const formatted = new Intl.NumberFormat("en-US", {
@@ -114,7 +96,7 @@ export const columns: ColumnDef<ExternalAsset>[] = [
         currency: "Php",
       }).format(amount);
 
-      return <div className="text-right font-medium">{formatted}</div>;
+      return <div className="text-left font-medium">{formatted}</div>;
     },
   },
   {

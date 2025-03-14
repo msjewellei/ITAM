@@ -1,0 +1,164 @@
+[
+    {
+        "company_id": 1,
+        "department_id": 1,
+        "name": "Executive Office",
+        "alias": "EO"
+    },
+    {
+        "company_id": 1,
+        "department_id": 2,
+        "name": "Administrative Department",
+        "alias": "Admin"
+    },
+    {
+        "company_id": 1,
+        "department_id": 3,
+        "name": "Finance and Accounting",
+        "alias": "Finance"
+    },
+    {
+        "company_id": 1,
+        "department_id": 4,
+        "name": "OOH Creatives",
+        "alias": "Creatives"
+    },
+    {
+        "company_id": 1,
+        "department_id": 5,
+        "name": "People Operations and Culture Department",
+        "alias": "POCD"
+    },
+    {
+        "company_id": 1,
+        "department_id": 6,
+        "name": "Information Systems and Technology Integration",
+        "alias": "ISTI"
+    },
+    {
+        "company_id": 1,
+        "department_id": 7,
+        "name": "Project Compliance and Property Management",
+        "alias": "PCPM"
+    },
+    {
+        "company_id": 1,
+        "department_id": 8,
+        "name": "Corporate Relationship and Networking Management",
+        "alias": ""
+    },
+    {
+        "company_id": 1,
+        "department_id": 9,
+        "name": "Sales and Account Management",
+        "alias": "Sales"
+    },
+    {
+        "company_id": 1,
+        "department_id": 10,
+        "name": "Site Operations",
+        "alias": "Ops"
+    },
+    {
+        "company_id": 1,
+        "department_id": 11,
+        "name": "Vismin Operations",
+        "alias": "Vismin Ops"
+    },
+    {
+        "company_id": 13,
+        "department_id": 12,
+        "name": "Media Display Solutions",
+        "alias": "MDS"
+    },
+    {
+        "company_id": 13,
+        "department_id": 13,
+        "name": "Onion Bulb Production",
+        "alias": "OBP"
+    },
+    {
+        "company_id": 13,
+        "department_id": 14,
+        "name": "Plus Media",
+        "alias": "Plus"
+    },
+    {
+        "company_id": 9,
+        "department_id": 15,
+        "name": "Operations",
+        "alias": "TAMC Ops"
+    },
+    {
+        "company_id": 10,
+        "department_id": 16,
+        "name": "Scholar Management",
+        "alias": "Scholar"
+    },
+    {
+        "company_id": 9,
+        "department_id": 17,
+        "name": "Sales",
+        "alias": "TAMC Sales"
+    },
+    {
+        "company_id": 11,
+        "department_id": 18,
+        "name": "Sales",
+        "alias": "UTASI Sales"
+    },
+    {
+        "company_id": 10,
+        "department_id": 19,
+        "name": "ALS Management",
+        "alias": "ALS"
+    },
+    {
+        "company_id": 1,
+        "department_id": 20,
+        "name": "Office of the Chief Revenue Officer",
+        "alias": "Office of CRO"
+    },
+    {
+        "company_id": 3,
+        "department_id": 21,
+        "name": "Accounts Management",
+        "alias": "IOI Accounts Management"
+    },
+    {
+        "company_id": 11,
+        "department_id": 25,
+        "name": "Operations",
+        "alias": "UTASI Ops"
+    },
+    {
+        "company_id": 3,
+        "department_id": 26,
+        "name": "Creatives",
+        "alias": "IOI Creatives"
+    },
+    {
+        "company_id": 9,
+        "department_id": 27,
+        "name": "Executive Office",
+        "alias": "TAMC EO"
+    },
+    {
+        "company_id": 10,
+        "department_id": 28,
+        "name": "Administrative Office",
+        "alias": "UNFI Admin"
+    },
+    {
+        "company_id": 3,
+        "department_id": 29,
+        "name": "Executive Office",
+        "alias": "IOI EO"
+    },
+    {
+        "company_id": 1,
+        "department_id": 30,
+        "name": "Board of Directors",
+        "alias": "Board"
+    }
+]

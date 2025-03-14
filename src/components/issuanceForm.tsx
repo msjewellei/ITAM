@@ -6,11 +6,11 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ChevronLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,383 +28,530 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { useMisc } from "@/context/miscellaneousContext";
+import { useAsset } from "@/context/assetContext";
+import { useIssuance } from "@/context/issuanceContext";
+import { Link } from "react-router-dom";
 
 const formSchema = z.object({
-  company_id: z.number().min(2),
-  company_name: z.string().min(2).max(50),
-  department_id: z.number().min(2),
-  department_name: z.string().min(2).max(50),
-  unit_id: z.number().min(2),
-  unit_name: z.string().min(2).max(50),
-  user_id: z.number().min(2),
-  employee_name: z.string().min(2).max(50),
-  category_id: z.number().min(2),
-  category_name: z.string().min(2).max(50),
-  sub_category_id: z.number().min(2),
-  sub_category_name: z.string().min(2).max(50),
-  type_id: z.number().min(2),
-  type_name: z.string().min(2).max(50),
-  asset_id: z.number().min(2),
-  asset_name: z.string().min(2).max(50),
+  company_id: z.string(),
+  department_id: z.string(),
+  unit_id: z.string(),
+  user_id: z.string(),
+  category_id: z.string(),
+  sub_category_id: z.string(),
+  type_id: z.string(),
+  asset_id: z.string(),
   issuance_date: z.date(),
-  status_id: z.number().min(2),
-  status_name: z.string().min(2).max(50),
+  status_id: z.string(),
 });
 
 function IssuanceForm() {
+  const {
+    company,
+    department,
+    unit,
+    filteredDepartments,
+    filteredUnits,
+    setCompanyID,
+    setDepartmentID,
+    setUnitID,
+    category,
+    subcategory,
+    type,
+    status,
+    filteredUsers,
+    setUserID,
+    user,
+  } = useMisc();
+  const {
+    filteredAssets,
+    setCategoryID,
+    setSubCategoryID,
+    setTypeID,
+    categoryID,
+    subCategoryID,
+  } = useAsset();
+
+  const { insertIssuance } = useIssuance();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      company_id: undefined,
-      company_name: "",
-      department_id: undefined,
-      department_name: "",
-      unit_id: undefined,
-      unit_name: "",
-      user_id: undefined,
-      employee_name: "",
-      category_id: undefined,
-      category_name: "",
-      sub_category_id: undefined,
-      sub_category_name: "",
-      type_id: undefined,
-      type_name: "",
-      asset_id: undefined,
-      asset_name: "",
-      issuance_date: undefined,
-      status_id: undefined,
-      status_name: "",
+      company_id: "",
+      department_id: "",
+      unit_id: "",
+      user_id: "",
+      category_id: "",
+      sub_category_id: "",
+      type_id: "",
+      asset_id: "",
+      issuance_date: new Date(),
+      status_id: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    values.asset_id = filteredAssets.find(
+      (cat) => cat.asset_name === values.asset_id
+    )?.asset_id;
+
+    values.user_id = filteredUsers.find(
+      (cat) => `${cat.first_name} ${cat.last_name}` === values.user_id
+    )?.user_id;
+
+    values.status_id = status.find(
+      (cat) => cat.status_name === values.status_id
+    )?.status_id;
+
+    const response = await insertIssuance(values);
   }
 
   return (
-    <div className="pl-5 pr-5">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="company_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Company" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="United Neon Advertising, Inc.">
-                          United Neon Advertising, Inc.
-                        </SelectItem>
-                        <SelectItem value="Breakthrough Leadership Management Consultancy, In">
-                          Breakthrough Leadership Management Consultancy, In
-                        </SelectItem>
-                        <SelectItem value="InnovationOne Inc.">
-                          InnovationOne Inc.
-                        </SelectItem>
-                        <SelectItem value="Inspire Leadership Consultancy Inc.">
-                          Inspire Leadership Consultancy Inc.
-                        </SelectItem>
-                        <SelectItem value="Media Display Solutions">
-                          Media Display Solutions
-                        </SelectItem>
-                        <SelectItem value="Onion Bulb Production">
-                          Onion Bulb Production
-                        </SelectItem>
-                        <SelectItem value="PLUS Media">PLUS Media</SelectItem>
-                        <SelectItem value="SeeWorthy International/LinkOD">
-                          SeeWorthy International/LinkOD
-                        </SelectItem>
-                        <SelectItem value="TapAds Media Corp">
-                          TapAds Media Corp
-                        </SelectItem>
-                        <SelectItem value="United Neon Foundation Inc.">
-                          United Neon Foundation Inc.
-                        </SelectItem>
-                        <SelectItem value="United Transit Ads System Inc.">
-                          United Transit Ads System Inc.
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+    <div className="flex flex-col ml-[calc(7rem+10px)] mt-15px mr-[calc(2.5rem)] ">
+      <div className="flex flex-row items-center justify-between">
+        <p className="pl-1 pt-5 mb-4 text-lg">New Issuance Transaction</p>
+        <Link to="/repair">
+          <Button variant="link">
+            <ChevronLeft />
+            <p>Back</p>
+          </Button>
+        </Link>
+      </div>
+      <div className="w-[calc(100vw-10rem)] rounded-xl bg-white min-h-[calc(100vh-13.10rem)] h-auto p-5 mb-5">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="w-full">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
+                  <FormField
+                    control={form.control}
+                    name="company_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setCompanyID(() => {
+                                const item = company.find(
+                                  (c) => c.name === value
+                                );
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="department_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Department" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Department 1">
-                            Department 1
-                          </SelectItem>
-                          <SelectItem value="Department 2">
-                            Department 2
-                          </SelectItem>
-                          <SelectItem value="Department 3">
-                            Department 3
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                                console.log(item);
+
+                                if (item) {
+                                  return Number(item.company_id);
+                                }
+                                return null;
+                              });
+                            }}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Company" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {company.map((comp) => (
+                                <SelectItem
+                                  key={comp.company_id}
+                                  value={comp.name}
+                                >
+                                  {comp.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {filteredDepartments.length > 0 && (
+                    <FormField
+                      control={form.control}
+                      name="department_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Department/Business Unit</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setDepartmentID(() => {
+                                  const dept = department.find(
+                                    (dep) => dep.name === value
+                                  );
+
+                                  console.log(dept);
+
+                                  if (dept) {
+                                    return Number(dept.department_id);
+                                  }
+                                  return null;
+                                });
+                              }}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Department" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {filteredDepartments.map((dept) => (
+                                  <SelectItem key={dept.name} value={dept.name}>
+                                    {dept.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {filteredUnits.length > 0 && (
+                    <FormField
+                      control={form.control}
+                      name="unit_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Unit</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setUnitID(() => {
+                                  const uni = unit.find(
+                                    (un) => un.name === value
+                                  );
+
+                                  console.log(uni);
+
+                                  if (uni) {
+                                    return Number(uni.unit_id);
+                                  }
+                                  return null;
+                                });
+                              }}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Unit" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {filteredUnits.map((un) => (
+                                  <SelectItem key={un.name} value={un.name}>
+                                    {un.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  <FormField
+                    control={form.control}
+                    name="user_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Requester Name</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setUserID(() => {
+                                const users = user.find(
+                                  (u) =>
+                                    `${u.first_name} ${u.last_name}` === value
+                                );
+
+                                if (users) {
+                                  return Number(users.user_id);
+                                }
+                                return null;
+                              });
+                            }}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Requester" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredUsers.map((users) => (
+                                <SelectItem
+                                  key={users.user_id}
+                                  value={`${users.first_name} ${users.last_name}`}
+                                >
+                                  {`${users.first_name} ${users.last_name}`}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  
+                </div>
+
+                <div className="flex flex-col gap-4"><FormField
+                    control={form.control}
+                    name="category_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setCategoryID(() => {
+                                const item = category.find(
+                                  (c) => c.category_name === value
+                                );
+
+                                console.log(item);
+
+                                if (item) {
+                                  return Number(item.category_id);
+                                }
+                                return null;
+                              });
+                            }}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {category.map((cat) => (
+                                <SelectItem
+                                  key={cat.category_name}
+                                  value={cat.category_name}
+                                >
+                                  {cat.category_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {categoryID === 2 && (
+                    <FormField
+                      control={form.control}
+                      name="sub_category_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subcategory</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setSubCategoryID(() => {
+                                  const sub = subcategory.find(
+                                    (c) => c.sub_category_name === value
+                                  );
+
+                                  console.log(sub);
+
+                                  if (sub) {
+                                    return Number(sub.sub_category_id);
+                                  }
+                                  return null;
+                                });
+                              }}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Sub Category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {subcategory.map((sub) => (
+                                  <SelectItem
+                                    key={sub.sub_category_name}
+                                    value={sub.sub_category_name}
+                                  >
+                                    {sub.sub_category_name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {categoryID === 2 && subCategoryID === 5 && (
+                    <FormField
+                      control={form.control}
+                      name="type_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setTypeID(() => {
+                                  const ty = type.find(
+                                    (typ) => typ.type_name === value
+                                  );
+
+                                  console.log(ty);
+
+                                  if (ty) {
+                                    return Number(ty.type_id);
+                                  }
+                                  return null;
+                                });
+                              }}
+                              value={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {type.map((type) => (
+                                  <SelectItem
+                                    key={type.type_name}
+                                    value={type.type_name}
+                                  >
+                                    {type.type_name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  <FormField
+                    control={form.control}
+                    name="asset_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Asset Name</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Asset Name" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredAssets.map((asset) => (
+                                <SelectItem
+                                  key={asset.asset_name}
+                                  value={asset.asset_name}
+                                >
+                                  {asset.asset_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="issuance_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Issuance Date</FormLabel>
+                        <FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span className="text-[#737373]">
+                                    Issuance Date
+                                  </span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="status_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {status.map((stat) => (
+                                <SelectItem
+                                  key={stat.status_name}
+                                  value={stat.status_name}
+                                >
+                                  {stat.status_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="col-span-2 flex justify-end align-end">
+                  <Button className="w-fit text-sm sm:text-base" type="submit">
+                    Submit
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="unit_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Unit 1">Unit 1</SelectItem>
-                          <SelectItem value="Unit 2">Unit 2</SelectItem>
-                          <SelectItem value="Unit 3">Unit 3</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="employee_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input type="name" placeholder="Employee Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="category_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Internal">Internal</SelectItem>
-                        <SelectItem value="External">External</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="sub_category_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Sub Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Laptop">Laptop</SelectItem>
-                          <SelectItem value="Printer">Printer</SelectItem>
-                          <SelectItem value="Access Point">
-                            Access Point
-                          </SelectItem>
-                          <SelectItem value="Routers and Switch">
-                            Routers and Switch
-                          </SelectItem>
-                          <SelectItem value="Stocks">Stocks</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="w-full sm:w-1/2 max-w-sm">
-              <FormField
-                control={form.control}
-                name="type_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Type 1">Type 1</SelectItem>
-                          <SelectItem value="Type 2">Type 2</SelectItem>
-                          <SelectItem value="Type 3">Type 3</SelectItem>
-                          <SelectItem value="Type 4">Type 4</SelectItem>
-                          <SelectItem value="Type 5">Type 5</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="asset_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Asset Name" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Asset 1">Asset 1</SelectItem>
-                        <SelectItem value="Asset 2">Asset 2</SelectItem>
-                        <SelectItem value="Asset 3">Asset 3</SelectItem>
-                        <SelectItem value="Asset 4">Asset 4</SelectItem>
-                        <SelectItem value="Asset 5">Asset 5</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="issuance_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span className="text-[#737373]">
-                              Issuance Date
-                            </span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="w-full">
-            <FormField
-              control={form.control}
-              name="status_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Completed">Completed</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="On Hold">On Hold</SelectItem>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="Rejected">Rejected</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <DialogFooter>
-            <Button className="w-full" type="submit">
-              Submit
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }

@@ -54,6 +54,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { Link } from "react-router-dom";
 
 interface RepairDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -180,7 +181,6 @@ export function RepairDataTable<TData, TValue>({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <DialogTrigger asChild>
                   <Button
                     variant={"outline"}
                     className={cn(
@@ -188,16 +188,15 @@ export function RepairDataTable<TData, TValue>({
                       !date && "text-muted-foreground"
                     )}
                   >
-                    <Plus className="m-auto h-4 w-4 p-auto" />
+                    <Link to="/repair/add">
+                    <Plus className="m-auto h-4 w-4 p-auto" /></Link>
                   </Button>
-                </DialogTrigger>
                 <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
                   <DialogHeader className="pb-2">
                     <DialogTitle className="text-center">
                       New Repair Request
                     </DialogTitle>
                   </DialogHeader>
-                  <RepairForm />
                 </DialogContent>
               </TooltipTrigger>
               <TooltipContent>

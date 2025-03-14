@@ -13,14 +13,16 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 
 export type IssuanceAsset = {
-  issuance_id: string;
-  user_id: number;
-  employee_name: string;
-  asset_id: number;
-  asset_name: string;
-  issuance_date: string;
-  status_id: number;
-  status_name: string;
+  company_id: string;
+  department_id: string;
+  unit_id: string;
+  user_id: string;
+  category_id: string;
+  sub_category_id: string;
+  type_id: string;
+  asset_id: string;
+  issuance_date: Date;
+  status_id: string;
 };
 
 export const columns: ColumnDef<IssuanceAsset>[] = [
@@ -53,6 +55,7 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-left w-full flex justify-start p-0"
         >
           Asset Name
           <ArrowUpDown className="ml-2 h-4 w-4" />

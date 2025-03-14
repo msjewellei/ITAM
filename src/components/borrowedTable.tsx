@@ -54,6 +54,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "./ui/tooltip";
+import { Link } from "react-router-dom";
 interface BorrowedDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -177,26 +178,19 @@ export function BorrowedDataTable<TData, TValue>({
             <Tooltip>
               <TooltipTrigger>
 
-              
-          <DialogTrigger asChild>
-            <Button
-              variant={"outline"}
+            
+            <Button variant={"outline"}
               className={cn(
                 "w-[30px] justify-center text-center font-normal",
-                !date && "text-muted-foreground"
+                "text-muted-foreground"
               )}
-            >
+             asChild>
+            <Link to="/borrowed/add">
+              
               <Plus className="m-auto h-4 w-4 p-auto" />
+              </Link>
             </Button>
-          </DialogTrigger>
-          <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader className="pb-2">
-              <DialogTitle className="text-center">
-                New Borrow Transaction
-              </DialogTitle>
-            </DialogHeader>
-            <BorrowForm />
-          </DialogContent></TooltipTrigger>
+            </TooltipTrigger>
           <TooltipContent>
             <p>Add New Transaction</p>
           </TooltipContent>

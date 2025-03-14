@@ -1,56 +1,67 @@
 import axios from "axios";
-import React, {
+import {
   createContext,
   useState,
   useContext,
   ReactNode,
   useEffect,
+  useMemo,
   Dispatch,
   SetStateAction,
-  useMemo,
 } from "react";
 
-interface Assets {
-    asset_id: number;
-    asset_name: string;
-    category_id: number;
-    sub_category_id: number;
-    type_id: number;
-    asset_condition_id: number;
-    location: string;
-    status_id: number;
-    serial_number: string;
-    specifications: string;
-    asset_amount: number;
-    warranty_duration: number;
-    warranty_due_date: string;
-    purchase_date: string;
-    aging: number;
-    notes: string;
+interface Asset {
+  asset_name: string;
+  category_id: string;
+  sub_category_id: string | null;
+  type_id: string | null;
+  location: string | null;
+  availability_status_id: string;
+  serial_number: string;
+  specifications: string;
+  asset_amount: number;
+  warranty_duration: string;
+  warranty_due_date: Date;
+  purchase_date: Date;
+  notes: string;
 }
-
 interface AssetContextType {
-    asset: Assets[];
-    setAssetID: Dispatch<SetStateAction<number | null>>;
-//   setCategoryID: Dispatch<SetStateAction<number | null>>;
-//   setSubCategoryID: Dispatch<SetStateAction<number | null>>;
-//   subCategoryID: number | null;
-//   filteredSubcategories: Subcategory[] | [];
+  assets: Asset[];
+  insertAsset: (asset: Asset) => void;
+  categoryID: number | null;
+  externalAssets: Asset[];
+  filteredAssets: Asset[];
+  setCategoryID: Dispatch<SetStateAction<number | null>>; 
+  setSubCategoryID: Dispatch<SetStateAction<number | null>>; 
+  setTypeID: Dispatch<SetStateAction<number | null>>; 
+  subCategoryID: number | null;
+  typeID: number | null;
 }
-
 const AssetContext = createContext<AssetContextType | undefined>(undefined);
 export const AssetProvider = ({ children }: { children: ReactNode }) => {
-    const [asset, setAsset] = useState<Assets[]>([]);
-    const [assetID, setAssetID] = useState<number | null>(null);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [categoryID, setCategoryID] = useState<number | null>(null);
+  const [typeID, setTypeID] = useState<number | null>(null);
+  const [subCategoryID, setSubCategoryID] = useState<number | null>(null);
+  const [externalAssets, setExternalAssets] = useState<Asset[]>([]);
 
-//   const [repairUrgency, setRepairUrgency] = useState<RepairUrgency[]>([]);
-//   const [categoryID, setCategoryID] = useState<number | null>(null);
-//   const [subCategoryID, setSubCategoryID] = useState<number | null>(null);
-
-  let url = "localhost/asset.php?resource=";
-  const getResource = async (resource: string) => {
+  let url = "http://localhost/itam_api/asset.php?resource=asset";
+  const getAssets = async () => {
     try {
-      const response = await axios.get(url + resource);
+      const response = await axios.get(url);
+      if (response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const insertAsset = async (data: Asset) => {
+    try {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+      const response = await axios.post(url, formData);
       if (response.data) {
         return response.data;
       }
@@ -60,39 +71,52 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const setup = async () => {
-      const assets = await getResource("asset");
-      setAsset(assets);
-    //   const subcategories = await getResource("subcategory");
-    //   const types = await getResource("type");
-    //   const conditions = await getResource("condition");
-    //   const statuses = await getResource("status");
-    //   const repairUrgencies = await getResource("repairUrgency");
-    //   setCategory(categories);
-    //   setSubcategory(subcategories);
-    //   setType(types);
-    //   setCondition(conditions);
-    //   setStatus(statuses);
-    //   setRepairUrgency(repairUrgencies);
+    const fetchAssets = async () => {
+      const assetData = await getAssets();
+      if (assetData) {
+        setAssets(assetData);
+      }
     };
-    setup();
+    fetchAssets();
   }, []);
 
+  useEffect(() => {
+    const external = assets.filter((asset) => Number(asset.category_id) === 1);
+    setExternalAssets(external);
+  }, [assets]);
+  const filteredAssets: Asset[] | [] = useMemo(() => {
+    let newAssets = assets;
+  
+    if (categoryID) {
+      newAssets = newAssets.filter((asset) => Number(asset.category_id) === categoryID);
+    }
+  
+    if (subCategoryID) {
+      newAssets = newAssets.filter((asset) => Number(asset.sub_category_id) === subCategoryID);
+    }
+  
+    if (typeID) {
+      newAssets = newAssets.filter((asset) => Number(asset.type_id) === typeID);
+    }
+  
+    return newAssets;
+  }, [categoryID, subCategoryID, typeID, assets]);
+  
   const value = {
-    asset,
-    setAssetID,
-    
-    // subcategory,
-    // type,
-    // condition,
-    // status,
-    // repairUrgency,
-    // setCategoryID,
-    // setSubCategoryID,
-    // subCategoryID,
-    // filteredSubcategories,
+    assets,
+    insertAsset,
+    categoryID,
+    subCategoryID,
+    typeID,
+    setCategoryID,
+    setSubCategoryID,
+    setTypeID,
+    externalAssets,
+    filteredAssets,
   };
-  return <AssetContext.Provider value={value}>{children}</AssetContext.Provider>;
+  return (
+    <AssetContext.Provider value={value}>{children}</AssetContext.Provider>
+  );
 };
 export const useAsset = () => {
   const context = useContext(AssetContext);

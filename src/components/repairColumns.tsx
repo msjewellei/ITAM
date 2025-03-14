@@ -14,20 +14,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DialogTrigger } from "./ui/dialog";
 
 export type RepairAsset = {
-  repair_request_id: string;
-  user_id: number;
-  employee_name: string;
-  asset_id: number;
-  asset_name: string;
+  company_id: string;
+  department_id: string;
+  unit_id: string;
+  user_id: string;
+  category_id: string;
+  sub_category_id: string;
+  type_id: string;
+  asset_id: string;
   issue: string;
   remarks: string;
-  date_reported: string;
-  urgency_id: number;
-  urgency_level: string;
-  repair_start_date: string;
-  repair_completion_date: string;
-  status_id: number;
-  status_name: string;
+  date_reported: Date;
+  urgency_id: string;
+  repair_start_date: Date;
+  repair_completion_date: Date;
+  status_id: string;
   repair_cost: number;
 };
 
@@ -61,6 +62,7 @@ export const columns: ColumnDef<RepairAsset>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-left w-full flex justify-start p-0"
         >
           Asset Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -117,7 +119,7 @@ export const columns: ColumnDef<RepairAsset>[] = [
   },
   {
     accessorKey: "repair_cost",
-    header: () => <div className="text-right">Cost</div>,
+    header: () => <div className="text-left">Cost</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("repair_cost"));
       const formatted = new Intl.NumberFormat("en-US", {
@@ -125,7 +127,7 @@ export const columns: ColumnDef<RepairAsset>[] = [
         currency: "Php",
       }).format(amount);
 
-      return <div className="text-right font-medium">{formatted}</div>;
+      return <div className="text-left font-medium">{formatted}</div>;
     },
   },
   {

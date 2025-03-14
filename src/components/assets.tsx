@@ -13,11 +13,11 @@ import {
 import AssetForm from "./assetForm.copy";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "./ui/tooltip";
 import { Toaster } from "./ui/sonner";
+import { Link } from "react-router-dom";
 
 export default function Assets() {
   return (
     <>
-      <Dialog>
         <div className="flex flex-col ml-[calc(7rem+10px)] mt-[calc(1.5rem+10px)] mr-[calc(2.5rem)] w-screen  mb-10">
           <Tabs defaultValue="Internal" className="">
             <div className="flex justify-between items-center w-full">
@@ -32,12 +32,12 @@ export default function Assets() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <DialogTrigger asChild>
-                      <Button className="justify-items-center h-11 w-fit bg-[#233345] text-white">
+                    <Button asChild className="justify-items-center h-11 w-fit bg-[#233345] text-white">
+                      <Link to="/assets/add" >
                         <Plus />
                         <p>Add Assets</p>
+                      </Link>
                       </Button>
-                    </DialogTrigger>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Add Assets</p>
@@ -45,14 +45,6 @@ export default function Assets() {
                 </Tooltip>
               </TooltipProvider>
 
-              <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-center">
-                    Add New Asset
-                  </DialogTitle>
-                </DialogHeader>
-                <AssetForm />
-              </DialogContent>
             </div>
             <TabsContent value="Internal">
               <InternalAsset />
@@ -63,7 +55,6 @@ export default function Assets() {
           </Tabs>
         </div>
         <Toaster />
-      </Dialog>
     </>
   );
 }

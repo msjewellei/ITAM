@@ -54,6 +54,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { Link } from "react-router-dom";
 
 interface IssuanceDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -97,10 +98,13 @@ export function IssuanceDataTable<TData, TValue>({
           <Input
             placeholder="Search Employee"
             value={
-              (table.getColumn("employee_name")?.getFilterValue() as string) ?? ""
+              (table.getColumn("employee_name")?.getFilterValue() as string) ??
+              ""
             }
             onChange={(event) =>
-              table.getColumn("employee_name")?.setFilterValue(event.target.value)
+              table
+                .getColumn("employee_name")
+                ?.setFilterValue(event.target.value)
             }
             className="max-w-md min-w-sm"
           />
@@ -177,25 +181,18 @@ export function IssuanceDataTable<TData, TValue>({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <DialogTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[30px] justify-center text-center font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
+                <Button
+                  asChild
+                  variant={"outline"}
+                  className={cn(
+                    "w-[30px] justify-center text-center font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <Link to="/issuance/add">
                     <Plus className="m-auto h-4 w-4 p-auto" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
-                  <DialogHeader className="pb-2">
-                    <DialogTitle className="text-center">
-                      New Issuance Request
-                    </DialogTitle>
-                  </DialogHeader>
-                  <IssuanceForm />
-                </DialogContent>
+                  </Link>
+                </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Add New Issuance</p>

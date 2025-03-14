@@ -1,269 +1,56 @@
-import { Asset, columns } from "./assetColumns";
+import { useAsset } from "@/context/assetContext";
+import { columns } from "./assetColumns";
 import { AssetDataTable } from "./assetTable";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { TabsContent } from "@radix-ui/react-tabs";
+import { useMisc } from "@/context/miscellaneousContext";
+import { useState } from "react";
 
 function InternalAsset() {
-  const data: Asset[] = [
-    {
-      asset_id: "728ed52a",
-      asset_name: "Internal Asset 2",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52a",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52b",
-      asset_name: "Internal Asset 2",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52b",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52c",
-      asset_name: "Internal Asset 3",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52c",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52d",
-      asset_name: "Internal Asset 4",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52d",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52e",
-      asset_name: "Internal Asset 5",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52e",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52f",
-      asset_name: "Internal Asset 6",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52f",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52g",
-      asset_name: "Internal Asset 7",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52g",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52h",
-      asset_name: "Internal Asset 8",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52h",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52i",
-      asset_name: "Internal Asset 9",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52i",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52j",
-      asset_name: "Internal Asset 10",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52j",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-    {
-      asset_id: "728ed52k",
-      asset_name: "Internal Asset 11",
-      category_id: 2,
-      category_name: "Internal",
-      sub_category_id: 1,
-      sub_category_name: "Laptop",
-      type_id: 1,
-      type_name: "None",
-      location: "eme",
-      asset_condition_id: 1,
-      asset_condition_name: "Good",
-      availability_status: "Available",
-      serial_number: "728ed52k",
-      specifications: "eme",
-      asset_amount: 7000,
-      warranty_duration: 2,
-      warranty_due_date: "02/24/2027",
-      purchase_date: "02/24/2025",
-      aging: 0,
-      notes: "eme",
-    },
-  ];
+  const { assets } = useAsset();
+  const { subcategory } = useMisc();
+
+  const [activeTab, setActiveTab] = useState("1");
   return (
-    <div className="bg-white rounded-xl min-h-[calc(100vh-14rem)] max-h-[calc(100vh-13.10rem)] flex flex-col">
-      <Tabs defaultValue="laptop" className="w-full">
-        <TabsList className="w-full">
-          <TabsTrigger value="laptop">LAPTOP</TabsTrigger>
-          <TabsTrigger value="printer">PRINTER</TabsTrigger>
-          <TabsTrigger value="access_point">ACCESS POINT</TabsTrigger>
-          <TabsTrigger value="routers_and_switch">
-            ROUTERS AND SWITCH
-          </TabsTrigger>
-          <TabsTrigger value="stocks">STOCKS</TabsTrigger>
-        </TabsList>
-      </Tabs>
-      <div className="flex-1 min-h-0">
-        <AssetDataTable columns={columns} data={data} />
+    assets && (
+      <div className="bg-white rounded-xl min-h-[calc(100vh-14rem)] max-h-[calc(100vh-13.10rem)] flex flex-col">
+        <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="w-full">
+            {subcategory.map((category) => {
+              return (
+                <TabsTrigger
+                  key={category.sub_category_id}
+                  value={category.sub_category_id.toString()}
+                  className="uppercase"
+                >
+                  {category.sub_category_name}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          {subcategory.map((category) => {
+            const data = assets.filter(
+              (asset) =>
+                Number(asset.category_id) === 2 &&
+                asset.sub_category_id == activeTab
+            );
+            
+            return (
+              <TabsContent
+                key={category.sub_category_id}
+                value={category.sub_category_id.toString()}
+                
+              >
+                <div className="flex-1 min-h-0">
+                  <AssetDataTable columns={columns} data={data} />
+                </div>
+              </TabsContent>
+            );
+          })}
+        </Tabs>
       </div>
-    </div>
+    )
   );
 }
 export default InternalAsset;
