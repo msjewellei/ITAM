@@ -100,6 +100,7 @@ interface MiscContextType {
   filteredUsers: User[] | [];
   userID: number | null;
   setUserID: Dispatch<SetStateAction<number | null>>;
+  unitID: number | null;
 }
 
 const MiscContext = createContext<MiscContextType | undefined>(undefined);
@@ -219,7 +220,8 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     setTypeID,
     filteredUsers,
     userID,
-    setUserID
+    setUserID,
+    unitID
   };
   return <MiscContext.Provider value={value}>{children}</MiscContext.Provider>;
 };

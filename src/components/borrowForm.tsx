@@ -34,7 +34,7 @@ import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { useMisc } from "@/context/miscellaneousContext";
 import { useAsset } from "@/context/assetContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useBorrow } from "@/context/borrowContext";
 
 const formSchema = z.object({
@@ -54,6 +54,7 @@ const formSchema = z.object({
 });
 
 function BorrowForm() {
+    const navigate = useNavigate();
   const {
     user,
     company,
@@ -70,6 +71,8 @@ function BorrowForm() {
     condition,
     filteredUsers,
     setUserID,
+    filteredSubcategories,
+    unitID
   } = useMisc();
   const {
     filteredAssets,
@@ -98,21 +101,55 @@ function BorrowForm() {
       remarks: "",
     },
   });
-  console.log(filteredUsers);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     values.asset_id = filteredAssets.find(
       (cat) => cat.asset_name === values.asset_id
     )?.asset_id;
 
-    values.user_id = users.find(
-      (cat) => cat.asset_name === values.asset_id
-    )?.asset_id;
+    values.user_id = filteredUsers.find(
+      (cat) => `${cat.first_name} ${cat.last_name}` === values.user_id
+    )?.user_id;
+
+    values.company_id = company.find(
+      (cat) => cat.name === values.company_id
+    )?.company_id;
+
+    values.department_id = filteredDepartments.find(
+      (cat) => cat.name === values.department_id
+    )?.department_id;
+
+    values.unit_id = filteredUnits.find(
+      (cat) => cat.name === values.unit_id
+    )?.unit_id;
+
+    values.category_id = category.find(
+      (cat) => cat.category_name === values.category_id
+    )?.category_id;
+
+    values.sub_category_id = filteredSubcategories.find(
+      (cat) => cat.sub_category_name === values.sub_category_id
+    )?.sub_category_id;
+    values.sub_category_id = filteredSubcategories.find(
+      (cat) => cat.sub_category_name === values.sub_category_id
+    )?.sub_category_id;
+
+    values.type_id = type.find(
+      (cat) => cat.type_name === values.type_id
+    )?.type_id;
 
     values.asset_condition_id = condition.find(
       (cat) => cat.asset_condition_name === values.asset_condition_id
     )?.asset_condition_id;
 
+    if (!unitID) {
+      values.unit_id = "";
+    }
+
     const response = await insertTransaction(values);
+    console.log(response)
+    window.location.reload();
+
   }
 
   return (
@@ -146,8 +183,6 @@ function BorrowForm() {
                                 (c) => c.name === value
                               );
 
-                              console.log(item);
-
                               if (item) {
                                 return Number(item.company_id);
                               }
@@ -162,7 +197,7 @@ function BorrowForm() {
                           <SelectContent>
                             {company.map((comp) => (
                               <SelectItem
-                                key={comp.company_id}
+                                key={comp.name}
                                 value={comp.name}
                               >
                                 {comp.name}
@@ -191,9 +226,6 @@ function BorrowForm() {
                                 const dept = department.find(
                                   (dep) => dep.name === value
                                 );
-
-                                console.log(dept);
-
                                 if (dept) {
                                   return Number(dept.department_id);
                                 }
@@ -226,7 +258,7 @@ function BorrowForm() {
                     name="unit_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Unit</FormLabel>
+                        <FormLabel>Section</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={(value) => {
@@ -235,8 +267,6 @@ function BorrowForm() {
                                 const uni = unit.find(
                                   (un) => un.name === value
                                 );
-
-                                console.log(uni);
 
                                 if (uni) {
                                   return Number(uni.unit_id);
@@ -247,7 +277,7 @@ function BorrowForm() {
                             value={field.value}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select Unit" />
+                              <SelectValue placeholder="Select Section" />
                             </SelectTrigger>
                             <SelectContent>
                               {filteredUnits.map((un) => (
@@ -288,7 +318,7 @@ function BorrowForm() {
                           value={field.value}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Company" />
+                            <SelectValue placeholder="Select Employee" />
                           </SelectTrigger>
                           <SelectContent>
                             {filteredUsers.map((users) => (
@@ -320,8 +350,6 @@ function BorrowForm() {
                               const item = category.find(
                                 (c) => c.category_name === value
                               );
-
-                              console.log(item);
 
                               if (item) {
                                 return Number(item.category_id);
@@ -366,8 +394,6 @@ function BorrowForm() {
                                   (c) => c.sub_category_name === value
                                 );
 
-                                console.log(sub);
-
                                 if (sub) {
                                   return Number(sub.sub_category_id);
                                 }
@@ -411,9 +437,6 @@ function BorrowForm() {
                                 const ty = type.find(
                                   (typ) => typ.type_name === value
                                 );
-
-                                console.log(ty);
-
                                 if (ty) {
                                   return Number(ty.type_id);
                                 }

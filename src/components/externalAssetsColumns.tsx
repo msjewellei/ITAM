@@ -134,11 +134,7 @@ export const columns: ColumnDef<ExternalAsset>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(external.asset_id)}
-            >
-              Copy External Asset ID
-            </DropdownMenuItem>
+            
             <DropdownMenuSeparator />
             <DropdownMenuItem>View External Asset details</DropdownMenuItem>
             <DropdownMenuItem>Edit External Asset details</DropdownMenuItem>

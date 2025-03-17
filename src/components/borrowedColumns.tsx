@@ -24,8 +24,8 @@ export type BorrowedAsset = {
   asset_id: string;
   date_borrowed: Date;
   due_date: Date;
-  asset_condition_id: string;
   remarks: string;
+  asset_condition_name: string;
 };
 
 export const columns: ColumnDef<BorrowedAsset>[] = [
@@ -114,11 +114,7 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(borrow.borrow_transaction_id)}
-            >
-              Copy Borrow ID
-            </DropdownMenuItem>
+            
             <DropdownMenuSeparator />
             <DropdownMenuItem>View Borrow details</DropdownMenuItem>
             <DropdownMenuItem>Edit Borrow details</DropdownMenuItem>

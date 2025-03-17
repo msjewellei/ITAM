@@ -20,7 +20,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DialogFooter } from "./ui/dialog";
 import {
   Select,
   SelectContent,
@@ -32,6 +31,8 @@ import { useMisc } from "@/context/miscellaneousContext";
 import { useAsset } from "@/context/assetContext";
 import { useIssuance } from "@/context/issuanceContext";
 import { Link } from "react-router-dom";
+import { toast } from "sonner"
+
 
 const formSchema = z.object({
   company_id: z.string(),
@@ -95,6 +96,18 @@ function IssuanceForm() {
       (cat) => cat.asset_name === values.asset_id
     )?.asset_id;
 
+    values.company_id = company.find(
+      (cat) => cat.name === values.company_id
+    )?.company_id;
+
+    values.department_id = filteredDepartments.find(
+      (cat) => cat.name === values.department_id
+    )?.department_id;
+
+    values.unit_id = filteredUnits.find(
+      (cat) => cat.name === values.unit_id
+    )?.unit_id;
+
     values.user_id = filteredUsers.find(
       (cat) => `${cat.first_name} ${cat.last_name}` === values.user_id
     )?.user_id;
@@ -104,13 +117,18 @@ function IssuanceForm() {
     )?.status_id;
 
     const response = await insertIssuance(values);
+      window.location.reload();
+      toast("Event has been created.")
+    
+        
   }
+
 
   return (
     <div className="flex flex-col ml-[calc(7rem+10px)] mt-15px mr-[calc(2.5rem)] ">
       <div className="flex flex-row items-center justify-between">
         <p className="pl-1 pt-5 mb-4 text-lg">New Issuance Transaction</p>
-        <Link to="/repair">
+        <Link to="/issuance">
           <Button variant="link">
             <ChevronLeft />
             <p>Back</p>
@@ -137,8 +155,6 @@ function IssuanceForm() {
                                 const item = company.find(
                                   (c) => c.name === value
                                 );
-
-                                console.log(item);
 
                                 if (item) {
                                   return Number(item.company_id);
@@ -183,8 +199,6 @@ function IssuanceForm() {
                                     (dep) => dep.name === value
                                   );
 
-                                  console.log(dept);
-
                                   if (dept) {
                                     return Number(dept.department_id);
                                   }
@@ -225,8 +239,6 @@ function IssuanceForm() {
                                   const uni = unit.find(
                                     (un) => un.name === value
                                   );
-
-                                  console.log(uni);
 
                                   if (uni) {
                                     return Number(uni.unit_id);
@@ -315,8 +327,6 @@ function IssuanceForm() {
                                   (c) => c.category_name === value
                                 );
 
-                                console.log(item);
-
                                 if (item) {
                                   return Number(item.category_id);
                                 }
@@ -359,8 +369,6 @@ function IssuanceForm() {
                                   const sub = subcategory.find(
                                     (c) => c.sub_category_name === value
                                   );
-
-                                  console.log(sub);
 
                                   if (sub) {
                                     return Number(sub.sub_category_id);
@@ -405,8 +413,6 @@ function IssuanceForm() {
                                   const ty = type.find(
                                     (typ) => typ.type_name === value
                                   );
-
-                                  console.log(ty);
 
                                   if (ty) {
                                     return Number(ty.type_id);

@@ -130,14 +130,10 @@ export const columns: ColumnDef<Asset>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(asset.asset_name)}
-            >
-              Copy Internal Asset ID
-            </DropdownMenuItem>
+            
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View Internal Asset details</DropdownMenuItem>
-            <DropdownMenuItem>Edit Internal Asset details</DropdownMenuItem>
+            <DropdownMenuItem>View asset details</DropdownMenuItem>
+            <DropdownMenuItem>Edit asset details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

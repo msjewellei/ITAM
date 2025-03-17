@@ -121,7 +121,21 @@ function RepairForm() {
       (cat) => cat.status_name === values.status_id
     )?.status_id;
 
+    values.company_id = company.find(
+      (cat) => cat.name === values.company_id
+    )?.company_id;
+
+    values.department_id = filteredDepartments.find(
+      (cat) => cat.name === values.department_id
+    )?.department_id;
+
+    values.unit_id = filteredUnits.find(
+      (cat) => cat.name === values.unit_id
+    )?.unit_id;
+
     const response = await insertRepair(values);
+    window.location.reload();
+
   }
 
   return (
@@ -154,8 +168,6 @@ function RepairForm() {
                               const item = company.find(
                                 (c) => c.name === value
                               );
-
-                              console.log(item);
 
                               if (item) {
                                 return Number(item.company_id);
@@ -200,8 +212,6 @@ function RepairForm() {
                                   (dep) => dep.name === value
                                 );
 
-                                console.log(dept);
-
                                 if (dept) {
                                   return Number(dept.department_id);
                                 }
@@ -242,8 +252,6 @@ function RepairForm() {
                                 const uni = unit.find(
                                   (un) => un.name === value
                                 );
-
-                                console.log(uni);
 
                                 if (uni) {
                                   return Number(uni.unit_id);
@@ -328,8 +336,6 @@ function RepairForm() {
                                 (c) => c.category_name === value
                               );
 
-                              console.log(item);
-
                               if (item) {
                                 return Number(item.category_id);
                               }
@@ -372,8 +378,6 @@ function RepairForm() {
                                 const sub = subcategory.find(
                                   (c) => c.sub_category_name === value
                                 );
-
-                                console.log(sub);
 
                                 if (sub) {
                                   return Number(sub.sub_category_id);
@@ -418,8 +422,6 @@ function RepairForm() {
                                 const ty = type.find(
                                   (typ) => typ.type_name === value
                                 );
-
-                                console.log(ty);
 
                                 if (ty) {
                                   return Number(ty.type_id);
@@ -548,7 +550,7 @@ function RepairForm() {
                           value={field.value}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Type" />
+                            <SelectValue placeholder="Select urgency level" />
                           </SelectTrigger>
                           <SelectContent>
                             {repairUrgency.map((ru) => (
@@ -619,7 +621,7 @@ function RepairForm() {
                           value={field.value}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Type" />
+                            <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
                             {status.map((st) => (

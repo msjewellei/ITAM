@@ -43,13 +43,13 @@ const formSchema = z.object({
   // asset_condition_id: z.string(),
   availability_status_id: z.string().min(2).max(50),
   serial_number: z.string().min(2).max(50),
-  specifications: z.string().min(2).max(100),
+  specifications: z.string().min(2),
   asset_amount: z.coerce.number(),
   warranty_duration: z.string().min(2).max(50),
   warranty_due_date: z.date(),
   purchase_date: z.date(),
   // aging: z.number(),
-  notes: z.string().min(2).max(100),
+  notes: z.string().min(2),
 });
 
 function AssetForm() {
@@ -90,6 +90,7 @@ function AssetForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+
     values.category_id = category.find(
       (cat) => cat.category_name === values.category_id
     )?.category_id;
@@ -110,9 +111,8 @@ function AssetForm() {
       values.type_id = "";
     }
     const response = await insertAsset(values);
-    console.log(response);
-    navigate(-1);
     window.location.reload();
+
   }
 
   return (
@@ -130,8 +130,7 @@ function AssetForm() {
         <Form {...form}>
           <form
             onSubmit={(e) => {
-              e.preventDefault(); // Only for debugging, remove later
-              console.log("Form submission triggered");
+              e.preventDefault();
               form.handleSubmit(onSubmit)();
             }}
           >
@@ -188,8 +187,6 @@ function AssetForm() {
                                 (c) => c.category_name === value
                               );
 
-                              console.log(item);
-
                               if (item) {
                                 return Number(item.category_id);
                               }
@@ -232,8 +229,6 @@ function AssetForm() {
                                 const sub = subcategory.find(
                                   (c) => c.sub_category_name === value
                                 );
-
-                                console.log(sub);
 
                                 if (sub) {
                                   return Number(sub.sub_category_id);

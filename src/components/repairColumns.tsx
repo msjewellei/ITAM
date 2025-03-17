@@ -25,10 +25,8 @@ export type RepairAsset = {
   issue: string;
   remarks: string;
   date_reported: Date;
-  urgency_id: string;
   repair_start_date: Date;
   repair_completion_date: Date;
-  status_id: string;
   repair_cost: number;
 };
 
@@ -114,7 +112,7 @@ export const columns: ColumnDef<RepairAsset>[] = [
   },
 
   {
-    accessorKey: "status",
+    accessorKey: "status_name",
     header: "Status",
   },
   {
@@ -145,13 +143,7 @@ export const columns: ColumnDef<RepairAsset>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(repair.repair_request_id)
-              }
-            >
-              Copy Repair ID
-            </DropdownMenuItem>
+            
             <DropdownMenuSeparator />
             <DropdownMenuItem>View Repair details</DropdownMenuItem>
             <DropdownMenuItem>Edit Repair details</DropdownMenuItem>

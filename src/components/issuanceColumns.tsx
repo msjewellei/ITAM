@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge"
 
 export type IssuanceAsset = {
   company_id: string;
@@ -74,6 +75,11 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
   {
     accessorKey: "status_name",
     header: "Status",
+    cell: ({row}) => {
+      return(
+        <Badge>{row.original.status_name}</Badge>
+      )
+    }
   },
   {
     id: "actions",
