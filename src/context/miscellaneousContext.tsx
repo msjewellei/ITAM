@@ -53,6 +53,7 @@ interface Subcategory {
 }
 
 interface Type {
+  find(arg0: (typ: { type_name: string; }) => boolean): unknown;
   type_id: number;
   type_name: string;
 }
@@ -193,6 +194,8 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       return newUsers;
     }, [companyID, departmentID, unitID, user]);
 
+
+    
   const value = {
     user,
     company,
@@ -221,7 +224,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     filteredUsers,
     userID,
     setUserID,
-    unitID
+    unitID,
   };
   return <MiscContext.Provider value={value}>{children}</MiscContext.Provider>;
 };

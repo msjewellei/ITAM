@@ -447,14 +447,14 @@ function IssuanceForm() {
                     name="asset_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Asset Name</FormLabel>
+                        <FormLabel>Asset ID</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={field.onChange}
                             value={field.value}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Asset Name" />
+                              <SelectValue placeholder="Asset ID" />
                             </SelectTrigger>
                             <SelectContent>
                               {filteredAssets.map((asset) => (
@@ -517,36 +517,7 @@ function IssuanceForm() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="status_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {status.map((stat) => (
-                                <SelectItem
-                                  key={stat.status_name}
-                                  value={stat.status_name}
-                                >
-                                  {stat.status_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  
                 </div>
                 <div className="col-span-2 flex justify-end align-end">
                   <Button className="w-fit text-sm sm:text-base" type="submit">

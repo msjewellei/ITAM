@@ -35,21 +35,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAsset } from "@/context/assetContext";
 
 const formSchema = z.object({
-  asset_name: z.string().min(2).max(50),
-  category_id: z.string().min(2).max(50),
-  sub_category_id: z.string().optional(),
-  type_id: z.string().optional(),
-  location: z.string().optional(),
+  asset_name: z.string(),
+  category_id: z.string(),
+  sub_category_id: z.string(),
+  type_id: z.string(),
+  location: z.string(),
   // asset_condition_id: z.string(),
-  availability_status_id: z.string().min(2).max(50),
-  serial_number: z.string().min(2).max(50),
-  specifications: z.string().min(2),
+  availability_status_id: z.string(),
+  serial_number: z.string(),
+  specifications: z.string(),
   asset_amount: z.coerce.number(),
-  warranty_duration: z.string().min(2).max(50),
+  warranty_duration: z.string(),
   warranty_due_date: z.date(),
   purchase_date: z.date(),
   // aging: z.number(),
-  notes: z.string().min(2),
+  notes: z.string(),
+  brand: z.string(),
+  insurance: z.string(),
+  file: z.instanceof(File).optional(),
 });
 
 function AssetForm() {
@@ -86,11 +89,13 @@ function AssetForm() {
       purchase_date: new Date(),
       // aging: 0,
       notes: "",
+      brand: "",
+      insurance: "",
+      file: undefined,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-
     values.category_id = category.find(
       (cat) => cat.category_name === values.category_id
     )?.category_id;
@@ -104,6 +109,11 @@ function AssetForm() {
         (ty) => ty.type_name === values.type_id
       )?.type_id;
     }
+    if (values.availability_status_id) {
+      values.availability_status_id = status.find(
+        (ty) => ty.status_name === values.availability_status_id
+      )?.status_id;
+    }
     if (categoryID !== 2) {
       values.sub_category_id = "";
     }
@@ -111,8 +121,8 @@ function AssetForm() {
       values.type_id = "";
     }
     const response = await insertAsset(values);
-    window.location.reload();
-
+    console.log(response);
+    // window.location.reload();
   }
 
   return (
@@ -136,24 +146,6 @@ function AssetForm() {
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-4">
-                <FormField
-                  control={form.control}
-                  name="asset_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Asset Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          {...field}
-                          className="text-sm sm:text-base"
-                          placeholder="Ex. Laptop-001"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="serial_number"
@@ -293,7 +285,25 @@ function AssetForm() {
                 )}
 
                 {categoryID === 1 && (
+                  <>
                   <FormField
+                    control={form.control}
+                    name="asset_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Asset Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="Ex. TPLink"
+                            {...field}
+                            className="text-sm sm:text-base"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  /><FormField
                     control={form.control}
                     name="location"
                     render={({ field }) => (
@@ -311,7 +321,27 @@ function AssetForm() {
                       </FormItem>
                     )}
                   />
+                  </>
+                  
                 )}
+                <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Brand</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          {...field}
+                          className="text-sm sm:text-base"
+                          placeholder="Ex. Dell"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="specifications"
@@ -323,6 +353,23 @@ function AssetForm() {
                           {...field}
                           className="text-sm sm:text-base"
                           placeholder="Ex. RAM - 2GB"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="insurance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Insurance</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          className="text-sm sm:text-base"
+                          placeholder="Ex. Provider: ABC"
                         />
                       </FormControl>
                       <FormMessage />
@@ -496,6 +543,27 @@ function AssetForm() {
                     </FormItem>
                   )}
                 />
+                {/* <FormField
+                  control={form.control}
+                  name="file"
+                  render={({ field: { onChange, value, ...rest } }) => (
+                    <FormItem>
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <FormLabel htmlFor="picture">Picture</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="picture"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => onChange(e.target.files?.[0])}
+                            {...rest}
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                /> */}
               </div>
 
               <div className="col-span-2 flex justify-end align-end">

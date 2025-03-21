@@ -11,20 +11,24 @@ import { IssuanceProvider } from "./context/issuanceContext.tsx";
 import { Toaster } from "@/components/ui/sonner";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <IssuanceProvider>
+  <StrictMode><MiscProvider>
+    <AssetProvider>
+    
+      <IssuanceProvider>
       <RepairProvider>
         <BrowserRouter>
           <BorrowProvider>
-            <AssetProvider>
-              <MiscProvider>
+            
+              
                 <App />
-              </MiscProvider>
-            </AssetProvider>
+              
+            
           </BorrowProvider>
         </BrowserRouter>
       </RepairProvider>
     </IssuanceProvider>
+    </AssetProvider>
+    </MiscProvider>
     <Toaster />
   </StrictMode>
 );

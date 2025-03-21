@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { conditionVariants } from "./badges";
+import { Badge } from "./ui/badge";
 
 export type BorrowedAsset = {
   borrow_transaction_id: string;
@@ -26,6 +28,13 @@ export type BorrowedAsset = {
   due_date: Date;
   remarks: string;
   asset_condition_name: string;
+  asset_condition_id: string;
+  department_name: string;
+  company_name: string;
+  category_name: string;
+  sub_category_name: string;
+  return_date: Date;
+  type_name: string;
 };
 
 export const columns: ColumnDef<BorrowedAsset>[] = [
@@ -62,30 +71,63 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Asset Name
+            Asset ID
             <ArrowUpDown className="ml-2 h-4 w-4 " />
           </Button>
         </div>
       );
     },
   },
+  
+  {
+    accessorKey: "sub_category_name",
+    header: "Category",
+    accessorFn: (row) => row.type_id !== null ? row.type_name : row.sub_category_id !== null ? row.sub_category_name: row.category_id !== null ? row.category_name : "",
+  },  
   {
     accessorKey: "employee_name",
-    header: ({}) => {
-      return <p className="">Borrower Name</p>;
-    },
+    header: "Borrower Name"
   },
+  {
+    accessorKey: "department_name",
+    header: "Department",
+    accessorFn: (row) => row.department_name || row.company_name, 
+  },  
   {
     accessorKey: "date_borrowed",
     header: "Date Borrowed",
+    accessorFn: (row) => 
+      row.date_borrowed 
+        ? new Date(row.date_borrowed).toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric" 
+          }) 
+        : "N/A",
   },
   {
     accessorKey: "due_date",
     header: "Due Date",
+    accessorFn: (row) => 
+      row.due_date 
+        ? new Date(row.due_date).toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric" 
+          }) 
+        : "N/A",
   },
   {
     accessorKey: "return_date",
     header: "Return Date",
+    accessorFn: (row) => 
+      row.return_date 
+        ? new Date(row.return_date).toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric" 
+          }) 
+        : "N/A",
   },
   {
     accessorKey: "duration",
@@ -94,6 +136,12 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
   {
     accessorKey: "asset_condition_name",
     header: "Condition",
+    cell: ({ row }) => {
+      const { asset_condition_id, asset_condition_name } = row.original;
+      const statusKey = `${asset_condition_id}`;
+      const bgColor = conditionVariants[statusKey] || "bg-gray-200";
+      return <Badge variant={"outline"} className={`${bgColor} px-2 py-1 rounded-md`}>{asset_condition_name}</Badge>;
+    },
   },
   {
     accessorKey: "remarks",

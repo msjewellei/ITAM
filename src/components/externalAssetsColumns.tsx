@@ -11,14 +11,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "./ui/badge";
+import { conditionVariants, statusVariants } from "./badges";
 
 export type ExternalAsset = {
-   asset_name: string;
+  asset_name: string;
   category_id: string;
   sub_category_id: string | null;
   type_id: string | null;
   location: string | null;
-  availability_status_id: string;
+  status_id: string;
   serial_number: string;
   specifications: string;
   asset_amount: number;
@@ -26,6 +28,9 @@ export type ExternalAsset = {
   warranty_due_date: Date;
   purchase_date: Date;
   notes: string;
+  asset_condition_id: string;
+  asset_condition_name: string;
+  status_name: string;
 };
 
 export const columns: ColumnDef<ExternalAsset>[] = [
@@ -67,21 +72,53 @@ export const columns: ColumnDef<ExternalAsset>[] = [
     },
   },
   {
-    accessorKey: "asset_condition_name",
-    header: "Condition",
+    accessorKey: "serial_number",
+    header: "Serial Number",
+  },
+  {
+    accessorKey: "brand",
+    header: "Brand",
   },
   {
     accessorKey: "location",
     header: "Location",
   },
   {
-    accessorKey: "availability_status",
-    header: "Status",
+    accessorKey: "asset_condition_name",
+    header: "Condition",
+    cell: ({ row }) => {
+      const { asset_condition_id, asset_condition_name } = row.original;
+      const statusKey = `${asset_condition_id}`;
+      const bgColor = conditionVariants[statusKey] || "bg-gray-200";
+      return (
+        <Badge
+          variant={"outline"}
+          className={`${bgColor} px-2 py-1 rounded-md`}
+        >
+          {asset_condition_name}
+        </Badge>
+      );
+    },
   },
+
   {
-    accessorKey: "serial_number",
-    header: "Serial Number",
+    accessorKey: "status_name",
+    header: "Status",
+    cell: ({ row }) => {
+      const { status_id, status_name } = row.original;
+      const statusKey = `${status_id}`;
+      const bgColor = statusVariants[statusKey] || "bg-gray-200";
+      return (
+        <Badge
+          variant={"outline"}
+          className={`${bgColor} px-2 py-1 rounded-md`}
+        >
+          {status_name}
+        </Badge>
+      );
+    },
   },
+
   {
     accessorKey: "specifications",
     header: "Specifications",
@@ -134,7 +171,7 @@ export const columns: ColumnDef<ExternalAsset>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            
+
             <DropdownMenuSeparator />
             <DropdownMenuItem>View External Asset details</DropdownMenuItem>
             <DropdownMenuItem>Edit External Asset details</DropdownMenuItem>

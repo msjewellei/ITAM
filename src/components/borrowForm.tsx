@@ -72,7 +72,8 @@ function BorrowForm() {
     filteredUsers,
     setUserID,
     filteredSubcategories,
-    unitID
+    unitID,
+    departmentID,
   } = useMisc();
   const {
     filteredAssets,
@@ -103,9 +104,11 @@ function BorrowForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    values.asset_id = filteredAssets.find(
+    const asset = filteredAssets.find(
       (cat) => cat.asset_name === values.asset_id
-    )?.asset_id;
+    );
+    values.asset_id = asset.asset_id
+    values.asset_condition_id = asset.asset_condition_id
 
     values.user_id = filteredUsers.find(
       (cat) => `${cat.first_name} ${cat.last_name}` === values.user_id
@@ -138,17 +141,19 @@ function BorrowForm() {
       (cat) => cat.type_name === values.type_id
     )?.type_id;
 
-    values.asset_condition_id = condition.find(
-      (cat) => cat.asset_condition_name === values.asset_condition_id
-    )?.asset_condition_id;
+
 
     if (!unitID) {
       values.unit_id = "";
     }
 
+    if (!departmentID) {
+      values.department_id = "";
+    }
+
     const response = await insertTransaction(values);
     console.log(response)
-    window.location.reload();
+    // window.location.reload();
 
   }
 
@@ -471,14 +476,14 @@ function BorrowForm() {
                     name="asset_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Asset Name</FormLabel>
+                        <FormLabel>Asset ID</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={field.onChange}
                             value={field.value}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Asset Name" />
+                              <SelectValue placeholder="Asset ID" />
                             </SelectTrigger>
                             <SelectContent>
                               {filteredAssets.map((asset) => (
@@ -583,7 +588,7 @@ function BorrowForm() {
                   name="duration"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duration</FormLabel>
+                      <FormLabel>Duration (in days)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -598,38 +603,6 @@ function BorrowForm() {
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="asset_condition_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Condition</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Condition" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {condition.map((con) => (
-                              <SelectItem
-                                key={con.asset_condition_name}
-                                value={con.asset_condition_name}
-                              >
-                                {con.asset_condition_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="remarks"

@@ -41,13 +41,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import * as React from "react";
-import {
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import RepairForm from "./repairForm";
+import { DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -55,6 +49,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { Link } from "react-router-dom";
+import { ReturnDate } from "./repairUpdate";
 
 interface RepairDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -66,9 +61,7 @@ export function RepairDataTable<TData, TValue>({
   data,
 }: RepairDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
+  const [globalFilter, setGlobalFilter] = React.useState("");
   const [] = React.useState<VisibilityState>({});
 
   const [rowSelection, setRowSelection] = React.useState({});
@@ -79,32 +72,38 @@ export function RepairDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      columnFilters,
+      globalFilter,
       rowSelection,
     },
+    onGlobalFilterChange: setGlobalFilter,
   });
   const [date, setDate] = React.useState<Date>();
-
+const initialized = React.useRef(false);
+  React.useEffect(() => {
+    if (!initialized.current) {
+      table.getColumn("department")?.toggleVisibility(false);
+      table.getColumn("remarks")?.toggleVisibility(false);
+      table.getColumn("date_reported")?.toggleVisibility(false);
+      table.getColumn("repair_start_date")?.toggleVisibility(false);
+      table.getColumn("repair_completion_date")?.toggleVisibility(false);
+      table.getColumn("repair_cost")?.toggleVisibility(false);
+      table.getColumn("department_name")?.toggleVisibility(false);
+      initialized.current = true;
+    }
+  }, []);
   return (
     <div className="pl-10 pr-10 pb-10">
       <div className="flex justify-between">
         <div className="flex items-center py-4 justify-start">
           <Input
-            placeholder="Search Requester"
-            value={
-              (table.getColumn("employee_name")?.getFilterValue() as string) ??
-              ""
-            }
-            onChange={(event) =>
-              table
-                .getColumn("employee_name")
-                ?.setFilterValue(event.target.value)
-            }
+            type="text"
+            placeholder="Search"
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
             className="max-w-md min-w-sm"
           />
         </div>
@@ -181,22 +180,24 @@ export function RepairDataTable<TData, TValue>({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[30px] justify-center text-center font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <Link to="/repair/add">
-                    <Plus className="m-auto h-4 w-4 p-auto" /></Link>
-                  </Button>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[30px] justify-center text-center font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <Link to="/repair/add">
+                    <Plus className="m-auto h-4 w-4 p-auto" />
+                  </Link>
+                </Button>
                 <DialogContent className="w-[90vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
                   <DialogHeader className="pb-2">
                     <DialogTitle className="text-center">
-                      New Repair Request
+                      Update Repair Request
                     </DialogTitle>
                   </DialogHeader>
+                  <ReturnDate />
                 </DialogContent>
               </TooltipTrigger>
               <TooltipContent>
@@ -208,7 +209,7 @@ export function RepairDataTable<TData, TValue>({
       </div>
       <div className="flex flex-col min-h-[calc(100vh-22rem)] max-h-[calc(100vh-22rem)] overflow-auto">
         <Table className="justify-start text-left">
-          <TableHeader className="justify-start text-left bg-[#f0f1f3]">
+         <TableHeader className="justify-start text-left sticky top-0 bg-[#f0f1f3] z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-gray-300">
                 {headerGroup.headers.map((header) => {

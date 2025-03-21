@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import {
@@ -12,19 +12,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge"
+import {statusVariants} from "@/components/badges"
+import { useIssuance } from "@/context/issuanceContext";
+import { useMisc } from "@/context/miscellaneousContext";
+import { DialogTrigger } from "./ui/dialog";
+import { useAsset } from "@/context/assetContext";
 
 export type IssuanceAsset = {
+  issuance_id: number;
+  status_name: string;
   company_id: string;
   department_id: string;
   unit_id: string;
-  user_id: string;
+  user_id: number;
   category_id: string;
   sub_category_id: string;
   type_id: string;
-  asset_id: string;
+  asset_id: number;
   issuance_date: Date;
   status_id: string;
+  company_name: string;
+  department_name: string;
+  category_name: string;
+  sub_category_name: string;
+  pullout_date: Date;
+  type_name: string;
 };
+
+
 
 export const columns: ColumnDef<IssuanceAsset>[] = [
   {
@@ -58,28 +73,78 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="text-left w-full flex justify-start p-0"
         >
-          Asset Name
+          Asset ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
   {
+    accessorKey: "sub_category_name",
+    header: "Category",
+    accessorFn: (row) => row.type_id !== null ? row.type_name : row.sub_category_id !== null ? row.sub_category_name: row.category_id !== null ? row.category_name : "",
+  },  
+  {
     accessorKey: "employee_name",
     header: "Employee Name",
   },
   {
+    accessorKey: "department_name",
+    header: "Department",
+    accessorFn: (row) => row.department_name || row.company_name, 
+  },  
+  {
     accessorKey: "issuance_date",
     header: "Issuance Date",
+    accessorFn: (row) => 
+      row.issuance_date 
+        ? new Date(row.issuance_date).toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric" 
+          }) 
+        : "N/A",
   },
   {
-    accessorKey: "status_name",
-    header: "Status",
-    cell: ({row}) => {
-      return(
-        <Badge>{row.original.status_name}</Badge>
-      )
-    }
+    accessorKey: "pullout_date",
+    header: "Pullout Date",
+    accessorFn: (row) => 
+      row.pullout_date 
+        ? new Date(row.pullout_date).toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric" 
+          }) 
+        : "N/A",
+    cell: ({ row }) => {
+      const { setIssuanceID } = useIssuance();
+      const { setUserID } = useMisc();
+      const { setAssetID } = useAsset();
+      const pullout = row.getValue("pullout_date") as string | null;
+      return (
+        <>
+          <DialogTrigger
+            onClick={() => {
+              console.log(row.original.issuance_id);
+              console.log(row.original.asset_id);
+              console.log(row.original.user_id);
+              setIssuanceID(row.original.issuance_id);
+              setUserID(row.original.user_id);
+              setAssetID(row.original.asset_id);
+            }}
+          >
+            <div className="relative group flex items-center cursor-pointer">
+              <span>{pullout ?? "N/A"}</span>
+              <SquarePen className="ml-2 h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+            </div>
+          </DialogTrigger>
+        </>
+      );
+    },        
+},
+  {
+    accessorKey: "remarks",
+    header: "Remarks",
   },
   {
     id: "actions",
@@ -96,11 +161,6 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(issuance.issuance_id)}
-            >
-              Copy Issuance ID
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>View Issuance details</DropdownMenuItem>
             <DropdownMenuItem>Edit Issuance details</DropdownMenuItem>

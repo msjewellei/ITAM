@@ -5,29 +5,55 @@ import {
   useContext,
   ReactNode,
   useEffect,
+  useMemo,
+  Dispatch,
+  SetStateAction,
 } from "react";
+import { useMisc } from "./miscellaneousContext";
 
 interface Issuance {
+  issuance_id: number;
+  status_name: string;
   company_id: string;
   department_id: string;
   unit_id: string;
-  user_id: string;
+  user_id: number;
   category_id: string;
   sub_category_id: string;
   type_id: string;
-  asset_id: string;
+  asset_id: number;
   issuance_date: Date;
   status_id: string;
+  company_name: string;
+  department_name: string;
+  category_name: string;
+  sub_category_name: string;
+  pullout_date: Date;
+  type_name: string;
 }
 interface IssuanceContextType {
   issuance: Issuance[];
   insertIssuance: (issuance: Issuance) => void;
+  filteredIssuance: Issuance[] | [];
+  updateIssuance: (
+    issuance_id: number,
+    user_id: number,
+    asset_id: number,
+    updatedData: Partial<Issuance>
+  ) => Promise<any>;
+  setIssuanceID: Dispatch<SetStateAction<number | null>>;
+  issuanceID: number | null;
 }
-const IssuanceContext = createContext<IssuanceContextType | undefined>(undefined);
+const IssuanceContext = createContext<IssuanceContextType | undefined>(
+  undefined
+);
 export const IssuanceProvider = ({ children }: { children: ReactNode }) => {
+  const { user, userID } = useMisc();
   const [issuance, setIssuance] = useState<Issuance[]>([]);
+  const [issuanceID, setIssuanceID] = useState<number | null>(null);
 
-  let url = "http://localhost/itam_api/AssetIssuance.php?resource=asset_issuance";
+  let url =
+    "http://localhost/itam_api/AssetIssuance.php?resource=asset_issuance";
   const getIssuance = async () => {
     try {
       const response = await axios.get(url);
@@ -63,12 +89,51 @@ export const IssuanceProvider = ({ children }: { children: ReactNode }) => {
     fetchIssuance();
   }, []);
 
+  const filteredIssuance: Issuance[] = useMemo(() => {
+    if (!userID) return [];
+
+    return issuance.filter((i) => String(i.user_id) === String(userID));
+  }, [userID, issuance]);
+
+  const updateIssuance = async (
+    issuance_id: number,
+    user_id: number,
+    asset_id: number,
+    updatedData: Partial<Issuance>
+  ) => {
+    try {
+      const response = await axios.put(
+        url,
+        {
+          issuance_id,
+          user_id,
+          asset_id,
+          ...updatedData,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (response.data) {
+        console.log("Issuance updated successfully:", response.data);
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error updating issuance:", error);
+    }
+  };
+
   const value = {
     issuance,
     insertIssuance,
+    filteredIssuance,
+    updateIssuance,
+    setIssuanceID,
+    issuanceID,
   };
   return (
-    <IssuanceContext.Provider value={value}>{children}</IssuanceContext.Provider>
+    <IssuanceContext.Provider value={value}>
+      {children}
+    </IssuanceContext.Provider>
   );
 };
 export const useIssuance = () => {

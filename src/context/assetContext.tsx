@@ -36,6 +36,8 @@ interface AssetContextType {
   setTypeID: Dispatch<SetStateAction<number | null>>; 
   subCategoryID: number | null;
   typeID: number | null;
+  assetID: number | null;
+  setAssetID: Dispatch<SetStateAction<number | null>>; 
 }
 const AssetContext = createContext<AssetContextType | undefined>(undefined);
 export const AssetProvider = ({ children }: { children: ReactNode }) => {
@@ -44,6 +46,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   const [typeID, setTypeID] = useState<number | null>(null);
   const [subCategoryID, setSubCategoryID] = useState<number | null>(null);
   const [externalAssets, setExternalAssets] = useState<Asset[]>([]);
+  const [assetID, setAssetID] = useState<number | null>(null);
 
   let url = "http://localhost/itam_api/asset.php?resource=asset";
   const getAssets = async () => {
@@ -113,6 +116,8 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
     setTypeID,
     externalAssets,
     filteredAssets,
+    assetID,
+    setAssetID
   };
   return (
     <AssetContext.Provider value={value}>{children}</AssetContext.Provider>

@@ -3,14 +3,6 @@ import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import InternalAsset from "./internalAsset";
 import External from "./externalAssets";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import AssetForm from "./assetForm.copy";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "./ui/tooltip";
 import { Toaster } from "./ui/sonner";
 import { Link } from "react-router-dom";

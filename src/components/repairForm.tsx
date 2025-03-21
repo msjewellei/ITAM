@@ -29,11 +29,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DialogFooter } from "./ui/dialog";
 import { useAsset } from "@/context/assetContext";
 import { useMisc } from "@/context/miscellaneousContext";
 import { Link } from "react-router-dom";
 import { useRepair } from "@/context/repairContext";
+import { useIssuance } from "@/context/issuanceContext";
 
 const formSchema = z.object({
   company_id: z.string(),
@@ -81,6 +81,7 @@ function RepairForm() {
     categoryID,
     subCategoryID,
   } = useAsset();
+  const {filteredIssuance} = useIssuance();
   const { insertRepair } = useRepair();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -134,7 +135,8 @@ function RepairForm() {
     )?.unit_id;
 
     const response = await insertRepair(values);
-    window.location.reload();
+    console.log(response)
+    // window.location.reload();
 
   }
 
@@ -456,17 +458,17 @@ function RepairForm() {
                   name="asset_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Asset Name</FormLabel>
+                      <FormLabel>Asset ID</FormLabel>
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Asset Name" />
+                            <SelectValue placeholder="Asset ID" />
                           </SelectTrigger>
                           <SelectContent>
-                            {filteredAssets.map((asset) => (
+                            {filteredIssuance.map((asset) => (
                               <SelectItem
                                 key={asset.asset_name}
                                 value={asset.asset_name}

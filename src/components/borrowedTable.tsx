@@ -65,9 +65,7 @@ export function BorrowedDataTable<TData, TValue>({
   data,
 }: BorrowedDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
+  const [globalFilter, setGlobalFilter] = React.useState("");
   const [] = React.useState<VisibilityState>({});
 
   const [rowSelection, setRowSelection] = React.useState({});
@@ -78,29 +76,35 @@ export function BorrowedDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      columnFilters,
+      globalFilter,
       rowSelection,
     },
+    onGlobalFilterChange: setGlobalFilter,
   });
   const [date, setDate] = React.useState<Date>();
-
+const initialized = React.useRef(false);
+  React.useEffect(() => {
+    if (!initialized.current) {
+      table.getColumn("due_date")?.toggleVisibility(false);
+      table.getColumn("return_date")?.toggleVisibility(false);
+      table.getColumn("duration")?.toggleVisibility(false);
+      table.getColumn("remarks")?.toggleVisibility(false);
+      initialized.current = true;
+    }
+  }, []);
   return (
     <div className="pl-10 pr-10 pb-10">
       <div className="flex justify-between">
         <div className="flex items-center py-4 justify-start">
           <Input
-            placeholder="Search Borrower"
-            value={
-              (table.getColumn("employee_name")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn("employee_name")?.setFilterValue(event.target.value)
-            }
+            type="text"
+            placeholder="Search"
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
             className="max-w-md min-w-sm"
           />
         </div>
@@ -177,34 +181,32 @@ export function BorrowedDataTable<TData, TValue>({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-
-            
-            <Button variant={"outline"}
-              className={cn(
-                "w-[30px] justify-center text-center font-normal",
-                "text-muted-foreground"
-              )}
-             asChild>
-            <Link to="/borrowed/add">
-              
-              <Plus className="m-auto h-4 w-4 p-auto" />
-              </Link>
-            </Button>
-            </TooltipTrigger>
-          <TooltipContent>
-            <p>Add New Transaction</p>
-          </TooltipContent>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[30px] justify-center text-center font-normal",
+                    "text-muted-foreground"
+                  )}
+                  asChild
+                >
+                  <Link to="/borrowed/add">
+                    <Plus className="m-auto h-4 w-4 p-auto" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add New Transaction</p>
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
       </div>
       <div className="flex flex-col min-h-[calc(100vh-22rem)] max-h-[calc(100vh-22rem)] overflow-auto">
         <Table className="justify-start text-left">
-          <TableHeader className="justify-start text-left bg-[#f0f1f3]">
+          <TableHeader className="justify-start text-left sticky top-0 bg-[#f0f1f3] z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
-                
                 className="border-gray-300 justify-start text-left"
               >
                 {headerGroup.headers.map((header) => {

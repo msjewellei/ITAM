@@ -51,9 +51,10 @@ export function ExternalDataTable<TData, TValue>({
   data,
 }: ExternalDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
+  const [globalFilter, setGlobalFilter] = React.useState("");
+   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+      []
+    );
 
   const [rowSelection, setRowSelection] = React.useState({});
   const table = useReactTable({
@@ -63,31 +64,43 @@ export function ExternalDataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onColumnFiltersChange: setColumnFilters,
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
+      globalFilter,
       rowSelection,
     },
+    onGlobalFilterChange: setGlobalFilter,
   });
   const [date, setDate] = React.useState<Date>();
-
+const initialized = React.useRef(false);
+  React.useEffect(() => {
+    if (!initialized.current) {
+      table.getColumn("type_id")?.toggleVisibility(false);
+      table.getColumn("warranty_duration")?.toggleVisibility(false);
+      table.getColumn("asset_amount")?.toggleVisibility(false);
+      table.getColumn("warranty_due_date")?.toggleVisibility(false);
+      table.getColumn("purchase_date")?.toggleVisibility(false);
+      table.getColumn("aging")?.toggleVisibility(false);
+      table.getColumn("specifications")?.toggleVisibility(false);
+      table.getColumn("notes")?.toggleVisibility(false);
+      initialized.current = true;
+    }
+  }, []);
   return (
     <div className="pl-10 pr-10 pb-10">
       <div className="flex justify-between">
         <div className="flex items-center py-4 justify-start">
           <Input
-            placeholder="Search Asset"
-            value={
-              (table.getColumn("asset_name")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn("asset_name")?.setFilterValue(event.target.value)
-            }
-            className="max-w-md min-w-sm"
-          />
+                  type="text"
+                  placeholder="Search"
+                  value={globalFilter}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  className="max-w-md min-w-sm"
+                />
         </div>
         <div className="flex justify-end gap-2 items-center">
           <Popover>
@@ -144,9 +157,9 @@ export function ExternalDataTable<TData, TValue>({
       </div>
       <div className="flex flex-col min-h-[calc(100vh-25rem)] max-h-[calc(100vh-25rem)] overflow-auto">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-[#f0f1f3]">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="border-gray-300">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -166,6 +179,7 @@ export function ExternalDataTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                className="border-gray-300"
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
@@ -180,7 +194,7 @@ export function ExternalDataTable<TData, TValue>({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="border-gray-300">
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"

@@ -251,7 +251,7 @@ function AssetForm() {
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="Asset Name"
+                        placeholder="Asset ID"
                         {...field}
                         className="text-sm sm:text-base"
                       />
