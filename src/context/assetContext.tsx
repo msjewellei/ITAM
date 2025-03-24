@@ -24,6 +24,7 @@ interface Asset {
   warranty_due_date: Date;
   purchase_date: Date;
   notes: string;
+  file: File;
 }
 interface AssetContextType {
   assets: Asset[];
@@ -64,6 +65,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
     try {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
+      formData.append("file", data.file);
       const response = await axios.post(url, formData);
       if (response.data) {
         return response.data;

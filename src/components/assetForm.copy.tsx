@@ -138,11 +138,12 @@ function AssetForm() {
       </div>
       <div className="w-[calc(100vw-10rem)] rounded-xl bg-white min-h-[calc(100vh-13.10rem)] h-auto p-5 mb-5">
         <Form {...form}>
-          <form
+          <form 
             onSubmit={(e) => {
               e.preventDefault();
               form.handleSubmit(onSubmit)();
             }}
+            encType="multipart/form-data"
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-4">
@@ -543,7 +544,7 @@ function AssetForm() {
                     </FormItem>
                   )}
                 />
-                {/* <FormField
+                <FormField
                   control={form.control}
                   name="file"
                   render={({ field: { onChange, value, ...rest } }) => (
@@ -563,7 +564,7 @@ function AssetForm() {
                       <FormMessage />
                     </FormItem>
                   )}
-                /> */}
+                />
               </div>
 
               <div className="col-span-2 flex justify-end align-end">
