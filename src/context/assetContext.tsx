@@ -89,6 +89,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
     const external = assets.filter((asset) => Number(asset.category_id) === 1);
     setExternalAssets(external);
   }, [assets]);
+  
   const filteredAssets: Asset[] | [] = useMemo(() => {
     let newAssets = assets;
   

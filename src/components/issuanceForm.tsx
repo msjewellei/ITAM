@@ -116,10 +116,17 @@ function IssuanceForm() {
       (cat) => cat.status_name === values.status_id
     )?.status_id;
 
-    const response = await insertIssuance(values);
-      window.location.reload();
-      toast("Event has been created.")
+    try {
+      const response = await insertIssuance(values);
     
+      if (response && Object.keys(response).length > 0) {
+        toast.success("Asset issuance recorded successfully!");
+      } else {
+        toast.error(`Failed to record asset issuance: ${response?.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
         
   }
 

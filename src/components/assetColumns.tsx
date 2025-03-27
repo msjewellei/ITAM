@@ -13,6 +13,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { conditionVariants, statusVariants } from "./badges";
 import { Badge } from "./ui/badge";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { useState } from "react";
 
 export type Asset = {
   type_name: string;
@@ -32,6 +34,7 @@ export type Asset = {
   notes: string;
   asset_condition_id: string;
   asset_condition_name: string;
+  file: string;
 };
 
 export const columns: ColumnDef<Asset>[] = [
@@ -56,6 +59,29 @@ export const columns: ColumnDef<Asset>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    accessorKey: "file",
+    header: "Picture",
+    cell: ({ row }) => {
+      const [open, setOpen] = useState(false);
+      const imageUrl = `http://localhost/itam_api/${row.original.file}`;
+
+      return (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <img
+              src={imageUrl}
+              className="max-w-16 max-h-16 object-cover cursor-pointer rounded-md"
+              onClick={() => setOpen(true)}
+            />
+          </DialogTrigger>
+          <DialogContent className="flex items-center justify-center">
+            <img src={imageUrl} alt="Asset Enlarged" className="max-w-full max-h-[80vh] rounded-md" />
+          </DialogContent>
+        </Dialog>
+      );
+    },
   },
   {
     accessorKey: "asset_name",
@@ -165,6 +191,7 @@ export const columns: ColumnDef<Asset>[] = [
     accessorKey: "insurance",
     header: "Insurance",
   },
+  
   {
     id: "actions",
     cell: ({ row }) => {

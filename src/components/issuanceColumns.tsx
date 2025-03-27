@@ -125,9 +125,6 @@ export const columns: ColumnDef<IssuanceAsset>[] = [
         <>
           <DialogTrigger
             onClick={() => {
-              console.log(row.original.issuance_id);
-              console.log(row.original.asset_id);
-              console.log(row.original.user_id);
               setIssuanceID(row.original.issuance_id);
               setUserID(row.original.user_id);
               setAssetID(row.original.asset_id);

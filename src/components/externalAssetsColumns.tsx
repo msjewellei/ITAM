@@ -13,6 +13,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "./ui/badge";
 import { conditionVariants, statusVariants } from "./badges";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
 export type ExternalAsset = {
   asset_name: string;
@@ -31,6 +33,7 @@ export type ExternalAsset = {
   asset_condition_id: string;
   asset_condition_name: string;
   status_name: string;
+  file: string;
 };
 
 export const columns: ColumnDef<ExternalAsset>[] = [
@@ -55,6 +58,29 @@ export const columns: ColumnDef<ExternalAsset>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    accessorKey: "file",
+    header: "Picture",
+    cell: ({ row }) => {
+      const [open, setOpen] = useState(false);
+      const imageUrl = `http://localhost/itam_api/${row.original.file}`;
+
+      return (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <img
+              src={imageUrl}
+              className="max-w-16 max-h-16 object-cover cursor-pointer"
+              onClick={() => setOpen(true)}
+            />
+          </DialogTrigger>
+          <DialogContent className="flex items-center justify-center">
+            <img src={imageUrl} alt="Asset Enlarged" className="max-w-full max-h-[80vh] rounded-md" />
+          </DialogContent>
+        </Dialog>
+      );
+    },
   },
   {
     accessorKey: "asset_name",

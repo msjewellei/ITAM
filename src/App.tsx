@@ -11,6 +11,7 @@ import AssetForm from "./components/assetForm.copy";
 import BorrowForm from "./components/borrowForm";
 import RepairForm from "./components/repairForm";
 import IssuanceForm from "./components/issuanceForm";
+import { Toaster } from "./components/ui/sonner";
 
 const routes = [
   { path: "/", element: <Dashboard /> },
@@ -37,6 +38,7 @@ function App() {
           ))}
         </Routes>
       </div>
+      <Toaster richColors />
     </>
   );
 }

@@ -9,7 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { format } from "date-fns";
+import { differenceInDays, format, startOfDay } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -29,63 +29,74 @@ import {
 } from "./ui/select";
 import { useMisc } from "@/context/miscellaneousContext";
 import { DialogFooter } from "./ui/dialog";
-import { useIssuance } from "@/context/issuanceContext";
-import { useAsset } from "@/context/assetContext";
+import { Input } from "./ui/input";
+import { useBorrow } from "@/context/borrowContext";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  pullout_date: z.date(),
-  status_id: z.string(),
+  return_date: z.date(),
+  duration: z.number(),
+  asset_condition_id: z.string()
 });
 
-export function IssuanceUpdate() {
-  const { status, userID } = useMisc();
-  const { assetID } = useAsset();
-  const { updateIssuance, issuanceID } = useIssuance();
+export function BorrowUpdate() {
+  const { condition } = useMisc();
+  const { borrowID, updateBorrow, dateBorrowed } = useBorrow();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-    pullout_date: new Date(),
-      status_id: "",
+      return_date: new Date(),
+      duration: 0,
+      asset_condition_id: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    values.status_id = status.find(
-        (cat) => cat.status_name === values.status_id
-      )?.status_id;
-    
-    if (!issuanceID || !userID || !assetID) { 
-      console.error("Missing issuanceID or userID or assetID!");
+    values.asset_condition_id = condition.find(
+        (cat) => cat.asset_condition_name === values.asset_condition_id
+      )?.asset_condition_id;
+    if (!borrowID) {
+      console.error("Missing borrowID!");
       return;
     }
-    const adjustedDate = format(values.pullout_date, "yyyy-MM-dd");
-
+    const adjustedDate = format(values.return_date, "yyyy-MM-dd");
+   
     try {
-      const response = await updateIssuance(issuanceID, userID, assetID, {
+      const response = await updateBorrow(borrowID, dateBorrowed,{
         ...values,
-        pullout_date: adjustedDate,
+        return_date: adjustedDate,
       });
     
       if (response && Object.keys(response).length > 0) {
-        toast.success("Asset issuance updated successfully!");
+        toast.success("Updated borrow transaction successfully!");
       } else {
-        toast.error(`Failed to update asset issuance: ${response?.error || "Unknown error"}`);
+        toast.error(`Failed to update borrow transaction: ${response?.error || "Unknown error"}`);
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
   }
   
+
+  useEffect(() => {
+    if (form.getValues("return_date")) {
+      const borrowedDate = startOfDay(new Date(dateBorrowed));
+      const returnDate = startOfDay(form.getValues("return_date"));
+  
+      const duration = differenceInDays(returnDate, borrowedDate);
+      form.setValue("duration", duration || 0, { shouldValidate: true });
+    }
+  }, [form.watch("return_date"), dateBorrowed]);
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="pullout_date"
+          name="return_date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Pullout Date</FormLabel>
+              <FormLabel>Return Date</FormLabel>
               <FormControl>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -100,7 +111,7 @@ export function IssuanceUpdate() {
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span className="text-[#737373]">Date Reported</span>
+                        <span className="text-[#737373]">Return Date</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -108,7 +119,16 @@ export function IssuanceUpdate() {
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={field.onChange}
+                      onSelect={(date) => {
+                        if (!date) return;
+                        form.setValue("return_date", date, { shouldValidate: true });
+                      
+                        const borrowedDate = startOfDay(new Date(dateBorrowed));
+                        const returnDate = startOfDay(date);
+                      
+                        const duration = differenceInDays(returnDate, borrowedDate);
+                        form.setValue("duration", duration || 0, { shouldValidate: true });
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -118,25 +138,44 @@ export function IssuanceUpdate() {
             </FormItem>
           )}
         />
-        
         <FormField
           control={form.control}
-          name="status_id"
+          name="duration"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
+              <FormLabel>Duration (in days)</FormLabel>
+              <FormControl>
+                <Input
+                  disabled
+                  type="number"
+                  className="text-sm sm:text-base"
+                  placeholder="Ex. 365"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="asset_condition_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Condition</FormLabel>
               <FormControl>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    {status.map((s) => (
+                    {condition.map((c) => (
                       <SelectItem
-                        key={s.status_name}
-                        value={s.status_name}
+                        key={c.asset_condition_name}
+                        value={c.asset_condition_name}
                       >
-                        {s.status_name}
+                        {c.asset_condition_name}
                       </SelectItem>
                     ))}
                   </SelectContent>

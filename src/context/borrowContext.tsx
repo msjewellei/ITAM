@@ -5,14 +5,16 @@ import {
   useContext,
   ReactNode,
   useEffect,
+  Dispatch,
+  SetStateAction,
 } from "react";
 
 interface Borrow {
-  borrow_transaction_id: string;
+  borrow_transaction_id: number;
   company_id: string;
   department_id: string;
   unit_id: string;
-  user_id: string;
+  user_id: number;
   category_id: string;
   sub_category_id: string;
   type_id: string;
@@ -22,15 +24,32 @@ interface Borrow {
   duration: number;
   asset_condition_id: string;
   remarks: string;
+  category_name: string;
+  sub_category_name: string;
+  asset_condition_name: string;
+  department_name: string;
+  company_name: string;
+  return_date: Date;
+  type_name: string;
 }
 interface BorrowContextType {
   borrow: Borrow[];
   insertTransaction: (borrow: Borrow) => void;
+  setBorrowID: Dispatch<SetStateAction<number | null>>;
+  borrowID: number | null;
+  dateBorrowed: Date | null;
+  setDateBorrowed: Dispatch<SetStateAction<Date | null>>;
+  updateBorrow: (
+    borrow_transaction_id: number,
+    date_borrowed: Date,
+    updatedData: Partial<Borrow>
+  ) => Promise<any>;
 }
 const BorrowContext = createContext<BorrowContextType | undefined>(undefined);
 export const BorrowProvider = ({ children }: { children: ReactNode }) => {
   const [borrow, setBorrow] = useState<Borrow[]>([]);
-  
+  const [borrowID, setBorrowID] = useState<number | null>(null);
+  const [dateBorrowed, setDateBorrowed] = useState<Date | null>(null);
 
   let url = "http://localhost/itam_api/BorrowedAssets.php?resource=borrowed_assets";
   const getTransactions = async () => {
@@ -68,9 +87,38 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
     fetchTransactions();
   }, []);
 
+  const updateBorrow = async (
+    borrow_transaction_id: number,
+    date_borrowed: Date,
+    updatedData: Partial<Borrow>
+  ) => {
+    try {
+      const response = await axios.put(
+        url,
+        {
+          borrow_transaction_id,
+          date_borrowed,
+          ...updatedData,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (response.data) {
+        console.log("Borrow Transaction updated successfully:", response.data);
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error updating borrow transaction:", error);
+    }
+  };
   const value = {
     borrow,
     insertTransaction,
+    setBorrowID,
+    borrowID,
+    dateBorrowed,
+    setDateBorrowed,
+    updateBorrow
   };
   return (
     <BorrowContext.Provider value={value}>{children}</BorrowContext.Provider>

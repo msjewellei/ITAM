@@ -1,7 +1,8 @@
-import { Dialog } from "@radix-ui/react-dialog";
+
 import { columns } from "./repairColumns";
 import { RepairDataTable } from "./repairTable";
 import { useRepair } from "@/context/repairContext";
+import { Dialog } from "./ui/dialog";
 
 export default function Repair() {
   const { repair } = useRepair();

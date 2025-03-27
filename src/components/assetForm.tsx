@@ -222,8 +222,6 @@ function AssetForm() {
   }, [subCategoryID]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("hehe");
-    console.log(values);
   }
 
   const {
@@ -231,11 +229,6 @@ function AssetForm() {
     formState: { errors },
   } = form;
   
-  useEffect(() => {
-    console.log("Form Errors:", errors);
-  }, [errors]);
-  
-
   return (
     <div className="pl-5 pr-5">
       <Form {...form}>

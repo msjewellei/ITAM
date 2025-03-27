@@ -156,8 +156,6 @@ export const columns: ColumnDef<RepairAsset>[] = [
         <>
           <DialogTrigger
             onClick={() => {
-              console.log(row.original.repair_request_id);
-              console.log(row.original.user_id);
               setRepairID(row.original.repair_request_id);
               setUserID(row.original.user_id);
             }}

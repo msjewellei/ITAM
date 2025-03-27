@@ -34,6 +34,7 @@ import { useMisc } from "@/context/miscellaneousContext";
 import { Link } from "react-router-dom";
 import { useRepair } from "@/context/repairContext";
 import { useIssuance } from "@/context/issuanceContext";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   company_id: z.string(),
@@ -134,9 +135,17 @@ function RepairForm() {
       (cat) => cat.name === values.unit_id
     )?.unit_id;
 
-    const response = await insertRepair(values);
-    console.log(response)
-    // window.location.reload();
+    try {
+      const response = await insertRepair(values);
+    
+      if (response && Object.keys(response).length > 0) {
+        toast.success("Repair request successfully added!");
+      } else {
+        toast.error(`Failed to add repair request: ${response?.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
 
   }
 
@@ -323,7 +332,7 @@ function RepairForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="category_id"
                   render={({ field }) => (
@@ -452,7 +461,7 @@ function RepairForm() {
                       </FormItem>
                     )}
                   />
-                )}
+                )} */}
                 <FormField
                   control={form.control}
                   name="asset_id"

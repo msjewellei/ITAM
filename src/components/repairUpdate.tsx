@@ -33,6 +33,7 @@ import { DialogFooter } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useRepair } from "@/context/repairContext";
+import { toast } from "sonner";
 
 const formSchema = z.object({
     repair_completion_date: z.date(),
@@ -64,11 +65,20 @@ export function ReturnDate() {
       return;
     }
     const adjustedDate = format(values.repair_completion_date, "yyyy-MM-dd");
-    const response = await updateRepair(repairID, userID, {
-      ...values,
-      repair_completion_date: adjustedDate,
-    });
-  console.log(response)
+    try {
+      const response = await updateRepair(repairID, userID, {
+        ...values,
+        repair_completion_date: adjustedDate,
+      });
+    
+      if (response && Object.keys(response).length > 0) {
+        toast.success("Updated repair request successfully!");
+      } else {
+        toast.error(`Failed to update repair request: ${response?.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
   }
   
   return (

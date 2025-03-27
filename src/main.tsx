@@ -8,27 +8,21 @@ import { AssetProvider } from "./context/assetContext.tsx";
 import { BorrowProvider } from "./context/borrowContext.tsx";
 import { RepairProvider } from "./context/repairContext.tsx";
 import { IssuanceProvider } from "./context/issuanceContext.tsx";
-import { Toaster } from "@/components/ui/sonner";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode><MiscProvider>
-    <AssetProvider>
-    
-      <IssuanceProvider>
-      <RepairProvider>
-        <BrowserRouter>
-          <BorrowProvider>
-            
-              
+  <StrictMode>
+    <MiscProvider>
+      <AssetProvider>
+        <IssuanceProvider>
+          <RepairProvider>
+            <BrowserRouter>
+              <BorrowProvider>
                 <App />
-              
-            
-          </BorrowProvider>
-        </BrowserRouter>
-      </RepairProvider>
-    </IssuanceProvider>
-    </AssetProvider>
+              </BorrowProvider>
+            </BrowserRouter>
+          </RepairProvider>
+        </IssuanceProvider>
+      </AssetProvider>
     </MiscProvider>
-    <Toaster />
   </StrictMode>
 );

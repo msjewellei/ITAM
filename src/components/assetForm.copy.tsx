@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
-import { format } from "date-fns";
-import { CalendarIcon, ChevronLeft } from "lucide-react";
+import { differenceInDays, format } from "date-fns";
+import { CalendarIcon, Check, ChevronLeft, ChevronsUpDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,15 @@ import {
 import { useMisc } from "@/context/miscellaneousContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useAsset } from "@/context/assetContext";
+import { useState } from "react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./ui/command";
 
 const formSchema = z.object({
   asset_name: z.string(),
@@ -45,7 +54,7 @@ const formSchema = z.object({
   serial_number: z.string(),
   specifications: z.string(),
   asset_amount: z.coerce.number(),
-  warranty_duration: z.string(),
+  warranty_duration: z.number(),
   warranty_due_date: z.date(),
   purchase_date: z.date(),
   // aging: z.number(),
@@ -84,7 +93,7 @@ function AssetForm() {
       serial_number: "",
       specifications: "",
       asset_amount: 0,
-      warranty_duration: "",
+      warranty_duration: 0,
       warranty_due_date: new Date(),
       purchase_date: new Date(),
       // aging: 0,
@@ -99,11 +108,21 @@ function AssetForm() {
     values.category_id = category.find(
       (cat) => cat.category_name === values.category_id
     )?.category_id;
+    
     if (values.sub_category_id) {
-      values.sub_category_id = subcategory.find(
-        (sub) => sub.sub_category_name === values.sub_category_id
-      )?.sub_category_id;
+      const existingSubcategory = subcategory.find(
+        (sub) => sub.sub_category_id === values.sub_category_id
+      );
+    
+      if (existingSubcategory) {
+        values.sub_category_id = existingSubcategory.sub_category_id;
+      } else {
+        values.sub_category_name = values.sub_category_id;
+        values.sub_category_id = null;
+      }
     }
+    
+    
     if (values.type_id) {
       values.type_id = type.find(
         (ty) => ty.type_name === values.type_id
@@ -120,11 +139,25 @@ function AssetForm() {
     if (values.sub_category_id === "") {
       values.type_id = "";
     }
-    const response = await insertAsset(values);
-    console.log(response);
-    // window.location.reload();
+    try {
+      const response = await insertAsset(values);
+    
+      if (response && Object.keys(response).length > 0) {
+        toast.success("Asset successfully added! 🎉");
+      } else {
+        toast.error(`Failed to add asset: ${response?.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast.error("Something went wrong. Please try again.");
+    }
+    
   }
 
+  const p = form.watch("purchase_date");
+  const w = form.watch("warranty_due_date");
+  const [open, setOpen] = useState(false);
+  const value = form.watch("sub_category_id");
   return (
     <div className="flex flex-col ml-[calc(7rem+10px)] mt-15px mr-[calc(2.5rem)] h-full ">
       <div className="flex flex-row items-center justify-between">
@@ -138,7 +171,7 @@ function AssetForm() {
       </div>
       <div className="w-[calc(100vw-10rem)] rounded-xl bg-white min-h-[calc(100vh-13.10rem)] h-auto p-5 mb-5">
         <Form {...form}>
-          <form 
+          <form
             onSubmit={(e) => {
               e.preventDefault();
               form.handleSubmit(onSubmit)();
@@ -215,36 +248,67 @@ function AssetForm() {
                       <FormItem>
                         <FormLabel>Subcategory</FormLabel>
                         <FormControl>
-                          <Select
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              setSubCategoryID(() => {
-                                const sub = subcategory.find(
-                                  (c) => c.sub_category_name === value
-                                );
-
-                                if (sub) {
-                                  return Number(sub.sub_category_id);
-                                }
-                                return null;
-                              });
-                            }}
-                            value={field.value}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Sub Category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {subcategory.map((sub) => (
-                                <SelectItem
-                                  key={sub.sub_category_name}
-                                  value={sub.sub_category_name}
+                          <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={open}
+                                className="w-full justify-between text-left font-normal truncate"
+                              >
+                                <span
+                                  className={
+                                    field.value ? "text-black" : "text-gray-500"
+                                  }
                                 >
-                                  {sub.sub_category_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                                  {field.value || "Select or Type Subcategory"}
+                                </span>
+                                <ChevronsUpDown className="opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="min-w-[var(--radix-popover-trigger-width)] w-full p-0">
+                              <Command>
+                                <CommandInput
+                                  placeholder="Search or type a subcategory..."
+                                  className="h-9 px-3 text-sm text-black focus:ring-0 focus:outline-none border-b"
+                                  value={field.value}
+                                  onValueChange={(val) => field.onChange(val)}
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    No subcategory found.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {subcategory.map((sub) => (
+                                      <CommandItem
+                                        key={sub.sub_category_name}
+                                        value={sub.sub_category_name}
+                                        onSelect={() => {
+                                          field.onChange(sub.sub_category_name);
+                                          setSubCategoryID(
+                                            Number(sub.sub_category_id)
+                                          );
+                                          setOpen(false);
+                                        }}
+                                        className="text-sm text-black"
+                                      >
+                                        {sub.sub_category_name}
+                                        <Check
+                                          className={cn(
+                                            "ml-auto",
+                                            field.value ===
+                                              sub.sub_category_name
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -287,43 +351,43 @@ function AssetForm() {
 
                 {categoryID === 1 && (
                   <>
-                  <FormField
-                    control={form.control}
-                    name="asset_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Asset Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Ex. TPLink"
-                            {...field}
-                            className="text-sm sm:text-base"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  /><FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Location"
-                            {...field}
-                            className="text-sm sm:text-base"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="asset_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Asset Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="Ex. TPLink"
+                              {...field}
+                              className="text-sm sm:text-base"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="Location"
+                              {...field}
+                              className="text-sm sm:text-base"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </>
-                  
                 )}
                 <FormField
                   control={form.control}
@@ -431,22 +495,52 @@ function AssetForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="warranty_duration"
+                  name="purchase_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Warranty Duration</FormLabel>
+                      <FormLabel>Purchase Date</FormLabel>
                       <FormControl>
-                        <Input
-                          type="text"
-                          className="text-sm sm:text-base"
-                          placeholder="Ex. 2 years"
-                          {...field}
-                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal text-sm ",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span className="text-[#737373]">
+                                  Choose Date
+                                </span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={(date) => {
+                                if (!date) return;
+                                const duration = differenceInDays(w, date);
+                                form.setValue("warranty_duration", duration, {
+                                  shouldValidate: true,
+                                });
+                                field.onChange(date);
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="warranty_due_date"
@@ -477,7 +571,14 @@ function AssetForm() {
                             <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={field.onChange}
+                              onSelect={(date) => {
+                                if (!date) return;
+                                const duration = differenceInDays(date, p);
+                                form.setValue("warranty_duration", duration, {
+                                  shouldValidate: true,
+                                });
+                                field.onChange(date);
+                              }}
                               initialFocus
                             />
                           </PopoverContent>
@@ -489,39 +590,21 @@ function AssetForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="purchase_date"
+                  name="warranty_duration"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Purchase Date</FormLabel>
+                      <FormLabel>Warranty Duration (in days)</FormLabel>
                       <FormControl>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal text-sm ",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span className="text-[#737373]">
-                                  Choose Date
-                                </span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                        <Input
+                          disabled
+                          type="number"
+                          className="text-sm sm:text-base"
+                          placeholder="Ex. 365"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

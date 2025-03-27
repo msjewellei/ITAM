@@ -29,13 +29,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DialogFooter } from "./ui/dialog";
-import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
 import { useMisc } from "@/context/miscellaneousContext";
 import { useAsset } from "@/context/assetContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, } from "react-router-dom";
 import { useBorrow } from "@/context/borrowContext";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   company_id: z.string(),
@@ -54,7 +52,7 @@ const formSchema = z.object({
 });
 
 function BorrowForm() {
-    const navigate = useNavigate();
+   
   const {
     user,
     company,
@@ -68,7 +66,6 @@ function BorrowForm() {
     category,
     subcategory,
     type,
-    condition,
     filteredUsers,
     setUserID,
     filteredSubcategories,
@@ -151,9 +148,17 @@ function BorrowForm() {
       values.department_id = "";
     }
 
-    const response = await insertTransaction(values);
-    console.log(response)
-    // window.location.reload();
+    try {
+      const response = await insertTransaction(values);
+    
+      if (response && Object.keys(response).length > 0) {
+        toast.success("Borrow transaction successfully added!");
+      } else {
+        toast.error(`Failed to add borrow transaction: ${response?.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
 
   }
 

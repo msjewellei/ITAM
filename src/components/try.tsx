@@ -38,7 +38,6 @@ function Account({name}: AccountProps) {
   useEffect(() => {
     const setup = async () => {
       const response = await axios.get("https://dummyjson.com/users");
-      // console.log(response.data);
       setUsers(response.data.users);
     };
     setup();
@@ -47,7 +46,6 @@ function Account({name}: AccountProps) {
   useEffect(() => {
     const fetchDepartments = async () => {
       const response = await axios.get("https://dummyjson.com/users");
-      // console.log(response.data);
       setDepartments(
         response.data.users.map((user : User) => {
           return {
@@ -63,7 +61,6 @@ function Account({name}: AccountProps) {
   useEffect(() => {
     const fetchUnits = async () => {
       const response = await axios.get("https://dummyjson.com/users");
-      // console.log(response.data);
       setUnits(
         response.data.users.map((user : User) => {
           return {

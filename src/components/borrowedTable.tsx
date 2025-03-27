@@ -4,7 +4,6 @@ import {
   SortingState,
   getSortedRowModel,
   getPaginationRowModel,
-  ColumnFiltersState,
   VisibilityState,
   getFilteredRowModel,
   getCoreRowModel,
@@ -42,19 +41,14 @@ import { Button } from "@/components/ui/button";
 
 import * as React from "react";
 import {
-  DialogTitle,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-} from "./ui/dialog";
-import BorrowForm from "./borrowForm";
-import {
   Tooltip,
   TooltipProvider,
   TooltipTrigger,
   TooltipContent,
 } from "./ui/tooltip";
 import { Link } from "react-router-dom";
+import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { BorrowUpdate } from "./borrowUpdate";
 interface BorrowedDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -97,6 +91,7 @@ const initialized = React.useRef(false);
     }
   }, []);
   return (
+    <Dialog>
     <div className="pl-10 pr-10 pb-10">
       <div className="flex justify-between">
         <div className="flex items-center py-4 justify-start">
@@ -133,7 +128,7 @@ const initialized = React.useRef(false);
                       initialFocus
                     />
                   </PopoverContent>
-                </Popover>{" "}
+                </Popover>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Filter by Date</p>
@@ -199,6 +194,12 @@ const initialized = React.useRef(false);
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          <DialogContent>
+            <DialogTitle className="text-center">
+              Update Borrow Transaction
+            </DialogTitle>
+            <BorrowUpdate />
+          </DialogContent>
         </div>
       </div>
       <div className="flex flex-col min-h-[calc(100vh-22rem)] max-h-[calc(100vh-22rem)] overflow-auto">
@@ -277,6 +278,6 @@ const initialized = React.useRef(false);
           Next
         </Button>
       </div>
-    </div>
+    </div></Dialog>
   );
 }
