@@ -50,6 +50,7 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
   const [borrow, setBorrow] = useState<Borrow[]>([]);
   const [borrowID, setBorrowID] = useState<number | null>(null);
   const [dateBorrowed, setDateBorrowed] = useState<Date | null>(null);
+  const [reload ,setReload] = useState(0);
 
   let url = "http://localhost/itam_api/BorrowedAssets.php?resource=borrowed_assets";
   const getTransactions = async () => {
@@ -70,6 +71,7 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
       console.log(JSON.stringify(data))
       const response = await axios.post(url, formData);  
       if (response.data) {
+        setReload(count => count=+1)
         return response.data;
       }
     } catch (error) {
@@ -85,7 +87,7 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     fetchTransactions();
-  }, []);
+  }, [reload]);
 
   const updateBorrow = async (
     borrow_transaction_id: number,
@@ -105,6 +107,7 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.data) {
         console.log("Borrow Transaction updated successfully:", response.data);
+        setReload(count => count=+1)
         return response.data;
       }
     } catch (error) {
@@ -118,7 +121,7 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
     borrowID,
     dateBorrowed,
     setDateBorrowed,
-    updateBorrow
+    updateBorrow,
   };
   return (
     <BorrowContext.Provider value={value}>{children}</BorrowContext.Provider>

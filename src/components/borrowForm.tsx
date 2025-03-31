@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/popover";
 import { useMisc } from "@/context/miscellaneousContext";
 import { useAsset } from "@/context/assetContext";
-import { Link, } from "react-router-dom";
+import { Link, useNavigate, } from "react-router-dom";
 import { useBorrow } from "@/context/borrowContext";
 import { toast } from "sonner";
 
@@ -52,7 +52,7 @@ const formSchema = z.object({
 });
 
 function BorrowForm() {
-   
+  const navigate = useNavigate();
   const {
     user,
     company,
@@ -153,6 +153,7 @@ function BorrowForm() {
     
       if (response && Object.keys(response).length > 0) {
         toast.success("Borrow transaction successfully added!");
+        navigate("/Borrowed");
       } else {
         toast.error(`Failed to add borrow transaction: ${response?.error || "Unknown error"}`);
       }

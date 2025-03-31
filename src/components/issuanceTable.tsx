@@ -157,7 +157,7 @@ export function IssuanceDataTable<TData, TValue>({
                               column.toggleVisibility(!!value)
                             }
                           >
-                            {column.id}
+                             {column.id.replaceAll("_", " ")}
                           </DropdownMenuCheckboxItem>
                         );
                       })}

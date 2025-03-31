@@ -1,4 +1,5 @@
 import axios from "axios";
+import { count } from "console";
 import {
   createContext,
   useState,
@@ -38,7 +39,7 @@ interface AssetContextType {
   subCategoryID: number | null;
   typeID: number | null;
   assetID: number | null;
-  setAssetID: Dispatch<SetStateAction<number | null>>; 
+  setAssetID: Dispatch<SetStateAction<number | null>>;
 }
 const AssetContext = createContext<AssetContextType | undefined>(undefined);
 export const AssetProvider = ({ children }: { children: ReactNode }) => {
@@ -48,6 +49,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   const [subCategoryID, setSubCategoryID] = useState<number | null>(null);
   const [externalAssets, setExternalAssets] = useState<Asset[]>([]);
   const [assetID, setAssetID] = useState<number | null>(null);
+  const [reload ,setReload] = useState(0);
 
   let url = "http://localhost/itam_api/asset.php?resource=asset";
   const getAssets = async () => {
@@ -68,6 +70,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
       formData.append("file", data.file);
       const response = await axios.post(url, formData);
       if (response.data) {
+        setReload(count => count=+1);
         return response.data;
       }
     } catch (error) {
@@ -83,7 +86,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     fetchAssets();
-  }, []);
+  }, [reload]);
 
   useEffect(() => {
     const external = assets.filter((asset) => Number(asset.category_id) === 1);
@@ -120,7 +123,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
     externalAssets,
     filteredAssets,
     assetID,
-    setAssetID
+    setAssetID,
   };
   return (
     <AssetContext.Provider value={value}>{children}</AssetContext.Provider>

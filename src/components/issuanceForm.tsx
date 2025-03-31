@@ -30,7 +30,7 @@ import {
 import { useMisc } from "@/context/miscellaneousContext";
 import { useAsset } from "@/context/assetContext";
 import { useIssuance } from "@/context/issuanceContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner"
 
 
@@ -48,6 +48,7 @@ const formSchema = z.object({
 });
 
 function IssuanceForm() {
+  const navigate = useNavigate();
   const {
     company,
     department,
@@ -121,6 +122,7 @@ function IssuanceForm() {
     
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset issuance recorded successfully!");
+        navigate("/issuance");
       } else {
         toast.error(`Failed to record asset issuance: ${response?.error || "Unknown error"}`);
       }

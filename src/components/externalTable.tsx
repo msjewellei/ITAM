@@ -147,7 +147,7 @@ const initialized = React.useRef(false);
                         column.toggleVisibility(!!value)
                       }
                     >
-                      {column.id}
+                       {column.id.replaceAll("_", " ")}
                     </DropdownMenuCheckboxItem>
                   );
                 })}

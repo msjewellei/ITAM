@@ -243,7 +243,7 @@ export function AssetDataTable<TData, TValue>({
                               column.toggleVisibility(!!value)
                             }
                           >
-                            {column.id}
+                             {column.id.replaceAll("_", " ")}
                           </DropdownMenuCheckboxItem>
                         );
                       })}

@@ -84,7 +84,10 @@ export const columns: ColumnDef<RepairAsset>[] = [
   {
     accessorKey: "sub_category_name",
     header: "Category",
-    accessorFn: (row) => row.sub_category_name || row.category_name, 
+    accessorFn: (row) => 
+      row.type_id ? row.type_name : 
+      row.sub_category_id ? row.sub_category_name : 
+      row.category_id ? row.category_name : "",
   },  
   {
     accessorKey: "employee_name",

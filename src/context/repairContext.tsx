@@ -44,6 +44,7 @@ const RepairContext = createContext<RepairContextType | undefined>(undefined);
 export const RepairProvider = ({ children }: { children: ReactNode }) => {
   const [repair, setRepair] = useState<Repair[]>([]);
   const [repairID, setRepairID] = useState<number | null>(null);
+  const [reload ,setReload] = useState(0);
 
   let url =
     "http://localhost/itam_api/RepairRequest.php?resource=repair_request";
@@ -65,6 +66,7 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
       console.log(JSON.stringify(data));
       const response = await axios.post(url, formData);
       if (response.data) {
+        setReload(count => count=+1)
         return response.data;
       }
     } catch (error) {
@@ -80,7 +82,7 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     fetchRepair();
-  }, []);
+  }, [reload]);
 
   const updateRepair = async (
     repair_request_id: number,
@@ -100,6 +102,7 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
   
       if (response.data) {
         console.log("Repair updated successfully:", response.data);
+        setReload(count => count=+1)
         return response.data;
       }
     } catch (error) {

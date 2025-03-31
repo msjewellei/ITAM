@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { differenceInDays, format } from "date-fns";
 import { CalendarIcon, Check, ChevronLeft, ChevronsUpDown } from "lucide-react";
-
+import Fuse from "fuse.js";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -49,7 +49,6 @@ const formSchema = z.object({
   sub_category_id: z.string(),
   type_id: z.string(),
   location: z.string(),
-  // asset_condition_id: z.string(),
   availability_status_id: z.string(),
   serial_number: z.string(),
   specifications: z.string(),
@@ -57,7 +56,6 @@ const formSchema = z.object({
   warranty_duration: z.number(),
   warranty_due_date: z.date(),
   purchase_date: z.date(),
-  // aging: z.number(),
   notes: z.string(),
   brand: z.string(),
   insurance: z.string(),
@@ -66,6 +64,7 @@ const formSchema = z.object({
 
 function AssetForm() {
   const navigate = useNavigate();
+  const [matches, setMatches] = useState([]);
 
   const {
     category,
@@ -88,7 +87,6 @@ function AssetForm() {
       sub_category_id: "",
       type_id: "",
       location: "",
-      // asset_condition_id: "",
       availability_status_id: "",
       serial_number: "",
       specifications: "",
@@ -96,7 +94,6 @@ function AssetForm() {
       warranty_duration: 0,
       warranty_due_date: new Date(),
       purchase_date: new Date(),
-      // aging: 0,
       notes: "",
       brand: "",
       insurance: "",
@@ -105,54 +102,84 @@ function AssetForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    await form.trigger();
+    const errors = form.formState.errors;
+    
+    if (Object.keys(errors).length > 0) {
+      console.log("Form has errors:", errors);
+      toast.error("Please fix the errors before submitting.");
+      return;
+    }
+    
+    if (matches.length > 0) {
+      toast.error("Invalid subcategory! It has a similar name in the stocks.");
+      return;
+    }
+
     values.category_id = category.find(
       (cat) => cat.category_name === values.category_id
     )?.category_id;
-    
-    if (values.sub_category_id) {
-      const existingSubcategory = subcategory.find(
-        (sub) => sub.sub_category_id === values.sub_category_id
-      );
-    
-      if (existingSubcategory) {
-        values.sub_category_id = existingSubcategory.sub_category_id;
-      } else {
-        values.sub_category_name = values.sub_category_id;
-        values.sub_category_id = null;
-      }
+
+    const hasSubcategory = subcategory.find( (sc) => sc.sub_category_name === values.sub_category_id)
+
+    if (!hasSubcategory) {
+      values.sub_category_name = values.sub_category_id;
+      values.sub_category_id = null;
+    }else{
+      values.sub_category_id = hasSubcategory.sub_category_id
+      delete values.sub_category_name
     }
-    
-    
+
     if (values.type_id) {
       values.type_id = type.find(
         (ty) => ty.type_name === values.type_id
       )?.type_id;
     }
+
     if (values.availability_status_id) {
       values.availability_status_id = status.find(
         (ty) => ty.status_name === values.availability_status_id
       )?.status_id;
     }
+
     if (categoryID !== 2) {
       values.sub_category_id = "";
     }
+
     if (values.sub_category_id === "") {
       values.type_id = "";
     }
+
+
     try {
       const response = await insertAsset(values);
-    
+
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset successfully added! 🎉");
+        navigate("/assets")
       } else {
-        toast.error(`Failed to add asset: ${response?.error || "Unknown error"}`);
+        toast.error(
+          `Failed to add asset: ${response?.error || "Unknown error"}`
+        );
       }
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("Something went wrong. Please try again.");
     }
-    
   }
+
+  const subcategoryFuse = new Fuse(subcategory, {
+    keys: ["sub_category_name"],
+    threshold: 0.3,
+  });
+
+  const typeFuse = new Fuse(type, {
+    keys: ["type_name"],
+    threshold: 0.4,
+  });
+
+  const [filteredResults, setFilteredResults] = useState(subcategory);
+  const { setError, clearErrors } = form;
 
   const p = form.watch("purchase_date");
   const w = form.watch("warranty_due_date");
@@ -246,9 +273,17 @@ function AssetForm() {
                     name="sub_category_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Subcategory</FormLabel>
+                        <FormLabel className="text-black">
+                          Subcategory
+                        </FormLabel>
                         <FormControl>
-                          <Popover open={open} onOpenChange={setOpen}>
+                          <Popover
+                            open={open}
+                            onOpenChange={(isOpen) => {
+                              setOpen(isOpen);
+                              if (isOpen) setFilteredResults(subcategory);
+                            }}
+                          >
                             <PopoverTrigger asChild>
                               <Button
                                 variant="outline"
@@ -270,16 +305,34 @@ function AssetForm() {
                               <Command>
                                 <CommandInput
                                   placeholder="Search or type a subcategory..."
-                                  className="h-9 px-3 text-sm text-black focus:ring-0 focus:outline-none border-b"
+                                  className="h-9 px-3 text-sm text-black focus:ring-0 focus:outline-none"
                                   value={field.value}
-                                  onValueChange={(val) => field.onChange(val)}
+                                  onValueChange={(val) => {
+                                    field.onChange(val);
+                                    const hasMatch = [
+                                      ...typeFuse.search(val),
+                                      ...subcategoryFuse.search(val),
+                                    ];
+                                    setMatches(hasMatch);
+                                    setFilteredResults(subcategory);
+                                    if (hasMatch.length != 0) {
+                                      setError("sub_category_id", {
+                                        type: "manual",
+                                        message: ""
+                                      });
+                                    } else {
+                                      clearErrors("sub_category_id");
+                                    }
+                                  }}
                                 />
                                 <CommandList>
                                   <CommandEmpty>
-                                    No subcategory found.
+                                    {matches.length > 0
+                                      ? "There is similar in stocks, check it"
+                                      : "No subcategory found."}
                                   </CommandEmpty>
                                   <CommandGroup>
-                                    {subcategory.map((sub) => (
+                                    {filteredResults.map((sub) => (
                                       <CommandItem
                                         key={sub.sub_category_name}
                                         value={sub.sub_category_name}
