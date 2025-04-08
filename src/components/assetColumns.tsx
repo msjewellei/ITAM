@@ -15,6 +15,7 @@ import { conditionVariants, statusVariants } from "./badges";
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export type Asset = {
   type_name: string;
@@ -210,7 +211,7 @@ export const columns: ColumnDef<Asset>[] = [
             
             <DropdownMenuSeparator />
             <DropdownMenuItem>View asset details</DropdownMenuItem>
-            <DropdownMenuItem>Edit asset details</DropdownMenuItem>
+            <Link to="/assets/update"><DropdownMenuItem>Edit asset details</DropdownMenuItem></Link>
           </DropdownMenuContent>
         </DropdownMenu>
       );

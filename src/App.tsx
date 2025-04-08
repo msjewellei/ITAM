@@ -12,6 +12,7 @@ import BorrowForm from "./components/borrowForm";
 import RepairForm from "./components/repairForm";
 import IssuanceForm from "./components/issuanceForm";
 import { Toaster } from "./components/ui/sonner";
+import { UpdateAsset } from "./components/editAsset";
 
 const routes = [
   { path: "/", element: <Dashboard /> },
@@ -24,6 +25,7 @@ const routes = [
   { path: "/borrowed/add", element: <BorrowForm /> },
   { path: "/repair/add", element: <RepairForm /> },
   { path: "/issuance/add", element: <IssuanceForm /> },
+  { path: "/assets/update", element: <UpdateAsset /> },
 ];
 
 function App() {
