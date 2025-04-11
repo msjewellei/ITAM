@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays, format, startOfDay } from "date-fns";
 import { CalendarIcon, Check, ChevronLeft, ChevronsUpDown } from "lucide-react";
 import Fuse from "fuse.js";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,7 @@ import {
 import { useMisc } from "@/context/miscellaneousContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useAsset } from "@/context/assetContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Command,
   CommandEmpty,
@@ -104,13 +104,13 @@ function AssetForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     await form.trigger();
     const errors = form.formState.errors;
-    
+
     if (Object.keys(errors).length > 0) {
       console.log("Form has errors:", errors);
       toast.error("Please fix the errors before submitting.");
       return;
     }
-    
+
     if (matches.length > 0) {
       toast.error("Invalid subcategory! It has a similar name in the stocks.");
       return;
@@ -120,14 +120,16 @@ function AssetForm() {
       (cat) => cat.category_name === values.category_id
     )?.category_id;
 
-    const hasSubcategory = subcategory.find( (sc) => sc.sub_category_name === values.sub_category_id)
+    const hasSubcategory = subcategory.find(
+      (sc) => sc.sub_category_name === values.sub_category_id
+    );
 
     if (!hasSubcategory) {
       values.sub_category_name = values.sub_category_id;
       values.sub_category_id = null;
-    }else{
-      values.sub_category_id = hasSubcategory.sub_category_id
-      delete values.sub_category_name
+    } else {
+      values.sub_category_id = hasSubcategory.sub_category_id;
+      delete values.sub_category_name;
     }
 
     if (values.type_id) {
@@ -150,13 +152,12 @@ function AssetForm() {
       values.type_id = "";
     }
 
-
     try {
       const response = await insertAsset(values);
 
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset successfully added! 🎉");
-        navigate("/assets")
+        navigate("/assets");
       } else {
         toast.error(
           `Failed to add asset: ${response?.error || "Unknown error"}`
@@ -185,6 +186,22 @@ function AssetForm() {
   const w = form.watch("warranty_due_date");
   const [open, setOpen] = useState(false);
   const value = form.watch("sub_category_id");
+  useEffect(() => {
+    if (form.getValues("purchase_date")) {
+      const purchaseDate = startOfDay(
+        new Date(form.getValues("purchase_date"))
+      );
+      const warrantyDueDate = startOfDay(
+        new Date(form.getValues("warranty_due_date"))
+      );
+
+      const duration = differenceInDays(warrantyDueDate, purchaseDate);
+      form.setValue("warranty_duration", duration || 0, {
+        shouldValidate: true,
+      });
+    }
+  }, [form.watch("purchase_date"), form.watch("warranty_due_date")]);
+
   return (
     <div className="flex flex-col ml-[calc(7rem+10px)] mt-15px mr-[calc(2.5rem)] h-full ">
       <div className="flex flex-row items-center justify-between">
@@ -318,7 +335,7 @@ function AssetForm() {
                                     if (hasMatch.length != 0) {
                                       setError("sub_category_id", {
                                         type: "manual",
-                                        message: ""
+                                        message: "",
                                       });
                                     } else {
                                       clearErrors("sub_category_id");
@@ -531,14 +548,16 @@ function AssetForm() {
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
-                            {status.map((stat) => (
-                              <SelectItem
-                                key={stat.status_name}
-                                value={stat.status_name}
-                              >
-                                {stat.status_name}
-                              </SelectItem>
-                            ))}
+                            {status
+                              .filter((stat) => stat.function_id === 1)
+                              .map((stat) => (
+                                <SelectItem
+                                  key={stat.status_id}
+                                  value={stat.status_id.toString()}
+                                >
+                                  {stat.status_name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       </FormControl>

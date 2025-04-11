@@ -65,6 +65,7 @@ export function ReturnDate() {
       return;
     }
     const adjustedDate = format(values.repair_completion_date, "yyyy-MM-dd");
+    
     try {
       const response = await updateRepair(repairID, userID, {
         ...values,

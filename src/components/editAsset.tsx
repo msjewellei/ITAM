@@ -26,6 +26,9 @@ import { Textarea } from "./ui/textarea";
 import { cn } from "@/lib/utils";
 import { differenceInDays, format } from "date-fns";
 import { Calendar } from "./ui/calendar";
+import { useEffect } from "react";
+import { useAsset } from "@/context/assetContext";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   asset_name: z.string(),
@@ -43,18 +46,24 @@ const formSchema = z.object({
   notes: z.string(),
   brand: z.string(),
   insurance: z.string(),
-  file: z.instanceof(File).optional(),
+  file: z.instanceof(File),
+  asset_condition_id: z.string(),
 });
 
 export function UpdateAsset() {
+  const { currentAsset, updateAsset } = useAsset();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       asset_name: "",
       serial_number: "",
-      category_id: "",
-      sub_category_id: "",
-      type_id: "",
+      category_id: currentAsset?.category_id
+        ? String(currentAsset.category_id)
+        : "",
+      sub_category_id: currentAsset?.sub_category_id
+        ? String(currentAsset.sub_category_id)
+        : "",
+      type_id: currentAsset?.type_id ? String(currentAsset.type_id) : "",
       location: "",
       availability_status_id: "",
       specifications: "",
@@ -66,8 +75,10 @@ export function UpdateAsset() {
       brand: "",
       insurance: "",
       file: undefined,
+      asset_condition_id: "",
     },
   });
+
   const {
     category,
     setCategoryID,
@@ -78,14 +89,77 @@ export function UpdateAsset() {
     categoryID,
     subCategoryID,
     status,
+    condition,
+    setTypeID,
   } = useMisc();
+
+  useEffect(() => {
+    if (currentAsset) {
+      form.reset({
+        ...currentAsset,
+        availability_status_id: String(currentAsset.status_id),
+        warranty_due_date: new Date(currentAsset.warranty_due_date),
+        purchase_date: new Date(currentAsset.purchase_date),
+      });
+
+      setCategoryID(Number(currentAsset.category_id));
+      setSubCategoryID(Number(currentAsset.sub_category_id));
+    }
+  }, [currentAsset, form, setCategoryID, setSubCategoryID]);
+
+  useEffect(() => {
+    if (categoryID) {
+      form.setValue("category_id", String(categoryID));
+    }
+    if (subCategoryID) {
+      form.setValue("sub_category_id", String(subCategoryID));
+    }
+  }, [categoryID, subCategoryID, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-
-    
+    console.log("Form values:", values);
+    values.category_id = category.find((cat) => cat.category_name === values.category_id)?.category_id;
+    values.sub_category_id = subcategory.find(
+      (sub) => sub.sub_category_name === values.sub_category_id
+    )?.sub_category_id;
+  
+    if (!currentAsset?.asset_id) {
+      console.error("Missing asset_id!");
+      toast.error("Asset ID is missing, cannot update the asset.");
+      return;
+    }
+  
+    const warrantyDueDate = format(values.warranty_due_date, "yyyy-MM-dd");
+    const purchaseDate = format(values.purchase_date, "yyyy-MM-dd");
+  
+    try {
+      const response = await updateAsset(currentAsset.asset_id, {
+        ...values,
+        warranty_due_date: warrantyDueDate,
+        purchase_date: purchaseDate,
+      });
+  
+      if (response && Object.keys(response).length > 0) {
+        toast.success("Asset updated successfully!");
+      } else {
+        toast.error(`Failed to update asset: ${response?.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
   }
-
+  
   const p = form.watch("purchase_date");
   const w = form.watch("warranty_due_date");
+
+  useEffect(() => {
+    console.log("Category ID: ", categoryID);
+    console.log("Subcategory ID: ", subCategoryID);
+  }, [categoryID, subCategoryID]);
+
+
+
+
   return (
     <div className="flex flex-col ml-[calc(7rem+10px)] mt-15px mr-[calc(2.5rem)] h-full ">
       <div className="flex flex-row items-center justify-between">
@@ -101,10 +175,7 @@ export function UpdateAsset() {
         <Form {...form}>
           <form
             className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              form.handleSubmit(onSubmit)();
-            }}
+            onSubmit={form.handleSubmit(onSubmit)} // Directly use handleSubmit without preventDefault
             encType="multipart/form-data"
           >
             <div className="grid grid-cols-2 gap-4">
@@ -114,11 +185,11 @@ export function UpdateAsset() {
                   name="asset_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Serial Number</FormLabel>
+                      <FormLabel>Asset ID</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
-                          placeholder="Serial Number"
+                          placeholder="Asset ID"
                           className="text-sm sm:text-base"
                           {...field}
                         />
@@ -153,18 +224,13 @@ export function UpdateAsset() {
                       <FormLabel>Category</FormLabel>
                       <FormControl>
                         <Select
+                          {...field}
                           onValueChange={(value) => {
                             field.onChange(value);
-                            setCategoryID(() => {
-                              const item = category.find(
-                                (c) => c.category_name === value
-                              );
-
-                              if (item) {
-                                return Number(item.category_id);
-                              }
-                              return null;
-                            });
+                            setCategoryID(Number(value)); // Update the categoryID state
+                            // Reset the subcategory when category changes
+                            form.setValue("sub_category_id", ""); // Clear the subcategory on category change
+                            setSubCategoryID(null); // Reset subcategory ID
                           }}
                           value={field.value}
                         >
@@ -174,8 +240,8 @@ export function UpdateAsset() {
                           <SelectContent>
                             {category.map((cat) => (
                               <SelectItem
-                                key={cat.category_name}
-                                value={cat.category_name}
+                                key={cat.category_id}
+                                value={String(cat.category_id)}
                               >
                                 {cat.category_name}
                               </SelectItem>
@@ -187,7 +253,8 @@ export function UpdateAsset() {
                     </FormItem>
                   )}
                 />
-                {filteredSubcategories.length > 0 && (
+
+                {categoryID === 2 && (
                   <FormField
                     control={form.control}
                     name="sub_category_id"
@@ -196,18 +263,10 @@ export function UpdateAsset() {
                         <FormLabel>Subcategory</FormLabel>
                         <FormControl>
                           <Select
+                            {...field}
                             onValueChange={(value) => {
                               field.onChange(value);
-                              setSubCategoryID(() => {
-                                const item = subcategory.find(
-                                  (sc) => sc.sub_category_name === value
-                                );
-
-                                if (item) {
-                                  return Number(item.sub_category_id);
-                                }
-                                return null;
-                              });
+                              setSubCategoryID(Number(value)); // Update the subcategory ID
                             }}
                             value={field.value}
                           >
@@ -215,10 +274,10 @@ export function UpdateAsset() {
                               <SelectValue placeholder="Select a subcategory" />
                             </SelectTrigger>
                             <SelectContent>
-                              {subcategory.map((sub) => (
+                              {filteredSubcategories.map((sub) => (
                                 <SelectItem
-                                  key={sub.sub_category_name}
-                                  value={sub.sub_category_name}
+                                  key={sub.sub_category_id}
+                                  value={String(sub.sub_category_id)}
                                 >
                                   {sub.sub_category_name}
                                 </SelectItem>
@@ -232,7 +291,7 @@ export function UpdateAsset() {
                   />
                 )}
 
-                {subCategoryID === 5 && categoryID === 2 && (
+                {categoryID === 2 && subCategoryID === 5 && (
                   <FormField
                     control={form.control}
                     name="type_id"
@@ -241,17 +300,21 @@ export function UpdateAsset() {
                         <FormLabel>Type</FormLabel>
                         <FormControl>
                           <Select
-                            onValueChange={field.onChange}
+                            {...field}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setTypeID(Number(value)); // Update the type ID
+                            }}
                             value={field.value}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Type" />
+                              <SelectValue placeholder="Select a type" />
                             </SelectTrigger>
                             <SelectContent>
                               {type.map((type) => (
                                 <SelectItem
-                                  key={type.type_name}
-                                  value={type.type_name}
+                                  key={type.type_id}
+                                  value={String(type.type_id)}
                                 >
                                   {type.type_name}
                                 </SelectItem>
@@ -266,44 +329,24 @@ export function UpdateAsset() {
                 )}
 
                 {categoryID === 1 && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="asset_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Asset Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              placeholder="Ex. TPLink"
-                              {...field}
-                              className="text-sm sm:text-base"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="location"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Location</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              placeholder="Location"
-                              {...field}
-                              className="text-sm sm:text-base"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="Location"
+                            {...field}
+                            className="text-sm sm:text-base"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
                 <FormField
                   control={form.control}
@@ -318,6 +361,36 @@ export function UpdateAsset() {
                           className="text-sm sm:text-base"
                           placeholder="Ex. Dell"
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="asset_condition_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Condition</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {condition.map((con) => (
+                              <SelectItem
+                                key={con.asset_condition_id}
+                                value={String(con.asset_condition_id)}
+                              >
+                                {con.asset_condition_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -394,14 +467,16 @@ export function UpdateAsset() {
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
-                            {status.map((stat) => (
-                              <SelectItem
-                                key={stat.status_name}
-                                value={stat.status_name}
-                              >
-                                {stat.status_name}
-                              </SelectItem>
-                            ))}
+                            {status
+                              .filter((stat) => stat.function_id === 1)
+                              .map((stat) => (
+                                <SelectItem
+                                  key={stat.status_id}
+                                  value={stat.status_id.toString()}
+                                >
+                                  {stat.status_name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -559,8 +634,8 @@ export function UpdateAsset() {
                             {...rest}
                           />
                         </FormControl>
+                        
                       </div>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />

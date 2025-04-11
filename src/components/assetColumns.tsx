@@ -78,7 +78,11 @@ export const columns: ColumnDef<Asset>[] = [
             />
           </DialogTrigger>
           <DialogContent className="flex items-center justify-center">
-            <img src={imageUrl} alt="Asset Enlarged" className="max-w-full max-h-[80vh] rounded-md" />
+            <img
+              src={imageUrl}
+              alt="Asset Enlarged"
+              className="max-w-full max-h-[80vh] rounded-md"
+            />
           </DialogContent>
         </Dialog>
       );
@@ -118,7 +122,7 @@ export const columns: ColumnDef<Asset>[] = [
     filterFn: (row, columnId, filterValue) => {
       return filterValue.includes(row.getValue(columnId));
     },
-  },  
+  },
   {
     accessorKey: "asset_condition_name",
     header: "Condition",
@@ -126,7 +130,14 @@ export const columns: ColumnDef<Asset>[] = [
       const { asset_condition_id, asset_condition_name } = row.original;
       const statusKey = `${asset_condition_id}`;
       const bgColor = conditionVariants[statusKey] || "bg-gray-200";
-      return <Badge variant={"outline"} className={`${bgColor} px-2 py-1 rounded-md`}>{asset_condition_name}</Badge>;
+      return (
+        <Badge
+          variant={"outline"}
+          className={`${bgColor} px-2 py-1 rounded-md`}
+        >
+          {asset_condition_name}
+        </Badge>
+      );
     },
   },
   {
@@ -136,9 +147,16 @@ export const columns: ColumnDef<Asset>[] = [
       const { status_id, status_name } = row.original;
       const statusKey = `${status_id}`;
       const bgColor = statusVariants[statusKey] || "bg-gray-200";
-      return <Badge variant={"outline"} className={`${bgColor} px-2 py-1 rounded-md`}>{status_name}</Badge>;
+      return (
+        <Badge
+          variant={"outline"}
+          className={`${bgColor} px-2 py-1 rounded-md`}
+        >
+          {status_name}
+        </Badge>
+      );
+    },
   },
-},
   {
     accessorKey: "asset_amount",
     header: () => <div className="text-left">Amount</div>,
@@ -159,25 +177,25 @@ export const columns: ColumnDef<Asset>[] = [
   {
     accessorKey: "warranty_due_date",
     header: "Warranty Due Date",
-    accessorFn: (row) => 
-      row.warranty_due_date 
-        ? new Date(row.warranty_due_date).toLocaleDateString("en-US", { 
-            year: "numeric", 
-            month: "short", 
-            day: "numeric" 
-          }) 
+    accessorFn: (row) =>
+      row.warranty_due_date
+        ? new Date(row.warranty_due_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
         : "N/A",
-  },  
+  },
   {
     accessorKey: "purchase_date",
     header: "Purchase Date",
-    accessorFn: (row) => 
-      row.purchase_date 
-        ? new Date(row.purchase_date).toLocaleDateString("en-US", { 
-            year: "numeric", 
-            month: "short", 
-            day: "numeric" 
-          }) 
+    accessorFn: (row) =>
+      row.purchase_date
+        ? new Date(row.purchase_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
         : "N/A",
   },
   {
@@ -192,7 +210,7 @@ export const columns: ColumnDef<Asset>[] = [
     accessorKey: "insurance",
     header: "Insurance",
   },
-  
+
   {
     id: "actions",
     cell: ({ row }) => {
@@ -208,10 +226,18 @@ export const columns: ColumnDef<Asset>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            
             <DropdownMenuSeparator />
             <DropdownMenuItem>View asset details</DropdownMenuItem>
-            <Link to="/assets/update"><DropdownMenuItem>Edit asset details</DropdownMenuItem></Link>
+
+            <DropdownMenuItem asChild>
+              <Link
+                to="/assets/update"
+                state={{ assetId: asset.asset_id }} // Pass asset_id through state
+                onClick={() => console.log("Asset ID:", asset.asset_id)}
+              >
+                Edit asset details
+              </Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

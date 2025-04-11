@@ -1,5 +1,6 @@
 import axios from "axios";
 import { count } from "console";
+import { useLocation } from "react-router-dom";
 import {
   createContext,
   useState,
@@ -12,6 +13,7 @@ import {
 } from "react";
 
 interface Asset {
+  asset_id: number;
   asset_name: string;
   category_id: string;
   sub_category_id: string | null;
@@ -21,11 +23,15 @@ interface Asset {
   serial_number: string;
   specifications: string;
   asset_amount: number;
-  warranty_duration: string;
+  warranty_duration: number;
   warranty_due_date: Date;
   purchase_date: Date;
   notes: string;
   file: File;
+  brand: string;
+  insurance: string;
+  status_id: string;
+  asset_condition_id: string;
 }
 interface AssetContextType {
   assets: Asset[];
@@ -40,6 +46,11 @@ interface AssetContextType {
   typeID: number | null;
   assetID: number | null;
   setAssetID: Dispatch<SetStateAction<number | null>>;
+  currentAsset: Asset | null;
+  updateAsset: (
+    asset_id: number,
+    updatedData: Partial<Asset>
+  ) => Promise<any>;
 }
 const AssetContext = createContext<AssetContextType | undefined>(undefined);
 export const AssetProvider = ({ children }: { children: ReactNode }) => {
@@ -50,7 +61,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   const [externalAssets, setExternalAssets] = useState<Asset[]>([]);
   const [assetID, setAssetID] = useState<number | null>(null);
   const [reload ,setReload] = useState(0);
-
+  const location = useLocation(); // Hook to access location/state
   let url = "http://localhost/itam_api/asset.php?resource=asset";
   const getAssets = async () => {
     try {
@@ -88,6 +99,24 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
     fetchAssets();
   }, [reload]);
 
+  const [currentAsset, setCurrentAsset] = useState<Asset | null>(null);
+
+useEffect(() => {
+  if (location.state?.assetId) {
+    const fetchAsset = async () => {
+      const assetData = await getAssets();
+      const singleAsset = assetData.find((asset: { asset_id: any; }) => asset.asset_id === location.state.assetId);
+      console.log(singleAsset);
+      if (singleAsset) {
+        setAssetID(singleAsset.asset_id);
+        setCurrentAsset(singleAsset);
+      }
+    };
+    fetchAsset();
+  }
+}, [location.state?.assetId]);
+
+
   useEffect(() => {
     const external = assets.filter((asset) => Number(asset.category_id) === 1);
     setExternalAssets(external);
@@ -110,6 +139,30 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   
     return newAssets;
   }, [categoryID, subCategoryID, typeID, assets]);
+
+  const updateAsset = async (
+    asset_id: number,
+    updatedData: Partial<Asset>
+  ) => {
+    try {
+      const response = await axios.put(
+        `/api/assets/${asset_id}`,
+        updatedData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+  
+      if (response.data) {
+        console.log("Asset updated successfully:", response.data);
+        setReload((count) => count + 1);
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error updating asset:", error);
+    }
+  };
+  
   
   const value = {
     assets,
@@ -124,6 +177,8 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
     filteredAssets,
     assetID,
     setAssetID,
+    currentAsset,
+    updateAsset
   };
   return (
     <AssetContext.Provider value={value}>{children}</AssetContext.Provider>

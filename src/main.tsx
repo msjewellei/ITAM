@@ -11,18 +11,18 @@ import { IssuanceProvider } from "./context/issuanceContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MiscProvider>
-      <AssetProvider>
-        <IssuanceProvider>
-          <RepairProvider>
-            <BrowserRouter>
+    <BrowserRouter>
+      <MiscProvider>
+        <AssetProvider>
+          <IssuanceProvider>
+            <RepairProvider>
               <BorrowProvider>
                 <App />
               </BorrowProvider>
-            </BrowserRouter>
-          </RepairProvider>
-        </IssuanceProvider>
-      </AssetProvider>
-    </MiscProvider>
+            </RepairProvider>
+          </IssuanceProvider>
+        </AssetProvider>
+      </MiscProvider>
+    </BrowserRouter>
   </StrictMode>
 );

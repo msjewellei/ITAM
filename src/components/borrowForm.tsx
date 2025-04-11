@@ -591,26 +591,6 @@ function BorrowForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="duration"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Duration (in days)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Duration"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="remarks"
                   render={({ field }) => (
                     <FormItem>

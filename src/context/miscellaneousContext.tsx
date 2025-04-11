@@ -66,7 +66,9 @@ interface Condition {
 interface Status {
   status_id: number;
   status_name: string;
+  function_id: number;
 }
+
 
 interface RepairUrgency {
   urgency_id: number;
