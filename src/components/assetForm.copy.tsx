@@ -708,6 +708,7 @@ function AssetForm() {
                         <FormLabel htmlFor="picture">Picture</FormLabel>
                         <FormControl>
                           <Input
+                          multiple
                             id="picture"
                             type="file"
                             accept="image/*"

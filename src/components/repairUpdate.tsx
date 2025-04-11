@@ -36,7 +36,7 @@ import { useRepair } from "@/context/repairContext";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-    repair_completion_date: z.date(),
+  repair_completion_date: z.date(),
   status_id: z.string(),
   repair_cost: z.number(),
   remarks: z.string(),
@@ -48,7 +48,7 @@ export function ReturnDate() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-    repair_completion_date: new Date(),
+      repair_completion_date: new Date(),
       status_id: "",
       repair_cost: 0,
       remarks: "",
@@ -56,32 +56,33 @@ export function ReturnDate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    values.status_id = status.find(
-        (cat) => cat.status_name === values.status_id
-      )?.status_id;
-    
-    if (!repairID || !userID) { 
+    if (!repairID || !userID) {
       console.error("Missing repairID or userID!");
       return;
     }
+  
     const adjustedDate = format(values.repair_completion_date, "yyyy-MM-dd");
-    
+  
     try {
       const response = await updateRepair(repairID, userID, {
         ...values,
+        status_id: Number(values.status_id),
         repair_completion_date: adjustedDate,
       });
-    
+  
       if (response && Object.keys(response).length > 0) {
         toast.success("Updated repair request successfully!");
       } else {
-        toast.error(`Failed to update repair request: ${response?.error || "Unknown error"}`);
+        toast.error(
+          `Failed to update repair request: ${response?.error || "Unknown error"}`
+        );
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
   }
   
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -149,17 +150,19 @@ export function ReturnDate() {
               <FormControl>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    {status.map((s) => (
-                      <SelectItem
-                        key={s.status_name}
-                        value={s.status_name}
-                      >
-                        {s.status_name}
-                      </SelectItem>
-                    ))}
+                    {status
+                      .filter((st) => st.function_id === 3) // ⬅️ Filter by function_id
+                      .map((st) => (
+                        <SelectItem
+                          key={st.status_id}
+                          value={st.status_id.toString()} // ⬅️ Use ID for value
+                        >
+                          {st.status_name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -167,6 +170,7 @@ export function ReturnDate() {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="remarks"

@@ -83,7 +83,7 @@ function RepairForm() {
     categoryID,
     subCategoryID,
   } = useAsset();
-  const {filteredIssuance} = useIssuance();
+  const { filteredIssuance } = useIssuance();
   const { insertRepair } = useRepair();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -138,17 +138,18 @@ function RepairForm() {
 
     try {
       const response = await insertRepair(values);
-    
+
       if (response && Object.keys(response).length > 0) {
         toast.success("Repair request successfully added!");
         navigate("/repair");
       } else {
-        toast.error(`Failed to add repair request: ${response?.error || "Unknown error"}`);
+        toast.error(
+          `Failed to add repair request: ${response?.error || "Unknown error"}`
+        );
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
-
   }
 
   return (
@@ -616,37 +617,6 @@ function RepairForm() {
                             />
                           </PopoverContent>
                         </Popover>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="status_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {status.map((st) => (
-                              <SelectItem
-                                key={st.status_name}
-                                value={st.status_name}
-                              >
-                                {st.status_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

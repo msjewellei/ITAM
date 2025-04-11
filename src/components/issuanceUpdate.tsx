@@ -45,17 +45,17 @@ export function IssuanceUpdate() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-    pullout_date: new Date(),
+      pullout_date: new Date(),
       status_id: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     values.status_id = status.find(
-        (cat) => cat.status_name === values.status_id
-      )?.status_id;
-    
-    if (!issuanceID || !userID || !assetID) { 
+      (cat) => cat.status_name === values.status_id
+    )?.status_id;
+
+    if (!issuanceID || !userID || !assetID) {
       console.error("Missing issuanceID or userID or assetID!");
       return;
     }
@@ -66,17 +66,21 @@ export function IssuanceUpdate() {
         ...values,
         pullout_date: adjustedDate,
       });
-    
+
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset issuance updated successfully!");
       } else {
-        toast.error(`Failed to update asset issuance: ${response?.error || "Unknown error"}`);
+        toast.error(
+          `Failed to update asset issuance: ${
+            response?.error || "Unknown error"
+          }`
+        );
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
   }
-  
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -118,7 +122,7 @@ export function IssuanceUpdate() {
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="status_id"
@@ -128,17 +132,19 @@ export function IssuanceUpdate() {
               <FormControl>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    {status.map((s) => (
-                      <SelectItem
-                        key={s.status_name}
-                        value={s.status_name}
-                      >
-                        {s.status_name}
-                      </SelectItem>
-                    ))}
+                    {status
+                      .filter((st) => st.function_id === 4)
+                      .map((st) => (
+                        <SelectItem
+                          key={st.status_id}
+                          value={st.status_id.toString()}
+                        >
+                          {st.status_name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -146,6 +152,7 @@ export function IssuanceUpdate() {
             </FormItem>
           )}
         />
+
         <DialogFooter>
           <Button className="w-full text-sm sm:text-base" type="submit">
             Submit

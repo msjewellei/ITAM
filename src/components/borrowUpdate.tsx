@@ -37,7 +37,7 @@ import { toast } from "sonner";
 const formSchema = z.object({
   return_date: z.date(),
   duration: z.number(),
-  asset_condition_id: z.string()
+  asset_condition_id: z.string(),
 });
 
 export function BorrowUpdate() {
@@ -54,36 +54,39 @@ export function BorrowUpdate() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     values.asset_condition_id = condition.find(
-        (cat) => cat.asset_condition_name === values.asset_condition_id
-      )?.asset_condition_id;
+      (cat) => cat.asset_condition_name === values.asset_condition_id
+    )?.asset_condition_id;
     if (!borrowID) {
       console.error("Missing borrowID!");
       return;
     }
     const adjustedDate = format(values.return_date, "yyyy-MM-dd");
-   
+
     try {
-      const response = await updateBorrow(borrowID, dateBorrowed,{
+      const response = await updateBorrow(borrowID, dateBorrowed, {
         ...values,
         return_date: adjustedDate,
       });
-    
+
       if (response && Object.keys(response).length > 0) {
         toast.success("Updated borrow transaction successfully!");
       } else {
-        toast.error(`Failed to update borrow transaction: ${response?.error || "Unknown error"}`);
+        toast.error(
+          `Failed to update borrow transaction: ${
+            response?.error || "Unknown error"
+          }`
+        );
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
   }
-  
 
   useEffect(() => {
     if (form.getValues("return_date")) {
       const borrowedDate = startOfDay(new Date(dateBorrowed));
       const returnDate = startOfDay(form.getValues("return_date"));
-  
+
       const duration = differenceInDays(returnDate, borrowedDate);
       form.setValue("duration", duration || 0, { shouldValidate: true });
     }
@@ -121,13 +124,20 @@ export function BorrowUpdate() {
                       selected={field.value}
                       onSelect={(date) => {
                         if (!date) return;
-                        form.setValue("return_date", date, { shouldValidate: true });
-                      
+                        form.setValue("return_date", date, {
+                          shouldValidate: true,
+                        });
+
                         const borrowedDate = startOfDay(new Date(dateBorrowed));
                         const returnDate = startOfDay(date);
-                      
-                        const duration = differenceInDays(returnDate, borrowedDate);
-                        form.setValue("duration", duration || 0, { shouldValidate: true });
+
+                        const duration = differenceInDays(
+                          returnDate,
+                          borrowedDate
+                        );
+                        form.setValue("duration", duration || 0, {
+                          shouldValidate: true,
+                        });
                       }}
                       initialFocus
                     />
@@ -167,17 +177,19 @@ export function BorrowUpdate() {
               <FormControl>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder="Select condition" />
                   </SelectTrigger>
                   <SelectContent>
-                    {condition.map((c) => (
-                      <SelectItem
-                        key={c.asset_condition_name}
-                        value={c.asset_condition_name}
-                      >
-                        {c.asset_condition_name}
-                      </SelectItem>
-                    ))}
+                    {condition
+                      .filter((c) => c.asset_condition_id !== 4)
+                      .map((c) => (
+                        <SelectItem
+                          key={c.asset_condition_id}
+                          value={c.asset_condition_id.toString()} // better to use ID as value
+                        >
+                          {c.asset_condition_name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -185,6 +197,7 @@ export function BorrowUpdate() {
             </FormItem>
           )}
         />
+
         <DialogFooter>
           <Button className="w-full text-sm sm:text-base" type="submit">
             Submit
