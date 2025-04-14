@@ -140,6 +140,7 @@ export function BorrowUpdate() {
                         });
                       }}
                       initialFocus
+                      disabled={{ after: new Date() }}
                     />
                   </PopoverContent>
                 </Popover>

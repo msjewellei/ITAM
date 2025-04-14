@@ -60,28 +60,29 @@ export function ReturnDate() {
       console.error("Missing repairID or userID!");
       return;
     }
-  
+
     const adjustedDate = format(values.repair_completion_date, "yyyy-MM-dd");
-  
+
     try {
       const response = await updateRepair(repairID, userID, {
         ...values,
         status_id: Number(values.status_id),
         repair_completion_date: adjustedDate,
       });
-  
+
       if (response && Object.keys(response).length > 0) {
         toast.success("Updated repair request successfully!");
       } else {
         toast.error(
-          `Failed to update repair request: ${response?.error || "Unknown error"}`
+          `Failed to update repair request: ${
+            response?.error || "Unknown error"
+          }`
         );
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
   }
-  
 
   return (
     <Form {...form}>
@@ -106,7 +107,7 @@ export function ReturnDate() {
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span className="text-[#737373]">Date Reported</span>
+                        <span className="text-[#737373]">Completion Date</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -116,6 +117,7 @@ export function ReturnDate() {
                       selected={field.value}
                       onSelect={field.onChange}
                       initialFocus
+                      disabled={{ after: new Date() }}
                     />
                   </PopoverContent>
                 </Popover>
@@ -154,11 +156,13 @@ export function ReturnDate() {
                   </SelectTrigger>
                   <SelectContent>
                     {status
-                      .filter((st) => st.function_id === 3) // ⬅️ Filter by function_id
+                      .filter(
+                        (st) => st.function_id === 3 && st.status_id !== 4
+                      )
                       .map((st) => (
                         <SelectItem
                           key={st.status_id}
-                          value={st.status_id.toString()} // ⬅️ Use ID for value
+                          value={st.status_id.toString()}
                         >
                           {st.status_name}
                         </SelectItem>
