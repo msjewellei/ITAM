@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { array, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -49,7 +49,6 @@ const formSchema = z.object({
   sub_category_id: z.string(),
   type_id: z.string(),
   location: z.string(),
-  availability_status_id: z.string(),
   serial_number: z.string(),
   specifications: z.string(),
   asset_amount: z.coerce.number(),
@@ -59,7 +58,7 @@ const formSchema = z.object({
   notes: z.string(),
   brand: z.string(),
   insurance: z.string(),
-  file: z.instanceof(File).optional(),
+  file: z.array(z.instanceof(File)).optional(),
 });
 
 function AssetForm() {
@@ -87,7 +86,6 @@ function AssetForm() {
       sub_category_id: "",
       type_id: "",
       location: "",
-      availability_status_id: "",
       serial_number: "",
       specifications: "",
       asset_amount: 0,
@@ -97,7 +95,7 @@ function AssetForm() {
       notes: "",
       brand: "",
       insurance: "",
-      file: undefined,
+      file: [],
     },
   });
 
@@ -138,11 +136,6 @@ function AssetForm() {
       )?.type_id;
     }
 
-    if (values.availability_status_id) {
-      values.availability_status_id = status.find(
-        (ty) => ty.status_name === values.availability_status_id
-      )?.status_id;
-    }
 
     if (categoryID !== 2) {
       values.sub_category_id = "";
@@ -151,7 +144,6 @@ function AssetForm() {
     if (values.sub_category_id === "") {
       values.type_id = "";
     }
-
     try {
       const response = await insertAsset(values);
 
@@ -533,38 +525,7 @@ function AssetForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="availability_status_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {status
-                              .filter((stat) => stat.function_id === 1)
-                              .map((stat) => (
-                                <SelectItem
-                                  key={stat.status_id}
-                                  value={stat.status_id.toString()}
-                                >
-                                  {stat.status_name}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+               
                 <FormField
                   control={form.control}
                   name="purchase_date"
@@ -712,7 +673,11 @@ function AssetForm() {
                             id="picture"
                             type="file"
                             accept="image/*"
-                            onChange={(e) => onChange(e.target.files?.[0])}
+                            onChange={(e) => {
+                              if (e.target.files) {
+                                onChange(Array.from(e.target.files));
+                              }
+                            }}
                             {...rest}
                           />
                         </FormControl>

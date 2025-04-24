@@ -27,7 +27,7 @@ interface Asset {
   warranty_due_date: Date;
   purchase_date: Date;
   notes: string;
-  file: File;
+  file: File[];
   brand: string;
   insurance: string;
   status_id: string;
@@ -81,7 +81,9 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
     try {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
-      formData.append("file", data.file);
+      data.file.forEach((file) => {
+        formData.append("file[]", file);
+      });
       const response = await axios.post(url, formData);
       if (response.data) {
         setReload(count => count=+1);

@@ -175,7 +175,7 @@ export function UpdateAsset() {
         <Form {...form}>
           <form
             className="space-y-4"
-            onSubmit={form.handleSubmit(onSubmit)} // Directly use handleSubmit without preventDefault
+            onSubmit={form.handleSubmit(onSubmit)}
             encType="multipart/form-data"
           >
             <div className="grid grid-cols-2 gap-4">
@@ -187,7 +187,7 @@ export function UpdateAsset() {
                     <FormItem>
                       <FormLabel>Asset ID</FormLabel>
                       <FormControl>
-                        <Input
+                        <Input disabled
                           type="text"
                           placeholder="Asset ID"
                           className="text-sm sm:text-base"

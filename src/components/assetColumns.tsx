@@ -67,7 +67,8 @@ export const columns: ColumnDef<Asset>[] = [
     header: "Picture",
     cell: ({ row }) => {
       const [open, setOpen] = useState(false);
-      const imageUrl = `http://localhost/itam_api/${row.original.file}`;
+      const images = row.original.file.split(",");
+      const imageUrl = images.length > 0 ? `http://localhost/itam_api/${images[0]}` : null;
 
       return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -219,14 +220,14 @@ export const columns: ColumnDef<Asset>[] = [
   },
   {
     accessorKey: "aging",
-    header: "Aging",
+    header: "Aging (in months)",
     cell: ({ row }) => {
       const purchaseDate = new Date(row.original.purchase_date);
       const today = new Date();
       
       const agingInMonths = differenceInMonths(today, purchaseDate);
       
-      return <div>{agingInMonths} months</div>;
+      return <div className="text-center">{agingInMonths}</div>;
     },
   },
   {
