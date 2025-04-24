@@ -16,6 +16,7 @@ import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { differenceInMonths } from "date-fns";
 
 export type Asset = {
   type_name: string;
@@ -171,8 +172,6 @@ export const columns: ColumnDef<Asset>[] = [
     },
   },
   {
-<<<<<<< HEAD
-=======
     accessorKey: "asset_value",
     header: "Asset Value",
     cell: ({ row }) => {
@@ -191,7 +190,6 @@ export const columns: ColumnDef<Asset>[] = [
     },
   },  
   {
->>>>>>> 37b1e71 (..)
     accessorKey: "warranty_duration",
     header: "Warranty Duration",
   },
@@ -222,6 +220,14 @@ export const columns: ColumnDef<Asset>[] = [
   {
     accessorKey: "aging",
     header: "Aging",
+    cell: ({ row }) => {
+      const purchaseDate = new Date(row.original.purchase_date);
+      const today = new Date();
+      
+      const agingInMonths = differenceInMonths(today, purchaseDate);
+      
+      return <div>{agingInMonths} months</div>;
+    },
   },
   {
     accessorKey: "notes",
