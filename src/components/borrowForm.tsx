@@ -73,7 +73,7 @@ function BorrowForm() {
     departmentID,
   } = useMisc();
   const {
-    filteredAssets,
+    filteredInternalAssets,
     setCategoryID,
     setSubCategoryID,
     setTypeID,
@@ -476,7 +476,7 @@ function BorrowForm() {
                     )}
                   />
                 )}
-                {filteredAssets.length > 0 && (
+                {filteredInternalAssets.length > 0 && (
                   <FormField
                     control={form.control}
                     name="asset_id"
@@ -492,7 +492,7 @@ function BorrowForm() {
                               <SelectValue placeholder="Asset ID" />
                             </SelectTrigger>
                             <SelectContent>
-                              {filteredAssets.map((asset) => (
+                              {filteredInternalAssets.map((asset) => (
                                 <SelectItem
                                   key={asset.asset_name}
                                   value={asset.asset_name}

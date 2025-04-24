@@ -67,7 +67,7 @@ function IssuanceForm() {
     user,
   } = useMisc();
   const {
-    filteredAssets,
+    filteredInternalAssets,
     setCategoryID,
     setSubCategoryID,
     setTypeID,
@@ -466,7 +466,7 @@ function IssuanceForm() {
                               <SelectValue placeholder="Asset ID" />
                             </SelectTrigger>
                             <SelectContent>
-                              {filteredAssets.map((asset) => (
+                              {filteredInternalAssets.map((asset) => (
                                 <SelectItem
                                   key={asset.asset_name}
                                   value={asset.asset_name}

@@ -38,7 +38,9 @@ interface AssetContextType {
   insertAsset: (asset: Asset) => void;
   categoryID: number | null;
   externalAssets: Asset[];
+  internalAssets: Asset[];
   filteredAssets: Asset[];
+  filteredInternalAssets: Asset[];
   setCategoryID: Dispatch<SetStateAction<number | null>>; 
   setSubCategoryID: Dispatch<SetStateAction<number | null>>; 
   setTypeID: Dispatch<SetStateAction<number | null>>; 
@@ -59,6 +61,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   const [typeID, setTypeID] = useState<number | null>(null);
   const [subCategoryID, setSubCategoryID] = useState<number | null>(null);
   const [externalAssets, setExternalAssets] = useState<Asset[]>([]);
+  const [internalAssets, setInternalAssets] = useState<Asset[]>([]);
   const [assetID, setAssetID] = useState<number | null>(null);
   const [reload ,setReload] = useState(0);
   const location = useLocation(); // Hook to access location/state
@@ -140,6 +143,34 @@ useEffect(() => {
     return newAssets;
   }, [categoryID, subCategoryID, typeID, assets]);
 
+
+  useEffect(() => {
+    const internal = assets.filter(
+      (asset) =>
+        Number(asset.category_id) === 2 && Number(asset.status_id) === 1
+    );
+    setInternalAssets(internal);
+  }, [assets]);
+  
+  const filteredInternalAssets: Asset[] | [] = useMemo(() => {
+    let intAssets = internalAssets;
+  
+    if (categoryID) {
+      intAssets = intAssets.filter((asset) => Number(asset.category_id) === categoryID);
+    }
+  
+    if (subCategoryID) {
+      intAssets = intAssets.filter((asset) => Number(asset.sub_category_id) === subCategoryID);
+    }
+  
+    if (typeID) {
+      intAssets = intAssets.filter((asset) => Number(asset.type_id) === typeID);
+    }
+  
+    return intAssets;
+  }, [categoryID, subCategoryID, typeID, internalAssets]);
+
+
   const updateAsset = async (
     asset_id: number,
     updatedData: Partial<Asset>
@@ -178,7 +209,9 @@ useEffect(() => {
     assetID,
     setAssetID,
     currentAsset,
-    updateAsset
+    updateAsset,
+    internalAssets,
+    filteredInternalAssets
   };
   return (
     <AssetContext.Provider value={value}>{children}</AssetContext.Provider>

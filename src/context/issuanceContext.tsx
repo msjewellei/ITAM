@@ -10,6 +10,7 @@ import {
   SetStateAction,
 } from "react";
 import { useMisc } from "./miscellaneousContext";
+import { useAsset } from "./assetContext";
 
 interface Issuance {
   issuance_id: number;
@@ -80,7 +81,7 @@ export const IssuanceProvider = ({ children }: { children: ReactNode }) => {
       console.log(error);
     }
   };
-
+  const { assets } = useAsset();
   useEffect(() => {
     const fetchIssuance = async () => {
       const issuanceData = await getIssuance();
@@ -92,10 +93,20 @@ export const IssuanceProvider = ({ children }: { children: ReactNode }) => {
   }, [reload]);
 
   const filteredIssuance: Issuance[] = useMemo(() => {
-    if (!userID) return [];
-
-    return issuance.filter((i) => String(i.user_id) === String(userID));
-  }, [userID, issuance]);
+    if (!userID || !assets.length) return [];
+  
+    const excludedStatusIds = [4, 7, 9];
+  
+    return issuance.filter((i) => {
+      const asset = assets.find((a) => a.asset_id === i.asset_id);
+      return (
+        String(i.user_id) === String(userID) &&
+        asset &&
+        !excludedStatusIds.includes(Number(asset.status_id))
+      );
+    });
+  }, [userID, issuance, assets]);
+  
 
   const updateIssuance = async (
     issuance_id: number,
