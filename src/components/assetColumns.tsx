@@ -171,6 +171,27 @@ export const columns: ColumnDef<Asset>[] = [
     },
   },
   {
+<<<<<<< HEAD
+=======
+    accessorKey: "asset_value",
+    header: "Asset Value",
+    cell: ({ row }) => {
+      const assetAmount = row.original.asset_amount;
+      const aging = differenceInMonths(new Date(), new Date(row.original.purchase_date));
+  
+      const rawValue = assetAmount - (assetAmount / 36) * aging;
+      const assetValue = Math.max(rawValue, 0);
+  
+      const formattedAssetValue = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "Php",
+      }).format(assetValue);
+  
+      return <div>{formattedAssetValue}</div>;
+    },
+  },  
+  {
+>>>>>>> 37b1e71 (..)
     accessorKey: "warranty_duration",
     header: "Warranty Duration",
   },
