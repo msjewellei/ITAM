@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
-import { differenceInDays, format, startOfDay } from "date-fns";
+import { differenceInMonths, format, startOfDay } from "date-fns";
 import { CalendarIcon, Check, ChevronLeft, ChevronsUpDown } from "lucide-react";
 import Fuse from "fuse.js";
 import { cn } from "@/lib/utils";
@@ -51,7 +51,7 @@ const formSchema = z.object({
   location: z.string(),
   serial_number: z.string(),
   specifications: z.string(),
-  asset_amount: z.coerce.number(),
+  asset_amount: z.coerce.number().min(1),
   warranty_duration: z.number(),
   warranty_due_date: z.date(),
   purchase_date: z.date(),
@@ -88,7 +88,7 @@ function AssetForm() {
       location: "",
       serial_number: "",
       specifications: "",
-      asset_amount: 0,
+      asset_amount: 1,
       warranty_duration: 0,
       warranty_due_date: new Date(),
       purchase_date: new Date(),
@@ -187,7 +187,7 @@ function AssetForm() {
         new Date(form.getValues("warranty_due_date"))
       );
 
-      const duration = differenceInDays(warrantyDueDate, purchaseDate);
+      const duration = differenceInMonths(warrantyDueDate, purchaseDate);
       form.setValue("warranty_duration", duration || 0, {
         shouldValidate: true,
       });
@@ -515,6 +515,7 @@ function AssetForm() {
                       <FormControl>
                         <Input
                           type="number"
+                          min={1}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -558,7 +559,7 @@ function AssetForm() {
                               selected={field.value}
                               onSelect={(date) => {
                                 if (!date) return;
-                                const duration = differenceInDays(w, date);
+                                const duration = differenceInMonths(w, date);
                                 form.setValue("warranty_duration", duration, {
                                   shouldValidate: true,
                                 });
@@ -606,7 +607,7 @@ function AssetForm() {
                               selected={field.value}
                               onSelect={(date) => {
                                 if (!date) return;
-                                const duration = differenceInDays(date, p);
+                                const duration = differenceInMonths(date, p);
                                 form.setValue("warranty_duration", duration, {
                                   shouldValidate: true,
                                 });

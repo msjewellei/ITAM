@@ -39,7 +39,7 @@ const formSchema = z.object({
   location: z.string(),
   availability_status_id: z.string(),
   specifications: z.string(),
-  asset_amount: z.coerce.number(),
+  asset_amount: z.coerce.number().min(1),
   warranty_duration: z.number(),
   warranty_due_date: z.date(),
   purchase_date: z.date(),
@@ -67,7 +67,7 @@ export function UpdateAsset() {
       location: "",
       availability_status_id: "",
       specifications: "",
-      asset_amount: 0,
+      asset_amount: 1,
       warranty_duration: 0,
       warranty_due_date: new Date(),
       purchase_date: new Date(),
@@ -442,6 +442,7 @@ export function UpdateAsset() {
                       <FormControl>
                         <Input
                           type="number"
+                          min={1}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
