@@ -20,7 +20,13 @@ import {
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { differenceInMonths, format, startOfDay } from "date-fns";
-import { CalendarIcon, Check, ChevronLeft, ChevronsUpDown } from "lucide-react";
+import {
+  CalendarIcon,
+  Check,
+  ChevronLeft,
+  ChevronsUpDown,
+  Plus,
+} from "lucide-react";
 import Fuse from "fuse.js";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,6 +48,9 @@ import {
   CommandItem,
   CommandList,
 } from "./ui/command";
+import { DialogTrigger } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent } from "./ui/dialog";
+import InsuranceDialog from "./insuranceDialog";
 
 const formSchema = z.object({
   asset_name: z.string(),
@@ -136,7 +145,6 @@ function AssetForm() {
       )?.type_id;
     }
 
-
     if (categoryID !== 2) {
       values.sub_category_id = "";
     }
@@ -195,6 +203,7 @@ function AssetForm() {
   }, [form.watch("purchase_date"), form.watch("warranty_due_date")]);
 
   return (
+    <Dialog>
     <div className="flex flex-col ml-[calc(7rem+10px)] mt-15px mr-[calc(2.5rem)] h-full ">
       <div className="flex flex-row items-center justify-between">
         <p className="pl-1 pt-5 mb-4 text-lg">New Asset</p>
@@ -486,23 +495,6 @@ function AssetForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="insurance"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Insurance</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          className="text-sm sm:text-base"
-                          placeholder="Ex. Provider: ABC"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
               <div className="flex flex-col gap-4">
@@ -526,7 +518,7 @@ function AssetForm() {
                     </FormItem>
                   )}
                 />
-               
+
                 <FormField
                   control={form.control}
                   name="purchase_date"
@@ -670,7 +662,7 @@ function AssetForm() {
                         <FormLabel htmlFor="picture">Picture</FormLabel>
                         <FormControl>
                           <Input
-                          multiple
+                            multiple
                             id="picture"
                             type="file"
                             accept="image/*"
@@ -688,66 +680,27 @@ function AssetForm() {
                   )}
                 />
               </div>
-
-              <div className="col-span-2 flex justify-end align-end">
-                <Button className="w-fit text-sm sm:text-base" type="submit">
-                  Submit
-                </Button>
-              </div>
             </div>
-            {/* 
-                <FormField
-                  control={form.control}
-                  name="asset_condition_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Condition" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {condition.map((con) => (
-                              <SelectItem
-                                key={con.asset_condition_name}
-                                value={con.asset_condition_name}
-                              >
-                                {con.asset_condition_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              <FormField
-                control={form.control}
-                name="aging"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Aging"
-                        {...field}
-                        className="text-sm sm:text-base"
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            */}
+            <div className="flex justify-between items-center w-full">
+              <DialogTrigger asChild>
+                <Button
+                  className="w-fit text-xs sm:text-sm gap-1 text-green-400"
+                  variant="link"
+                >
+                  <Plus className="w-4 h-4 text-green-400" />
+                  Add Insurance
+                </Button>
+              </DialogTrigger>
+              <DialogContent><InsuranceDialog/></DialogContent>
+
+              <Button className="w-fit text-xs sm:text-sm" type="submit">
+                Submit
+              </Button>
+            </div>
           </form>
         </Form>
       </div>
-    </div>
+    </div></Dialog>
   );
 }
 

@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { differenceInMonths } from "date-fns";
+import ImageDialog from "./pictureDialog";
 
 export type Asset = {
   type_name: string;
@@ -66,28 +67,11 @@ export const columns: ColumnDef<Asset>[] = [
     accessorKey: "file",
     header: "Picture",
     cell: ({ row }) => {
-      const [open, setOpen] = useState(false);
-      const images = row.original.file.split(",");
-      const imageUrl = images.length > 0 ? `http://localhost/itam_api/${images[0]}` : null;
-
-      return (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <img
-              src={imageUrl}
-              className="max-w-16 max-h-16 object-cover cursor-pointer rounded-md"
-              onClick={() => setOpen(true)}
-            />
-          </DialogTrigger>
-          <DialogContent className="flex items-center justify-center">
-            <img
-              src={imageUrl}
-              alt="Asset Enlarged"
-              className="max-w-full max-h-[80vh] rounded-md"
-            />
-          </DialogContent>
-        </Dialog>
-      );
+      const images = row.original.file
+        ? row.original.file.split(",").map((img) => `http://localhost/itam_api/${img.trim()}`)
+        : [];
+  
+      return <ImageDialog imageUrls={images} />;
     },
   },
   {
@@ -177,19 +161,22 @@ export const columns: ColumnDef<Asset>[] = [
     header: "Asset Value",
     cell: ({ row }) => {
       const assetAmount = row.original.asset_amount;
-      const aging = differenceInMonths(new Date(), new Date(row.original.purchase_date));
-  
+      const aging = differenceInMonths(
+        new Date(),
+        new Date(row.original.purchase_date)
+      );
+
       const rawValue = assetAmount - (assetAmount / 36) * aging;
       const assetValue = Math.max(rawValue, 0);
-  
+
       const formattedAssetValue = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "Php",
       }).format(assetValue);
-  
+
       return <div>{formattedAssetValue}</div>;
     },
-  },  
+  },
   {
     accessorKey: "warranty_duration",
     header: "Warranty Duration",
@@ -224,9 +211,9 @@ export const columns: ColumnDef<Asset>[] = [
     cell: ({ row }) => {
       const purchaseDate = new Date(row.original.purchase_date);
       const today = new Date();
-      
+
       const agingInMonths = differenceInMonths(today, purchaseDate);
-      
+
       return <div className="text-center">{agingInMonths}</div>;
     },
   },

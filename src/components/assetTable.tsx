@@ -69,8 +69,8 @@ interface AssetDataTableProps<TData, TValue> {
 export function AssetDataTable<TData, TValue>({
   columns,
   data,
-  isLastTab,
-}: AssetDataTableProps<TData, TValue> & { isLastTab: boolean }) {
+  selectedTab,
+}: AssetDataTableProps<TData, TValue> & { selectedTab: number }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -86,7 +86,7 @@ export function AssetDataTable<TData, TValue>({
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-  onColumnFiltersChange: setColumnFilters,
+    onColumnFiltersChange: setColumnFilters,
     onRowSelectionChange: setRowSelection,
 
     state: {
@@ -108,7 +108,7 @@ export function AssetDataTable<TData, TValue>({
     id: null,
     name: "",
   });
-  
+
   const initialized = useRef(false);
   useEffect(() => {
     if (!initialized.current) {
@@ -136,56 +136,59 @@ export function AssetDataTable<TData, TValue>({
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="max-w-md min-w-sm"
           />
-{isLastTab && (
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-[200px] justify-between"
-              >
-                {selectedType.name || "Filter Type"}
-                <ChevronsUpDown className="opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
-              <Command>
-                <CommandInput placeholder="Search type..." className="h-9" />
-                <CommandList>
-                  <CommandEmpty>No type found.</CommandEmpty>
-                  <CommandGroup>
-                    {type.map((typeItem) => (
-                      <CommandItem
-                        key={typeItem.type_id}
-                        value={typeItem.type_id ?? ""}
-                        onSelect={() => {
-                          setSelectedType({ id: typeItem.type_id, name: typeItem.type_name });
-                          setTypeID(typeItem.type_id);
-                          setColumnFilters((prev) => [
-                            ...prev.filter((f) => f.id !== "type_id"),
-                            { id: "type_id", value: [typeItem.type_id] },
-                          ]);
-                          
-                          setOpen(false);
-                        }}
-                      >
-                        {typeItem.type_name}
-                        <Check
-                          className={cn(
-                            "ml-auto",
-                            selectedType.id === typeItem.type_id
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>)}
+          {selectedTab === 4 && (
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="min-w-max justify-between"
+                >
+                  {selectedType.name || "Filter Type"}
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="min-w-max p-0">
+                <Command>
+                  <CommandInput placeholder="Search type..." className="h-9" />
+                  <CommandList>
+                    <CommandEmpty>No type found.</CommandEmpty>
+                    <CommandGroup>
+                      {type.map((typeItem) => (
+                        <CommandItem
+                          key={typeItem.type_id}
+                          value={typeItem.type_id ?? ""}
+                          onSelect={() => {
+                            setSelectedType({
+                              id: typeItem.type_id,
+                              name: typeItem.type_name,
+                            });
+                            setTypeID(typeItem.type_id);
+                            setColumnFilters((prev) => [
+                              ...prev.filter((f) => f.id !== "type_id"),
+                              { id: "type_id", value: [typeItem.type_id] },
+                            ]);
+                            setOpen(false);
+                          }}
+                        >
+                          {typeItem.type_name}
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              selectedType.id === typeItem.type_id
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 items-center">
@@ -243,7 +246,7 @@ export function AssetDataTable<TData, TValue>({
                               column.toggleVisibility(!!value)
                             }
                           >
-                             {column.id.replaceAll("_", " ")}
+                            {column.id.replaceAll("_", " ")}
                           </DropdownMenuCheckboxItem>
                         );
                       })}
@@ -295,7 +298,10 @@ export function AssetDataTable<TData, TValue>({
               ))
             ) : (
               <TableRow className="border-gray-300">
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
