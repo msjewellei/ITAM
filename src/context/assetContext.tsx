@@ -53,6 +53,11 @@ interface AssetContextType {
     asset_id: number,
     updatedData: Partial<Asset>
   ) => Promise<any>;
+  setInsurance: Dispatch<SetStateAction<any>>;
+  insurance: any;
+  setInsuranceDialogOpen: Dispatch<SetStateAction<boolean>>;
+  isInsuranceDialogOpen: boolean;
+  handleInsuranceSave: (insuranceData: any) => void;
 }
 const AssetContext = createContext<AssetContextType | undefined>(undefined);
 export const AssetProvider = ({ children }: { children: ReactNode }) => {
@@ -64,7 +69,10 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   const [internalAssets, setInternalAssets] = useState<Asset[]>([]);
   const [assetID, setAssetID] = useState<number | null>(null);
   const [reload ,setReload] = useState(0);
-  const location = useLocation(); // Hook to access location/state
+  const location = useLocation();
+  const [insurance, setInsurance] = useState(null);
+  const [isInsuranceDialogOpen, setInsuranceDialogOpen] = useState(false);
+
   let url = "http://localhost/itam_api/asset.php?resource=asset";
   const getAssets = async () => {
     try {
@@ -195,6 +203,11 @@ useEffect(() => {
       console.error("Error updating asset:", error);
     }
   };
+
+  const handleInsuranceSave = (insuranceData: SetStateAction<null>) => {
+    setInsurance(insuranceData);
+    setInsuranceDialogOpen(false);
+  };
   
   
   const value = {
@@ -213,7 +226,12 @@ useEffect(() => {
     currentAsset,
     updateAsset,
     internalAssets,
-    filteredInternalAssets
+    filteredInternalAssets,
+    setInsurance,
+    insurance,
+    setInsuranceDialogOpen,
+    isInsuranceDialogOpen,
+    handleInsuranceSave,
   };
   return (
     <AssetContext.Provider value={value}>{children}</AssetContext.Provider>
