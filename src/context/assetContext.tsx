@@ -29,7 +29,9 @@ interface Asset {
   notes: string;
   file: File[];
   brand: string;
-  insurance: string;
+  insurance_coverage: string;
+  insurance_date_from: Date;
+  insurance_date_to: Date;
   status_id: string;
   asset_condition_id: string;
 }

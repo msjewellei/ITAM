@@ -66,7 +66,6 @@ const formSchema = z.object({
   purchase_date: z.date(),
   notes: z.string(),
   brand: z.string(),
-  insurance: z.string(),
   file: z.array(z.instanceof(File)).optional(),
   insurance_coverage: z.string().optional(),
   insurance_date_from: z.date().optional(),
@@ -112,7 +111,9 @@ function AssetForm() {
       purchase_date: new Date(),
       notes: "",
       brand: "",
-      insurance: "",
+      insurance_coverage: "",
+      insurance_date_from: new Date(),
+      insurance_date_to: new Date(),
       file: [],
     },
   });
@@ -164,9 +165,10 @@ function AssetForm() {
     try {
       const finalValues = {
         ...values,
-        insurance: insurance ? JSON.stringify(insurance) : null,
+        insurance_coverage: insurance.coverage || "",
+        insurance_date_from: insurance.dateFrom || "",
+        insurance_date_to: insurance.dateTo || "",
       };
-
       const response = await insertAsset(finalValues);
 
       if (response && Object.keys(response).length > 0) {
