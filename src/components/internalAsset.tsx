@@ -41,13 +41,11 @@ function InternalAsset() {
                 key={category.sub_category_id}
                 value={category.sub_category_id.toString()}
               >
-                <div className="flex-1 min-h-0">
-                  <AssetDataTable
-                    columns={columns}
-                    data={data}
-                    selectedTab={index}
-                  />
-                </div>
+                <AssetDataTable
+                  columns={columns}
+                  data={data}
+                  selectedTab={index}
+                />
               </TabsContent>
             );
           })}
