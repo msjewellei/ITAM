@@ -4,6 +4,7 @@ import {
   Package,
   UserRound,
   Wrench,
+  Settings
 } from "lucide-react";
 
 export const links = [
@@ -42,4 +43,10 @@ export const links = [
     ),
     label: "Issuance",
   },
+  {
+    path: "/Settings",
+    icon: Settings,
+    label: "Settings",
+  },
+  
 ];

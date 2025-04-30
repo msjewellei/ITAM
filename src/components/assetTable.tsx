@@ -126,140 +126,140 @@ export function AssetDataTable<TData, TValue>({
   }, []);
 
   return (
-    <div className="pl-10 pb-10 pr-10">
-      <div className="flex justify-between">
-        <div className="flex items-center py-4 justify-start gap-4">
-          <Input
-            type="text"
-            placeholder="Search"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="max-w-md min-w-sm"
-          />
-          {selectedTab === 4 && (
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className="min-w-max justify-between"
-                >
-                  {selectedType.name || "Filter Type"}
-                  <ChevronsUpDown className="opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="min-w-max p-0">
-                <Command>
-                  <CommandInput placeholder="Search type..." className="h-9" />
-                  <CommandList>
-                    <CommandEmpty>No type found.</CommandEmpty>
-                    <CommandGroup>
-                      {type.map((typeItem) => (
-                        <CommandItem
-                          key={typeItem.type_id}
-                          value={typeItem.type_id ?? ""}
-                          onSelect={() => {
-                            setSelectedType({
-                              id: typeItem.type_id,
-                              name: typeItem.type_name,
-                            });
-                            setTypeID(typeItem.type_id);
-                            setColumnFilters((prev) => [
-                              ...prev.filter((f) => f.id !== "type_id"),
-                              { id: "type_id", value: [typeItem.type_id] },
-                            ]);
-                            setOpen(false);
-                          }}
-                        >
-                          {typeItem.type_name}
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              selectedType.id === typeItem.type_id
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          )}
-        </div>
-
-        <div className="flex justify-end gap-2 items-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
+    <div className="pl-10 pr-10">
+     <div className="flex flex-wrap items-center gap-4 py-4">
+  <div className="flex flex-wrap items-center gap-4 flex-1 min-w-[200px]">
+    <Input
+      type="text"
+      placeholder="Search"
+      value={globalFilter}
+      onChange={(e) => setGlobalFilter(e.target.value)}
+      className="flex-1 min-w-[150px] max-w-md"
+    />
+    {selectedTab === 4 && (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="min-w-max justify-between"
+          >
+            {selectedType.name || "Filter Type"}
+            <ChevronsUpDown className="opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="min-w-max p-0">
+          <Command>
+            <CommandInput placeholder="Search type..." className="h-9" />
+            <CommandList>
+              <CommandEmpty>No type found.</CommandEmpty>
+              <CommandGroup>
+                {type.map((typeItem) => (
+                  <CommandItem
+                    key={typeItem.type_id}
+                    value={typeItem.type_id ?? ""}
+                    onSelect={() => {
+                      setSelectedType({
+                        id: typeItem.type_id,
+                        name: typeItem.type_name,
+                      });
+                      setTypeID(typeItem.type_id);
+                      setColumnFilters((prev) => [
+                        ...prev.filter((f) => f.id !== "type_id"),
+                        { id: "type_id", value: [typeItem.type_id] },
+                      ]);
+                      setOpen(false);
+                    }}
+                  >
+                    {typeItem.type_name}
+                    <Check
                       className={cn(
-                        "w-[30px] justify-center text-center font-normal",
-                        !date && "text-muted-foreground"
+                        "ml-auto",
+                        selectedType.id === typeItem.type_id
+                          ? "opacity-100"
+                          : "opacity-0"
                       )}
-                    >
-                      <CalendarIcon className="m-auto h-4 w-4 p-auto" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      initialFocus
                     />
-                  </PopoverContent>
-                </Popover>
-              </TooltipTrigger>
-              <TooltipContent>Filter by Date</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-[30px] justify-center text-center font-normal"
-                    >
-                      <ListFilter className="m-auto h-4 w-4 p-auto" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {table
-                      .getAllColumns()
-                      .filter((column) => column.getCanHide())
-                      .map((column) => {
-                        return (
-                          <DropdownMenuCheckboxItem
-                            key={column.id}
-                            className="capitalize"
-                            checked={column.getIsVisible()}
-                            onCheckedChange={(value) =>
-                              column.toggleVisibility(!!value)
-                            }
-                          >
-                            {column.id.replaceAll("_", " ")}
-                          </DropdownMenuCheckboxItem>
-                        );
-                      })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Filter Columns</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    )}
+  </div>
+
+  {/* RIGHT: Calendar + Column Filter */}
+  <div className="flex items-center gap-2 flex-shrink-0">
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-[30px] justify-center text-center font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="m-auto h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </TooltipTrigger>
+        <TooltipContent>Filter by Date</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-[30px] justify-center text-center font-normal"
+              >
+                <ListFilter className="m-auto h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id.replaceAll("_", " ")}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Filter Columns</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  </div>
+</div>
+
       <div className="flex flex-col min-h-[calc(100vh-25rem)] max-h-[calc(100vh-25rem)] overflow-auto">
         <Table>
           <TableHeader className="bg-[#f0f1f3]">

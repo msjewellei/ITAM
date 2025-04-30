@@ -13,6 +13,7 @@ import RepairForm from "./components/repairForm";
 import IssuanceForm from "./components/issuanceForm";
 import { Toaster } from "./components/ui/sonner";
 import { UpdateAsset } from "./components/editAsset";
+import SettingsPage from "./components/settings";
 
 const routes = [
   { path: "/", element: <Dashboard /> },
@@ -26,13 +27,15 @@ const routes = [
   { path: "/repair/add", element: <RepairForm /> },
   { path: "/issuance/add", element: <IssuanceForm /> },
   { path: "/assets/update", element: <UpdateAsset /> },
+  { path: "/settings", element: <SettingsPage /> },
 ];
 
 function App() {
   return (
     <>
       <Header />
-      <div className="flex flex-row bg-slate-200 min-h-[calc(100dvh-85px)] h-full">
+      <div className="flex flex-row bg-slate-200 min-h-screen w-full overflow-x-hidden">
+
         <Sidebar />
         <Routes>
           {routes.map(({ path, element }) => (

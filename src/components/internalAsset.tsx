@@ -13,19 +13,21 @@ function InternalAsset() {
 
   return (
     assets && (
-      <div className="bg-white rounded-xl min-h-[calc(100vh-14rem)] max-h-[calc(100vh-13.10rem)] flex flex-col">
+      <div className="bg-white rounded-xl min-h-[calc(100vh-14rem)] flex flex-col">
         <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="w-full">
-            {subcategory.map((category) => (
-              <TabsTrigger
-                key={category.sub_category_id}
-                value={category.sub_category_id.toString()}
-                className="uppercase"
-              >
-                {category.sub_category_name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="w-full overflow-x-auto">
+            <TabsList className="w-full whitespace-nowrap">
+              {subcategory.map((category) => (
+                <TabsTrigger
+                  key={category.sub_category_id}
+                  value={category.sub_category_id.toString()}
+                  className="uppercase"
+                >
+                  {category.sub_category_name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {subcategory.map((category, index) => {
             const data = assets.filter(
