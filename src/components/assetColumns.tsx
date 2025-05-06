@@ -13,8 +13,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { conditionVariants, statusVariants } from "./badges";
 import { Badge } from "./ui/badge";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { differenceInMonths } from "date-fns";
 import ImageDialog from "./pictureDialog";

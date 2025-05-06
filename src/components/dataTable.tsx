@@ -35,6 +35,7 @@ import {
   Check,
   ChevronsUpDown,
   ListFilter,
+  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -60,17 +61,25 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useMisc } from "@/context/miscellaneousContext";
+import { Link } from "react-router-dom";
 
-interface AssetDataTableProps<TData, TValue> {
+interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  selectedTab?: number;
+  showAddButton?: boolean;
+  addButtonPath?: string;
+  hiddenColumns?: string[];
 }
 
-export function AssetDataTable<TData, TValue>({
+export function DataTable<TData, TValue>({
   columns,
   data,
+  showAddButton,
+  addButtonPath,
   selectedTab,
-}: AssetDataTableProps<TData, TValue> & { selectedTab: number }) {
+  hiddenColumns,
+}: DataTableProps<TData, TValue> & { selectedTab?: number }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -108,22 +117,17 @@ export function AssetDataTable<TData, TValue>({
     id: null,
     name: "",
   });
-
   const initialized = useRef(false);
+
   useEffect(() => {
-    if (!initialized.current) {
-      table.getColumn("type_id")?.toggleVisibility(false);
-      table.getColumn("warranty_duration")?.toggleVisibility(false);
-      table.getColumn("asset_amount")?.toggleVisibility(false);
-      table.getColumn("warranty_due_date")?.toggleVisibility(false);
-      table.getColumn("purchase_date")?.toggleVisibility(false);
-      table.getColumn("aging")?.toggleVisibility(false);
-      table.getColumn("specifications")?.toggleVisibility(false);
-      table.getColumn("notes")?.toggleVisibility(false);
-      table.getColumn("insurance")?.toggleVisibility(false);
+    if (!initialized.current && hiddenColumns?.length) {
+      hiddenColumns.forEach((columnId) => {
+        table.getColumn(columnId)?.toggleVisibility(false);
+      });
       initialized.current = true;
     }
-  }, []);
+  }, [table, hiddenColumns]);
+  
 
   return (
     <div className="pl-10 pr-10">
@@ -136,7 +140,7 @@ export function AssetDataTable<TData, TValue>({
       onChange={(e) => setGlobalFilter(e.target.value)}
       className="flex-1 min-w-[150px] max-w-md"
     />
-    {selectedTab === 4 && (
+    {selectedTab !== undefined && selectedTab === 4 && (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -257,6 +261,26 @@ export function AssetDataTable<TData, TValue>({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
+    {showAddButton && addButtonPath && (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger>
+        <Button
+          variant="outline"
+          className="w-[30px] justify-center text-center font-normal"
+          asChild
+        >
+          <Link to={addButtonPath}>
+            <Plus className="m-auto h-4 w-4 p-auto" />
+          </Link>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Add New Entry</p>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+)}
   </div>
 </div>
 

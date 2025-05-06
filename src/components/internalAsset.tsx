@@ -1,6 +1,6 @@
 import { useAsset } from "@/context/assetContext";
 import { columns } from "./assetColumns";
-import { AssetDataTable } from "./assetTable";
+import { DataTable } from "./dataTable";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { TabsContent } from "@radix-ui/react-tabs";
 import { useMisc } from "@/context/miscellaneousContext";
@@ -41,10 +41,11 @@ function InternalAsset() {
                 key={category.sub_category_id}
                 value={category.sub_category_id.toString()}
               >
-                <AssetDataTable
+                <DataTable
                   columns={columns}
                   data={data}
                   selectedTab={index}
+                  hiddenColumns={["type_id", "warranty_duration", "asset_amount", "warranty_due_date", "purchase_date", "aging", "specifications", "notes", "insurance",]}
                 />
               </TabsContent>
             );

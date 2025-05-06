@@ -101,7 +101,7 @@ function BorrowForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const asset = filteredAssets.find(
+    const asset = filteredInternalAssets.find(
       (cat) => cat.asset_name === values.asset_id
     );
     values.asset_id = asset.asset_id
