@@ -45,8 +45,11 @@ const formSchema = z.object({
   purchase_date: z.date(),
   notes: z.string(),
   brand: z.string(),
-  insurance: z.string(),
-  file: z.instanceof(File),
+  insurance_id: z.string(),
+  insurance_coverage: z.string(),
+  insurance_date_from: z.date(),
+  insurance_date_to: z.date(),
+  file: z.union([z.instanceof(File), z.string()]).optional(),
   asset_condition_id: z.string(),
 });
 
@@ -73,7 +76,10 @@ export function UpdateAsset() {
       purchase_date: new Date(),
       notes: "",
       brand: "",
-      insurance: "",
+      insurance_id: "",
+      insurance_coverage: "",
+      insurance_date_from: new Date(),
+      insurance_date_to: new Date(),
       file: undefined,
       asset_condition_id: "",
     },
@@ -92,6 +98,7 @@ export function UpdateAsset() {
     condition,
     setTypeID,
   } = useMisc();
+  // const { getInsuranceByAsset } = useAsset();
 
   useEffect(() => {
     if (currentAsset) {
@@ -100,6 +107,7 @@ export function UpdateAsset() {
         availability_status_id: String(currentAsset.status_id),
         warranty_due_date: new Date(currentAsset.warranty_due_date),
         purchase_date: new Date(currentAsset.purchase_date),
+        file: currentAsset.file ?? "",
       });
 
       setCategoryID(Number(currentAsset.category_id));
@@ -118,46 +126,43 @@ export function UpdateAsset() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log("Form values:", values);
-    values.category_id = category.find((cat) => cat.category_name === values.category_id)?.category_id;
+    values.category_id = category.find(
+      (cat) => cat.category_name === values.category_id
+    )?.category_id;
     values.sub_category_id = subcategory.find(
       (sub) => sub.sub_category_name === values.sub_category_id
     )?.sub_category_id;
-  
+
     if (!currentAsset?.asset_id) {
       console.error("Missing asset_id!");
       toast.error("Asset ID is missing, cannot update the asset.");
       return;
     }
-  
+
     const warrantyDueDate = format(values.warranty_due_date, "yyyy-MM-dd");
     const purchaseDate = format(values.purchase_date, "yyyy-MM-dd");
-  
+
     try {
       const response = await updateAsset(currentAsset.asset_id, {
         ...values,
         warranty_due_date: warrantyDueDate,
         purchase_date: purchaseDate,
       });
-  
+
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset updated successfully!");
       } else {
-        toast.error(`Failed to update asset: ${response?.error || "Unknown error"}`);
+        toast.error(
+          `Failed to update asset: ${response?.error || "Unknown error"}`
+        );
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
   }
-  
+
   const p = form.watch("purchase_date");
   const w = form.watch("warranty_due_date");
-
-  useEffect(() => {
-    console.log("Category ID: ", categoryID);
-    console.log("Subcategory ID: ", subCategoryID);
-  }, [categoryID, subCategoryID]);
-
-
 
 
   return (
@@ -187,7 +192,8 @@ export function UpdateAsset() {
                     <FormItem>
                       <FormLabel>Asset ID</FormLabel>
                       <FormControl>
-                        <Input disabled
+                        <Input
+                          disabled
                           type="text"
                           placeholder="Asset ID"
                           className="text-sm sm:text-base"
@@ -413,23 +419,102 @@ export function UpdateAsset() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="insurance"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Insurance</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          className="text-sm sm:text-base"
-                          placeholder="Ex. Provider: ABC"
+               {/* {insuranceId && (
+                  <div className="border border-dashed border-green-500 rounded-md p-4 space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="insurance_coverage"
+                      render={() => (
+                        <FormItem>
+                          <FormLabel>Coverage</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Coverage"
+                              className="text-sm sm:text-base"
+                              value={insurance?.coverage || ""}
+
+                              disabled
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <FormField
+                          control={form.control}
+                          name="insurance_date_from"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>Date From</FormLabel>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal text-sm",
+                                    !insurance?.dateFrom &&
+                                      "text-muted-foreground",
+                                    "cursor-default"
+                                  )}
+                                  disabled
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
+                                  {insurance?.dateFrom ? (
+                                    new Date(
+                                      insurance.dateFrom
+                                    ).toLocaleDateString()
+                                  ) : (
+                                    <span className="text-[#737373]">
+                                      Choose Date
+                                    </span>
+                                  )}
+                                </Button>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      </div>
+                      <div className="w-6 text-center text-lg pb-1">-</div>
+                      <div className="flex-1">
+                        <FormField
+                          control={form.control}
+                          name="insurance_date_to"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>Date To</FormLabel>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal text-sm",
+                                    !insurance?.dateTo &&
+                                      "text-muted-foreground",
+                                    "cursor-default"
+                                  )}
+                                  disabled
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
+                                  {insurance?.dateTo ? (
+                                    new Date(
+                                      insurance.dateTo
+                                    ).toLocaleDateString()
+                                  ) : (
+                                    <span className="text-[#737373]">
+                                      Choose Date
+                                    </span>
+                                  )}
+                                </Button>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )} */}
               </div>
 
               <div className="flex flex-col gap-4">
@@ -622,23 +707,64 @@ export function UpdateAsset() {
                 <FormField
                   control={form.control}
                   name="file"
-                  render={({ field: { onChange, value, ...rest } }) => (
-                    <FormItem>
-                      <div className="grid w-full max-w-sm items-center gap-1.5">
-                        <FormLabel htmlFor="picture">Picture</FormLabel>
-                        <FormControl>
-                          <Input
-                            id="picture"
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => onChange(e.target.files?.[0])}
-                            {...rest}
-                          />
-                        </FormControl>
-                        
-                      </div>
-                    </FormItem>
-                  )}
+                  render={({ field: { onChange, value, ...rest } }) => {
+                    const filesArray = Array.isArray(value)
+                      ? value
+                      : typeof value === "string" && value.length > 0
+                      ? value.split(",").map((v) => v.trim())
+                      : [];
+
+                    return (
+                      <FormItem>
+                        <div className="grid w-full items-center gap-1.5">
+                          <FormLabel htmlFor="picture">Picture</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="picture"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => onChange(e.target.files?.[0])}
+                              {...rest}
+                            />
+                          </FormControl>
+
+                          {typeof value === "string" &&
+                            !value.includes(",") &&
+                            value && (
+                              <>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Current file: {value}
+                                </p>
+                                <img
+                                  src={`http://localhost/itam_api/${value}`}
+                                  alt="Uploaded"
+                                  className="mt-2 rounded-md border max-w-full h-auto"
+                                  style={{ maxWidth: "150px" }}
+                                />
+                              </>
+                            )}
+
+                          {filesArray.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-sm text-gray-600 mb-1">
+                                Uploaded files:
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {filesArray.map((fileName, index) => (
+                                  <img
+                                    key={index}
+                                    src={`http://localhost/itam_api/${fileName}`}
+                                    alt={`Uploaded ${index}`}
+                                    className="max-w-[100px] max-h-[100px]"
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
 

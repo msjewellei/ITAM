@@ -245,8 +245,7 @@ export const columns: ColumnDef<Asset>[] = [
             <DropdownMenuItem asChild>
               <Link
                 to="/assets/update"
-                state={{ assetId: asset.asset_id }} // Pass asset_id through state
-                onClick={() => console.log("Asset ID:", asset.asset_id)}
+                state={{ assetId: asset.asset_id }}
               >
                 Edit asset details
               </Link>
