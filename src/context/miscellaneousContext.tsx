@@ -58,6 +58,12 @@ interface Type {
   type_name: string;
 }
 
+interface MappedType {
+  map_id: number;
+  subcategory_id: number;
+  type_id: string;
+}
+
 interface Condition {
   asset_condition_id: number;
   asset_condition_name: string;
@@ -104,6 +110,7 @@ interface MiscContextType {
   userID: number | null;
   setUserID: Dispatch<SetStateAction<number | null>>;
   unitID: number | null;
+  mappedtype: MappedType[];
 }
 
 const MiscContext = createContext<MiscContextType | undefined>(undefined);
@@ -125,6 +132,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
   const [departmentID, setDepartmentID] = useState<number | null>(null);
   const [unitID, setUnitID] = useState<number | null>(null);
   const [userID, setUserID] = useState<number | null>(null);
+  const [mappedtype, setMappedType] = useState<SubType[]>([]);
 
   let url = "http://localhost/itam_api/asset.php?resource=";
   const getResource = async (resource: string) => {
@@ -146,6 +154,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       const conditions = await getResource("condition");
       const statuses = await getResource("status");
       const repairUrgencies = await getResource("repairUrgency");
+      const mappedtypes = await getResource("mappedtype");
       setCategory(categories);
       setSubcategory(subcategories);
       setType(types);
@@ -156,6 +165,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       setDepartment(mockDepartments);
       setUnit(mockUnits);
       setUser(mockUsers);
+      setMappedType(mappedtypes);
     };
     setup();
   }, []);
@@ -227,6 +237,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     userID,
     setUserID,
     unitID,
+    mappedtype
   };
   return <MiscContext.Provider value={value}>{children}</MiscContext.Provider>;
 };

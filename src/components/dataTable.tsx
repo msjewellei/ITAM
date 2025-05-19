@@ -70,6 +70,8 @@ interface DataTableProps<TData, TValue> {
   showAddButton?: boolean;
   addButtonPath?: string;
   hiddenColumns?: string[];
+  width?: string;
+  showDateFilter?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -79,6 +81,8 @@ export function DataTable<TData, TValue>({
   addButtonPath,
   selectedTab,
   hiddenColumns,
+  width,
+  showDateFilter,
 }: DataTableProps<TData, TValue> & { selectedTab?: number }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -109,7 +113,7 @@ export function DataTable<TData, TValue>({
 
   const [date, setDate] = React.useState<Date>();
   const [open, setOpen] = React.useState(false);
-  const { type, typeID, setTypeID } = useMisc();
+  const { type, setTypeID } = useMisc();
   const [selectedType, setSelectedType] = useState<{
     id: number | null;
     name: string;
@@ -130,7 +134,8 @@ export function DataTable<TData, TValue>({
   
 
   return (
-    <div className="pl-10 pr-10">
+    <div className={cn("mx-auto", !width && "pl-10 pr-10")} style={{ width }}>
+
      <div className="flex flex-wrap items-center gap-4 py-4">
   <div className="flex flex-wrap items-center gap-4 flex-1 min-w-[200px]">
     <Input
@@ -195,8 +200,9 @@ export function DataTable<TData, TValue>({
     )}
   </div>
 
-  {/* RIGHT: Calendar + Column Filter */}
+  
   <div className="flex items-center gap-2 flex-shrink-0">
+  {showDateFilter && (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
@@ -225,6 +231,7 @@ export function DataTable<TData, TValue>({
         <TooltipContent>Filter by Date</TooltipContent>
       </Tooltip>
     </TooltipProvider>
+    )}
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>

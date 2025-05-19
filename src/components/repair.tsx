@@ -26,6 +26,7 @@ export default function Repair() {
                   "repair_cost",
                   "department_name",
                 ]}
+                showDateFilter={true}
               />
             </div>
           </div>

@@ -1,40 +1,37 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable }  from "./dataTable";
 
-export const categoryColumns: ColumnDef<any>[] = [
-  {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => row.original.id,
-  },
+export const typeColumns: ColumnDef<any>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => row.original.name,
   },
   {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => row.original.description,
+    accessorKey: "classification",
+    header: "Classification",
   },
   {
-    id: "actions",
-    header: "Actions",
-    cell: () => <div className="text-right">Edit</div>,
+    accessorKey: "parent",
+    header: "Parent",
   },
 ];
 
-// Dummy data
-const categoryData = [
-  { id: 1, name: "Electronics", description: "Devices and gadgets" },
-  { id: 2, name: "Furniture", description: "Chairs, desks, etc." },
+export const subcategoryColumns: ColumnDef<any>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => row.original.sub_category_name,
+  },
+  {
+    accessorKey: "classification",
+    header: "Classification",
+    cell: () => "Subcategory",
+  },
+  {
+    accessorKey: "category_name",
+    header: "Parent",
+    cell: ({ row }) => {
+      console.log("Row data:", row.original);
+      return row.original.category_name || "Missing";
+    },
+  },
 ];
-
-export default function CategoryTable() {
-  return (
-    <DataTable
-      columns={categoryColumns}
-      data={categoryData}
-    />
-  );
-}

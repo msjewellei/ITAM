@@ -46,6 +46,7 @@ function InternalAsset() {
                   data={data}
                   selectedTab={index}
                   hiddenColumns={["type_id", "warranty_duration", "asset_amount", "warranty_due_date", "purchase_date", "aging", "specifications", "notes", "insurance",]}
+                  showDateFilter={true}
                 />
               </TabsContent>
             );

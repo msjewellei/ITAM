@@ -19,6 +19,7 @@ export default function Issuance() {
                 showAddButton
                 addButtonPath="/issuance/add"
                 hiddenColumns={["remarks"]}
+                showDateFilter={true}
               />
             </div>
           </div>

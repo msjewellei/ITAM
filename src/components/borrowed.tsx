@@ -17,6 +17,7 @@ export default function Borrowed() {
               showAddButton
               addButtonPath="/borrowed/add"
               hiddenColumns={["due_date", "return_date", "duration", "remarks"]}
+              showDateFilter={true}
             />
           </div>
         </div>

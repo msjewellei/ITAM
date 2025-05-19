@@ -259,187 +259,117 @@ function AssetForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="category_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              setCategoryID(() => {
-                                const item = category.find(
-                                  (c) => c.category_name === value
-                                );
+ <FormField
+  control={form.control}
+  name="sub_category_id"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-black">Subcategory or Type</FormLabel>
+      <FormControl>
+        <Popover
+          open={open}
+          onOpenChange={(isOpen) => {
+            setOpen(isOpen);
+            if (isOpen) {
+              setFilteredResults([...subcategory, ...type]);
+              setMatches([]);
+            }
+          }}
+        >
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between text-left font-normal truncate"
+            >
+              <span className={field.value ? "text-black" : "text-gray-500"}>
+                {field.value || "Select or type..."}
+              </span>
+              <ChevronsUpDown className="opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="min-w-[var(--radix-popover-trigger-width)] w-full p-0">
+            <Command>
+              <CommandInput
+                placeholder="Search subcategories or types..."
+                className="h-9 px-3 text-sm text-black focus:ring-0 focus:outline-none"
+                value={field.value}
+                onValueChange={(val) => {
+                  field.onChange(val);
+                  const typeResults = typeFuse.search(val);
+                  const subcatResults = subcategoryFuse.search(val);
+                  setMatches([...typeResults, ...subcatResults]);
 
-                                if (item) {
-                                  return Number(item.category_id);
-                                }
-                                return null;
-                              });
-                            }}
-                            value={field.value}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {category.map((cat) => (
-                                <SelectItem
-                                  key={cat.category_name}
-                                  value={cat.category_name}
-                                >
-                                  {cat.category_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {filteredSubcategories.length > 0 && (
-                    <FormField
-                      control={form.control}
-                      name="sub_category_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-black">
-                            Subcategory
-                          </FormLabel>
-                          <FormControl>
-                            <Popover
-                              open={open}
-                              onOpenChange={(isOpen) => {
-                                setOpen(isOpen);
-                                if (isOpen) setFilteredResults(subcategory);
-                              }}
-                            >
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  aria-expanded={open}
-                                  className="w-full justify-between text-left font-normal truncate"
-                                >
-                                  <span
-                                    className={
-                                      field.value
-                                        ? "text-black"
-                                        : "text-gray-500"
-                                    }
-                                  >
-                                    {field.value ||
-                                      "Select or Type Subcategory"}
-                                  </span>
-                                  <ChevronsUpDown className="opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="min-w-[var(--radix-popover-trigger-width)] w-full p-0">
-                                <Command>
-                                  <CommandInput
-                                    placeholder="Search or type a subcategory..."
-                                    className="h-9 px-3 text-sm text-black focus:ring-0 focus:outline-none"
-                                    value={field.value}
-                                    onValueChange={(val) => {
-                                      field.onChange(val);
-                                      const hasMatch = [
-                                        ...typeFuse.search(val),
-                                        ...subcategoryFuse.search(val),
-                                      ];
-                                      setMatches(hasMatch);
-                                      setFilteredResults(subcategory);
-                                      if (hasMatch.length != 0) {
-                                        setError("sub_category_id", {
-                                          type: "manual",
-                                          message: "",
-                                        });
-                                      } else {
-                                        clearErrors("sub_category_id");
-                                      }
-                                    }}
-                                  />
-                                  <CommandList>
-                                    <CommandEmpty>
-                                      {matches.length > 0
-                                        ? "There is similar in stocks, check it"
-                                        : "No subcategory found."}
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                      {filteredResults.map((sub) => (
-                                        <CommandItem
-                                          key={sub.sub_category_name}
-                                          value={sub.sub_category_name}
-                                          onSelect={() => {
-                                            field.onChange(
-                                              sub.sub_category_name
-                                            );
-                                            setSubCategoryID(
-                                              Number(sub.sub_category_id)
-                                            );
-                                            setOpen(false);
-                                          }}
-                                          className="text-sm text-black"
-                                        >
-                                          {sub.sub_category_name}
-                                          <Check
-                                            className={cn(
-                                              "ml-auto",
-                                              field.value ===
-                                                sub.sub_category_name
-                                                ? "opacity-100"
-                                                : "opacity-0"
-                                            )}
-                                          />
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  setFilteredResults([
+                    ...subcategory.filter((s) =>
+                      s.sub_category_name.toLowerCase().startsWith(val.toLowerCase())
+                    ),
+                    ...type.filter((t) =>
+                      t.type_name.toLowerCase().startsWith(val.toLowerCase())
+                    ),
+                  ]);
 
-                  {subCategoryID === 5 && categoryID === 2 && (
-                    <FormField
-                      control={form.control}
-                      name="type_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Type</FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              value={field.value}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {type.map((type) => (
-                                  <SelectItem
-                                    key={type.type_name}
-                                    value={type.type_name}
-                                  >
-                                    {type.type_name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  if (typeResults.length + subcatResults.length > 0) {
+                    clearErrors("combined_id");
+                  } else {
+                    setError("combined_id", {
+                      type: "manual",
+                      message: "No match found",
+                    });
+                  }
+                }}
+              />
+              <CommandList>
+                <CommandEmpty>
+                  {matches.length > 0
+                    ? "There are similar items in stock, check them"
+                    : "No results found."}
+                </CommandEmpty>
+                <CommandGroup>
+                  {filteredResults.map((item) => (
+                    <CommandItem
+                      key={item.sub_category_id || item.type_id}
+                      value={
+                        item.sub_category_name || item.type_name || "Unnamed"
+                      }
+                      onSelect={() => {
+                        const value =
+                          item.sub_category_name || item.type_name;
+                        field.onChange(value);
+
+                        if (item.sub_category_id) {
+                          setSubCategoryID(Number(item.sub_category_id));
+                        } else if (item.type_id) {
+                          setSubCategoryID(null); // Or reset if needed
+                        }
+
+                        setOpen(false);
+                      }}
+                      className="text-sm text-black"
+                    >
+                      {item.sub_category_name || item.type_name}
+                      <Check
+                        className={cn(
+                          "ml-auto",
+                          field.value ===
+                            (item.sub_category_name || item.type_name)
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
                   {categoryID === 1 && (
                     <>
