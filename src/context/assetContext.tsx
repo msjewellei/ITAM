@@ -86,6 +86,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
       console.log(error);
     }
   };
+  
 
   const insertAsset = async (data: Asset) => {
     try {

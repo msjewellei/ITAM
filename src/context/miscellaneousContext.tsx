@@ -61,7 +61,8 @@ interface Type {
 interface MappedType {
   map_id: number;
   subcategory_id: number;
-  type_id: string;
+  type_id: number;
+  parent_id: number;
 }
 
 interface Condition {
@@ -111,6 +112,7 @@ interface MiscContextType {
   setUserID: Dispatch<SetStateAction<number | null>>;
   unitID: number | null;
   mappedtype: MappedType[];
+  insertSubcategory: (sub: Subcategory) => void;
 }
 
 const MiscContext = createContext<MiscContextType | undefined>(undefined);
@@ -132,7 +134,8 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
   const [departmentID, setDepartmentID] = useState<number | null>(null);
   const [unitID, setUnitID] = useState<number | null>(null);
   const [userID, setUserID] = useState<number | null>(null);
-  const [mappedtype, setMappedType] = useState<SubType[]>([]);
+  const [mappedtype, setMappedType] = useState<MappedType[]>([]);
+  const [reload ,setReload] = useState(0);
 
   let url = "http://localhost/itam_api/asset.php?resource=";
   const getResource = async (resource: string) => {
@@ -206,7 +209,20 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       return newUsers;
     }, [companyID, departmentID, unitID, user]);
 
-
+    const insertSubcategory = async (data: Subcategory) => {
+      try {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(data));
+        console.log(JSON.stringify(data))
+        const response = await axios.post(url, formData);  
+        if (response.data) {
+          setReload(count => count=+1)
+          return response.data;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
     
   const value = {
     user,
@@ -237,7 +253,8 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     userID,
     setUserID,
     unitID,
-    mappedtype
+    mappedtype,
+    insertSubcategory
   };
   return <MiscContext.Provider value={value}>{children}</MiscContext.Provider>;
 };
