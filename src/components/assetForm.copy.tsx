@@ -39,7 +39,7 @@ import {
 import { useMisc } from "@/context/miscellaneousContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useAsset } from "@/context/assetContext";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Command,
   CommandEmpty,
@@ -55,7 +55,6 @@ import InsuranceDialog from "./insuranceDialog";
 const formSchema = z.object({
   asset_name: z.string(),
   category_id: z.string(),
-  sub_category_id: z.string(),
   type_id: z.string(),
   location: z.string(),
   serial_number: z.string(),
@@ -70,27 +69,20 @@ const formSchema = z.object({
   insurance_coverage: z.string().optional(),
   insurance_date_from: z.date().optional(),
   insurance_date_to: z.date().optional(),
+  category: {
+      category_id: null,
+      sub_category_id: null,
+      type_id: null,
+    },
 });
 
 function AssetForm() {
   const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
 
-  const {
-    category,
-    subcategory,
-    mappedtype,
-    type,
-    filteredSubcategories,
-    setCategoryID,
-    setSubCategoryID,
-    subCategoryID,
-    status,
-    categoryID,
-  } = useMisc();
+  const { category, subcategory, mappedtype, type, categoryID } = useMisc();
 
   const {
-    insertAsset,
     handleInsuranceSave,
     insurance,
     setInsuranceDialogOpen,
@@ -102,7 +94,6 @@ function AssetForm() {
     defaultValues: {
       asset_name: "",
       category_id: "",
-      sub_category_id: "",
       type_id: "",
       location: "",
       serial_number: "",
@@ -117,6 +108,11 @@ function AssetForm() {
       insurance_date_from: new Date(),
       insurance_date_to: new Date(),
       file: [],
+      category: z.object({
+        category_id: z.number().nullable(),
+        sub_category_id: z.number().nullable(),
+        type_id: z.number().nullable(),
+      }),
     },
   });
 
@@ -173,7 +169,8 @@ function AssetForm() {
         insurance_date_from: insurance.dateFrom || "",
         insurance_date_to: insurance.dateTo || "",
       };
-      const response = await insertAsset(finalValues);
+      // const response = await insertAsset(finalValues);
+      console.log("Final Values:", finalValues);
 
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset successfully added! 🎉");
@@ -198,10 +195,12 @@ function AssetForm() {
     keys: ["type_name"],
     threshold: 0.4,
   });
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const combinedInitial = [...subcategory, ...type].sort((a, b) => {
     const nameA = (a.sub_category_name || a.type_name || "").toLowerCase();
     const nameB = (b.sub_category_name || b.type_name || "").toLowerCase();
+
     return nameA.localeCompare(nameB);
   });
   const [filteredResults, setFilteredResults] = useState(combinedInitial);
@@ -227,6 +226,7 @@ function AssetForm() {
       });
     }
   }, [form.watch("purchase_date"), form.watch("warranty_due_date")]);
+  const [inputValue, setInputValue] = React.useState("");
 
   return (
     <Dialog open={isInsuranceDialogOpen} onOpenChange={setInsuranceDialogOpen}>
@@ -271,20 +271,25 @@ function AssetForm() {
                   />
                   <FormField
                     control={form.control}
-                    name="sub_category_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-black">
-                          Subcategory or Type
-                        </FormLabel>
-                        <FormControl>
-                          <Popover
-                            open={open}
-                            onOpenChange={(isOpen) => {
-                              setOpen(isOpen);
-                              if (isOpen) {
-                                const combined = [...subcategory, ...type].sort(
-                                  (a, b) => {
+                    name="category"
+                    render={({ field }) => {
+                      const displayValue = inputValue;
+
+                      return (
+                        <FormItem>
+                          <FormLabel className="text-black">
+                            Subcategory or Type
+                          </FormLabel>
+                          <FormControl>
+                            <Popover
+                              open={open}
+                              onOpenChange={(isOpen) => {
+                                setOpen(isOpen);
+                                if (isOpen) {
+                                  const combined = [
+                                    ...subcategory,
+                                    ...type,
+                                  ].sort((a, b) => {
                                     const nameA = (
                                       a.sub_category_name ||
                                       a.type_name ||
@@ -296,214 +301,248 @@ function AssetForm() {
                                       ""
                                     ).toLowerCase();
                                     return nameA.localeCompare(nameB);
-                                  }
-                                );
-                                setFilteredResults(combined);
-                                setMatches([]);
-                              }
-                            }}
-                          >
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={open}
-                                className="w-full justify-between text-left font-normal truncate"
-                              >
-                                <span
-                                  className={
-                                    field.value ? "text-black" : "text-gray-500"
-                                  }
+                                  });
+                                  setFilteredResults(combined);
+                                  setMatches([]);
+                                }
+                              }}
+                            >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  aria-expanded={open}
+                                  className="w-full justify-between text-left font-normal truncate"
                                 >
-                                  {field.value || "Select or type..."}
-                                </span>
-                                <ChevronsUpDown className="opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="min-w-[var(--radix-popover-trigger-width)] w-full p-0">
-                              <Command>
-                                <CommandInput
-                                  placeholder="Search subcategories or types..."
-                                  className="h-9 px-3 text-sm text-black focus:ring-0 focus:outline-none"
-                                  value={field.value}
-                                  onValueChange={(val) => {
-                                    field.onChange(val);
-
-                                    const foundSub = subcategory.find(
-                                      (s) => s.sub_category_name === val
-                                    );
-                                    const foundType = type.find(
-                                      (t) => t.type_name === val
-                                    );
-
-                                    if (foundSub) {
-                                      setCategoryID(foundSub.category_id);
-                                    } else if (foundType) {
-                                      setCategoryID(foundType.category_id);
+                                  <span
+                                    className={
+                                      displayValue
+                                        ? "text-black"
+                                        : "text-gray-500"
                                     }
-
-                                    const typeResults = typeFuse.search(val);
-                                    const subcatResults =
-                                      subcategoryFuse.search(val);
-                                    setMatches([
-                                      ...typeResults,
-                                      ...subcatResults,
-                                    ]);
-
-                                    const filtered = [
-                                      ...subcategory.filter((s) =>
-                                        s.sub_category_name
-                                          .toLowerCase()
-                                          .includes(val.toLowerCase())
-                                      ),
-                                      ...type.filter((t) =>
-                                        t.type_name
-                                          .toLowerCase()
-                                          .includes(val.toLowerCase())
-                                      ),
-                                    ].sort((a, b) => {
-                                      const nameA = (
-                                        a.sub_category_name ||
-                                        a.type_name ||
-                                        ""
-                                      ).toLowerCase();
-                                      const nameB = (
-                                        b.sub_category_name ||
-                                        b.type_name ||
-                                        ""
-                                      ).toLowerCase();
-                                      return nameA.localeCompare(nameB);
-                                    });
-
-                                    setFilteredResults(filtered);
-
-                                    if (
-                                      typeResults.length +
-                                        subcatResults.length >
-                                      0
-                                    ) {
-                                      clearErrors("combined_id");
-                                    } else {
-                                      setError("combined_id", {
-                                        type: "manual",
-                                        message: "No match found",
+                                  >
+                                    {displayValue || "Select or type..."}
+                                  </span>
+                                  <ChevronsUpDown className="opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="min-w-[var(--radix-popover-trigger-width)] w-full p-0">
+                                <Command>
+                                  <CommandInput
+                                    placeholder="Search subcategories or types..."
+                                    className="h-9 px-3 text-sm text-black focus:ring-0 focus:outline-none"
+                                    value={inputValue}
+                                    onValueChange={(val) => {
+                                      setInputValue(val);
+                                      field.onChange({
+                                        category_id: null,
+                                        sub_category_id: null,
+                                        type_id: null,
+                                        searchString: val,
                                       });
-                                    }
-                                  }}
-                                />
-                                <CommandList>
-                                  <CommandEmpty>
-                                    {matches.length > 0
-                                      ? "There are similar items in stock, check them"
-                                      : "No results found."}
-                                  </CommandEmpty>
-                                  <CommandGroup>
-                                    {filteredResults.map((item) => (
-                                      <CommandItem
-                                        key={
-                                          item.sub_category_id || item.type_id
-                                        }
-                                        value={
+
+                                      const typeResults = typeFuse.search(val);
+                                      const subcatResults =
+                                        subcategoryFuse.search(val);
+                                      setMatches([
+                                        ...typeResults,
+                                        ...subcatResults,
+                                      ]);
+
+                                      const filtered = [
+                                        ...subcategory.filter((s) =>
+                                          s.sub_category_name
+                                            .toLowerCase()
+                                            .includes(val.toLowerCase())
+                                        ),
+                                        ...type.filter((t) =>
+                                          t.type_name
+                                            .toLowerCase()
+                                            .includes(val.toLowerCase())
+                                        ),
+                                      ].sort((a, b) => {
+                                        const nameA = (
+                                          a.sub_category_name ||
+                                          a.type_name ||
+                                          ""
+                                        ).toLowerCase();
+                                        const nameB = (
+                                          b.sub_category_name ||
+                                          b.type_name ||
+                                          ""
+                                        ).toLowerCase();
+                                        return nameA.localeCompare(nameB);
+                                      });
+
+                                      setFilteredResults(filtered);
+
+                                      if (
+                                        typeResults.length +
+                                          subcatResults.length >
+                                        0
+                                      ) {
+                                        clearErrors("sub_category_id");
+                                      } else {
+                                        setError("sub_category_id", {
+                                          type: "manual",
+                                          message: "No match found",
+                                        });
+                                      }
+                                    }}
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {matches.length > 0
+                                        ? "There are similar items in stock, check them"
+                                        : "No results found."}
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {filteredResults.map((item) => {
+                                        const isSubcategory =
+                                          "sub_category_id" in item;
+                                        const label =
                                           item.sub_category_name ||
                                           item.type_name ||
-                                          "Unnamed"
-                                        }
-                                        onSelect={() => {
-                                          const value =
-                                            item.sub_category_id ||
-                                            item.type_id;
-                                          field.onChange(value);
+                                          "Unnamed";
+                                        const id = isSubcategory
+                                          ? item.sub_category_id
+                                          : item.type_id;
+                                        const categoryId = item.category_id;
 
-                                          if (item.sub_category_id) {
-                                            setSubCategoryID(
-                                              Number(item.sub_category_id)
-                                            );
-                                          } else if (item.type_id) {
-                                            setSubCategoryID(null);
-                                          }
-
-                                          setOpen(false);
-                                        }}
-                                        className="text-sm text-black flex flex-col items-start"
-                                      >
-                                        <span className="font-medium">
-                                          {item.sub_category_name ||
-                                            item.type_name}
-                                        </span>
-                                        <span className="text-xs text-gray-600">
-                                          {(() => {
-                                            if ("sub_category_name" in item) {
-                                              const foundCategory =
-                                                category.find(
-                                                  (c) =>
-                                                    c.category_id ===
-                                                    item.category_id
+                                        return (
+                                          <CommandItem
+                                            key={id}
+                                            value={label}
+                                            onSelect={() => {
+                                              if (isSubcategory) {
+                                                const newValue = {
+                                                  category_id: categoryId,
+                                                  sub_category_id:
+                                                    item.sub_category_id,
+                                                  type_id: undefined,
+                                                };
+                                                field.onChange(newValue);
+                                                setInputValue(
+                                                  item.sub_category_name
                                                 );
-                                              const categoryName = foundCategory
-                                                ? foundCategory.category_name
-                                                : "Unknown Category";
-                                              return `${categoryName}`;
-                                            } else if ("type_name" in item) {
-                                              const mapping = mappedtype.find(
-                                                (m) =>
-                                                  String(m.type_id) ===
-                                                  String(item.type_id)
-                                              );
+                                              } else {
+                                                const typeId = String(
+                                                  item.type_id
+                                                ).trim();
 
-                                              console.log("mapping", mapping);
-
-                                              if (mapping) {
+                                                const mapping = mappedtype.find(
+                                                  (m) =>
+                                                    String(m.type_id).trim() ===
+                                                    typeId
+                                                );
                                                 const sub = subcategory.find(
                                                   (s) =>
                                                     s.sub_category_id ===
-                                                    mapping.parent_id
+                                                    mapping?.sub_category_id
                                                 );
 
-                                                if (sub) {
+                                                const newValue = {
+                                                  category_id:
+                                                    sub?.category_id ?? null,
+                                                  sub_category_id:
+                                                    sub?.sub_category_id ??
+                                                    null,
+                                                  type_id: item.type_id,
+                                                };
+
+                                                field.onChange(newValue);
+                                                setInputValue(item.type_name);
+                                              }
+
+                                              setOpen(false);
+                                            }}
+                                            className="text-sm text-black flex flex-col items-start"
+                                          >
+                                            <span className="font-medium">
+                                              {item.sub_category_name ||
+                                                item.type_name}
+                                            </span>
+                                            <span className="text-xs text-gray-600">
+                                              {(() => {
+                                                if (
+                                                  "sub_category_name" in item
+                                                ) {
+                                                  const foundCategory =
+                                                    category.find(
+                                                      (c) =>
+                                                        c.category_id ===
+                                                        item.category_id
+                                                    );
+                                                  const categoryName =
+                                                    foundCategory
+                                                      ? foundCategory.category_name
+                                                      : "Unknown Category";
+                                                  return `${categoryName}`;
+                                                } else if (
+                                                  "type_name" in item
+                                                ) {
+                                                  const typeId = String(
+                                                    item.type_id
+                                                  ).trim();
+
+                                                  const mapping =
+                                                    mappedtype.find(
+                                                      (m) =>
+                                                        String(m.id).trim() ===
+                                                        typeId
+                                                    );
+
+                                                  if (!mapping) {
+                                                    console.warn(
+                                                      `No mapping found for type_id: ${typeId}`
+                                                    );
+                                                    return `Mapping Not Found for type_id: ${typeId}`;
+                                                  }
+
+                                                  const sub = subcategory.find(
+                                                    (s) =>
+                                                      s.sub_category_id ===
+                                                      mapping.sub_category_id
+                                                  );
+
+                                                  if (!sub) {
+                                                    console.warn(
+                                                      `No subcategory found for parent_id: ${mapping.sub_category_id}`
+                                                    );
+                                                    return `Unknown Category > Unknown Subcategory`;
+                                                  }
+
                                                   const foundCategory =
                                                     category.find(
                                                       (c) =>
                                                         c.category_id ===
                                                         sub.category_id
                                                     );
+
                                                   const categoryName =
                                                     foundCategory
                                                       ? foundCategory.category_name
                                                       : "Unknown Category";
 
                                                   return `${categoryName} > ${sub.sub_category_name}`;
-                                                } else {
-                                                  return `Unknown Category > Unknown Subcategory`;
                                                 }
-                                              } else {
-                                                return `Mapping Not Found`;
-                                              }
-                                            }
-                                            return "Unknown";
-                                          })()}
-                                        </span>
 
-                                        <Check
-                                          className={cn(
-                                            "ml-auto",
-                                            field.value ===
-                                              (item.sub_category_name ||
-                                                item.type_name)
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                                                return "Unknown";
+                                              })()}
+                                            </span>
+                                          </CommandItem>
+                                        );
+                                      })}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   {categoryID === 1 && (

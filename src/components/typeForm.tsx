@@ -29,7 +29,7 @@ const formSchema = z.object({
 });
 
 export function TypeForm() {
-  const { subcategory, setSubCategoryID } = useMisc();
+  const { subcategory, setSubCategoryID, insertMappedType } = useMisc();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,10 +41,20 @@ export function TypeForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      //   const response = await updateIssuance(issuanceID, userID, assetID, {
-      //     ...values,
-      //     pullout_date: adjustedDate,
-      //   });
+      
+      values.subcategory_id = subcategory.find(
+        (cat) => cat.sub_category_name === values.subcategory_id
+      )?.sub_category_id;
+      
+      const finalValues = {
+        ...values,
+        sub_category_id: values.subcategory_id,
+      };
+
+      
+
+
+      const response = await insertMappedType(finalValues);
 
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset issuance updated successfully!");
@@ -61,76 +71,75 @@ export function TypeForm() {
   }
 
   return (
- 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="subcategory_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setSubCategoryID(() => {
-                          const item = subcategory.find(
-                            (c) => c.sub_category_name === value
-                          );
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="subcategory_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setSubCategoryID(() => {
+                      const item = subcategory.find(
+                        (c) => c.sub_category_name === value
+                      );
 
-                          if (item) {
-                            return Number(item.sub_category_id);
-                          }
-                          return null;
-                        });
-                      }}
-                      value={field.value}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {subcategory.map((cat) => (
-                          <SelectItem
-                            key={cat.sub_category_name}
-                            value={cat.sub_category_name}
-                          >
-                            {cat.sub_category_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      if (item) {
+                        return Number(item.sub_category_id);
+                      }
+                      return null;
+                    });
+                  }}
+                  value={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subcategory.map((cat) => (
+                      <SelectItem
+                        key={cat.sub_category_name}
+                        value={cat.sub_category_name}
+                      >
+                        {cat.sub_category_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <FormField
-              control={form.control}
-              name="type_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      className="w-full border px-3 py-2 rounded"
-                      placeholder="Enter name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <FormField
+          control={form.control}
+          name="type_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  className="w-full border px-3 py-2 rounded"
+                  placeholder="Enter name"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <DialogFooter>
-              <Button className="w-full text-sm sm:text-base" type="submit">
-                Submit
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <DialogFooter>
+          <Button className="w-full text-sm sm:text-base" type="submit">
+            Submit
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
   );
 }

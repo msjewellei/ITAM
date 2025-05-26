@@ -12,6 +12,13 @@ import {
 import { Toaster } from "./ui/sonner";
 import { Link } from "react-router-dom";
 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
 export default function Assets() {
   return (
     <>
@@ -29,16 +36,23 @@ export default function Assets() {
 
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    asChild
-                    className="h-11 w-fit bg-[#233345] text-white flex items-center gap-2"
-                  >
-                    <Link to="/assets/add">
-                      <Plus />
-                      <p>Add Assets</p>
-                    </Link>
-                  </Button>
+                <TooltipTrigger asChild>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button className="h-11 w-fit bg-[#233345] text-white flex items-center gap-2">
+                        <Plus />
+                        <p>Add Assets</p>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to="/assets/add">Single</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/assets/add/multiple">Multiple</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Add Assets</p>

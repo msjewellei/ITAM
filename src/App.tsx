@@ -14,6 +14,7 @@ import IssuanceForm from "./components/issuanceForm";
 import { Toaster } from "./components/ui/sonner";
 import { UpdateAsset } from "./components/editAsset";
 import SettingsPage from "./components/settings";
+import AssetBatch from "./components/assetBatch";
 
 const routes = [
   { path: "/", element: <Dashboard /> },
@@ -23,6 +24,7 @@ const routes = [
   { path: "/repair", element: <Repair /> },
   { path: "/issuance", element: <Issuance /> },
   { path: "/assets/add", element: <AssetForm /> },
+  { path: "/assets/add/multiple", element: <AssetBatch /> },
   { path: "/borrowed/add", element: <BorrowForm /> },
   { path: "/repair/add", element: <RepairForm /> },
   { path: "/issuance/add", element: <IssuanceForm /> },
@@ -35,7 +37,6 @@ function App() {
     <>
       <Header />
       <div className="flex flex-row bg-slate-200 min-h-screen w-full overflow-x-hidden">
-
         <Sidebar />
         <Routes>
           {routes.map(({ path, element }) => (

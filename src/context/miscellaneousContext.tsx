@@ -23,6 +23,12 @@ interface User {
   last_name: string;
 }
 
+interface NewSubcategory {
+  category_id: number;
+  sub_category_name: string;
+}
+
+
 interface Company {
   company_id: number;
   name: string;
@@ -53,16 +59,15 @@ interface Subcategory {
 }
 
 interface Type {
-  find(arg0: (typ: { type_name: string; }) => boolean): unknown;
+  find(arg0: (typ: { type_name: string }) => boolean): unknown;
   type_id: number;
   type_name: string;
 }
 
 interface MappedType {
   map_id: number;
-  subcategory_id: number;
+  sub_category_id: number;
   type_id: number;
-  parent_id: number;
 }
 
 interface Condition {
@@ -75,7 +80,6 @@ interface Status {
   status_name: string;
   function_id: number;
 }
-
 
 interface RepairUrgency {
   urgency_id: number;
@@ -112,7 +116,8 @@ interface MiscContextType {
   setUserID: Dispatch<SetStateAction<number | null>>;
   unitID: number | null;
   mappedtype: MappedType[];
-  insertSubcategory: (sub: Subcategory) => void;
+  insertSubCategory: (sub: Subcategory) => void;
+  insertMappedType: (type: MappedType) => void;
 }
 
 const MiscContext = createContext<MiscContextType | undefined>(undefined);
@@ -135,7 +140,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
   const [unitID, setUnitID] = useState<number | null>(null);
   const [userID, setUserID] = useState<number | null>(null);
   const [mappedtype, setMappedType] = useState<MappedType[]>([]);
-  const [reload ,setReload] = useState(0);
+  const [reload, setReload] = useState(0);
 
   let url = "http://localhost/itam_api/asset.php?resource=";
   const getResource = async (resource: string) => {
@@ -188,42 +193,67 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
   const filteredUnits: Unit[] | [] = useMemo(() => {
     if (!company) return [];
 
-    return unit.filter((un) => un.company_id === companyID && un.department_id === departmentID);
+    return unit.filter(
+      (un) => un.company_id === companyID && un.department_id === departmentID
+    );
   }, [companyID, departmentID]);
 
   const filteredUsers: User[] | [] = useMemo(() => {
-      let newUsers = user;
-    
-      if (companyID) {
-        newUsers = newUsers.filter((asset) => Number(asset.company_id) === companyID);
-      }
-    
-      if (departmentID) {
-        newUsers = newUsers.filter((asset) => Number(asset.department_id) === departmentID);
-      }
-    
-      if (unitID) {
-        newUsers = newUsers.filter((asset) => Number(asset.unit_id) === unitID);
-      }
-    
-      return newUsers;
-    }, [companyID, departmentID, unitID, user]);
+    let newUsers = user;
 
-    const insertSubcategory = async (data: Subcategory) => {
-      try {
-        const formData = new FormData();
-        formData.append("data", JSON.stringify(data));
-        console.log(JSON.stringify(data))
-        const response = await axios.post(url, formData);  
-        if (response.data) {
-          setReload(count => count=+1)
-          return response.data;
-        }
-      } catch (error) {
-        console.log(error);
+    if (companyID) {
+      newUsers = newUsers.filter(
+        (asset) => Number(asset.company_id) === companyID
+      );
+    }
+
+    if (departmentID) {
+      newUsers = newUsers.filter(
+        (asset) => Number(asset.department_id) === departmentID
+      );
+    }
+
+    if (unitID) {
+      newUsers = newUsers.filter((asset) => Number(asset.unit_id) === unitID);
+    }
+
+    return newUsers;
+  }, [companyID, departmentID, unitID, user]);
+
+  const insertSubCategory = async (data: Subcategory) => {
+    try {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+      const response = await axios.post(
+        "http://localhost/itam_api/asset.php?resource=subcategory",
+        formData
+      );
+      if (response.data) {
+        setReload((count) => count + 1); // increment reload count properly
+        return response.data;
       }
-    };
-    
+    } catch (error) {
+      console.log(error);
+    }
+  };
+ const insertMappedType = async (data: MappedType) => {
+    try {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+      const response = await axios.post(
+        "http://localhost/itam_api/asset.php?resource=mappedtype",
+        formData
+      );
+      if (response.data) {
+        setReload((count) => count + 1);
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+
   const value = {
     user,
     company,
@@ -254,7 +284,8 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     setUserID,
     unitID,
     mappedtype,
-    insertSubcategory
+    insertSubCategory,
+    insertMappedType
   };
   return <MiscContext.Provider value={value}>{children}</MiscContext.Provider>;
 };

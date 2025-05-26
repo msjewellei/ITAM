@@ -21,6 +21,7 @@ import { useMisc } from "@/context/miscellaneousContext";
 import { DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   category_id: z.string().optional(),
@@ -28,7 +29,7 @@ const formSchema = z.object({
 });
 
 export function SubForm() {
-  const { category, setCategoryID, insertSubcategory } = useMisc();
+  const { category, setCategoryID, insertSubCategory } = useMisc();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,23 +40,22 @@ export function SubForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // try {
-    //   // const response = await insertSubcategory(values);
-    //   console.log(values);
+    try {
+      values.category_id = category.find(
+        (cat) => cat.category_name === values.category_id
+      )?.category_id;
+      const response = await insertSubCategory(values);
 
-    //   if (response && Object.keys(response).length > 0) {
-    //     toast.success("Asset issuance updated successfully!");
-    //   } else {
-    //     toast.error(
-    //       `Failed to update asset issuance: ${
-    //         response?.error || "Unknown error"
-    //       }`
-    //     );
-    //   }
-    // } catch (error) {
-    //   toast.error("Something went wrong. Please try again.");
-    // }
+      if (response && Object.keys(response).length > 0) {
+        toast.success("Subcategory added successfully!");
+      } else {
+        toast.error(
+          `Failed to add subcategory: ${response?.error || "Unknown error"}`
+        );
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
   }
 
   return (
