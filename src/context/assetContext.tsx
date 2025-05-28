@@ -60,6 +60,7 @@ interface AssetContextType {
   setInsuranceDialogOpen: Dispatch<SetStateAction<boolean>>;
   isInsuranceDialogOpen: boolean;
   handleInsuranceSave: (insuranceData: any) => void;
+  insertMultipleAssets: (assets: Asset[]) => Promise<any>;
 }
 const AssetContext = createContext<AssetContextType | undefined>(undefined);
 export const AssetProvider = ({ children }: { children: ReactNode }) => {
@@ -87,6 +88,47 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
+const insertMultipleAssets = async (assets: Asset[], onSuccess?: () => void) => {
+  try {
+    const cleanedAssets = assets.map((asset) => {
+      const {
+        asset_amount,
+        insurance_date_from,
+        insurance_date_to,
+        category,
+        subcategory,
+        type,
+        ...rest
+      } = asset;
+
+      return {
+        ...rest,
+        category_id: category,
+        sub_category_id: subcategory,
+        type_id: type,
+        amount: asset_amount,
+        insurance_start_date: insurance_date_from,
+        insurance_end_date: insurance_date_to,
+      };
+    });
+
+    const response = await axios.post(
+      "http://localhost/itam_api/asset.php?resource=asset&batch=true",
+      JSON.stringify(cleanedAssets),
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (response.data) {
+      if (onSuccess) onSuccess();
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error inserting multiple assets:", error);
+  }
+};
+
 
   const insertAsset = async (data: Asset) => {
     try {
@@ -235,6 +277,7 @@ useEffect(() => {
     setInsuranceDialogOpen,
     isInsuranceDialogOpen,
     handleInsuranceSave,
+    insertMultipleAssets
   };
   return (
     <AssetContext.Provider value={value}>{children}</AssetContext.Provider>
