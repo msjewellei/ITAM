@@ -8,21 +8,24 @@ import { AssetProvider } from "./context/assetContext.tsx";
 import { BorrowProvider } from "./context/borrowContext.tsx";
 import { RepairProvider } from "./context/repairContext.tsx";
 import { IssuanceProvider } from "./context/issuanceContext.tsx";
+import { DashboardProvider } from "./context/dashboardContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <MiscProvider>
-        <AssetProvider>
-          <IssuanceProvider>
-            <RepairProvider>
-              <BorrowProvider>
-                <App />
-              </BorrowProvider>
-            </RepairProvider>
-          </IssuanceProvider>
-        </AssetProvider>
-      </MiscProvider>
+      <DashboardProvider>
+        <MiscProvider>
+          <AssetProvider>
+            <IssuanceProvider>
+              <RepairProvider>
+                <BorrowProvider>
+                  <App />
+                </BorrowProvider>
+              </RepairProvider>
+            </IssuanceProvider>
+          </AssetProvider>
+        </MiscProvider>
+      </DashboardProvider>
     </BrowserRouter>
   </StrictMode>
 );

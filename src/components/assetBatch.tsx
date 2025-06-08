@@ -3,6 +3,7 @@ import { Toaster } from "./ui/sonner";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { useAsset } from "@/context/assetContext";
+import { useMisc } from "@/context/miscellaneousContext";
 
 const downloadTemplate = () => {
   const link = document.createElement("a");
@@ -17,7 +18,7 @@ export default function AssetBatch() {
   const [data, setData] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { insertMultipleAssets } = useAsset();
-
+  const { category, subcategory, type, insurance } = useMisc();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -54,17 +55,19 @@ export default function AssetBatch() {
         if (typeof value === "number") {
           const jsDate = XLSX.SSF.parse_date_code(value);
           if (jsDate) {
-            return `${String(jsDate.d).padStart(2, "0")}/${String(
-              jsDate.m
-            ).padStart(2, "0")}/${jsDate.y}`;
+            const year = jsDate.y;
+            const month = String(jsDate.m).padStart(2, "0");
+            const day = String(jsDate.d).padStart(2, "0");
+            return `${year}-${month}-${day}`;
           }
         } else if (typeof value === "string" && !isNaN(Date.parse(value))) {
           const d = new Date(value);
-          return `${String(d.getDate()).padStart(2, "0")}/${String(
-            d.getMonth() + 1
-          ).padStart(2, "0")}/${d.getFullYear()}`;
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
         }
-        return value;
+        return "";
       };
 
       const dateFields = [
@@ -75,12 +78,49 @@ export default function AssetBatch() {
       ];
 
       const formattedData = rawData.map((row: any) => {
-        const newRow = { ...row }; // Avoid direct mutation
+        const newRow = { ...row };
+
         dateFields.forEach((field) => {
           if (newRow[field]) {
             newRow[field] = formatExcelDate(newRow[field]);
           }
         });
+
+        const matchedCategory = category.find(
+          (c) =>
+            c.category_name.toLowerCase() ===
+            String(newRow.category).toLowerCase()
+        );
+        if (matchedCategory) {
+          newRow.category = matchedCategory.category_id;
+        }
+
+        const matchedSubcategory = subcategory.find(
+          (s) =>
+            s.sub_category_name.toLowerCase() ===
+            String(newRow.subcategory).toLowerCase()
+        );
+        if (matchedSubcategory) {
+          newRow.subcategory = matchedSubcategory.sub_category_id;
+        }
+
+        const matchedType = type.find(
+          (t) => t.type_name.toLowerCase() === String(newRow.type).toLowerCase()
+        );
+        if (matchedType) {
+          newRow.type = matchedType.type_id;
+        }
+
+        const matchedInsurance = insurance.find(
+          (i) =>
+            i.insurance_name.toLowerCase() ===
+            String(newRow.insurance_name).toLowerCase()
+        );
+        if (matchedInsurance) {
+          newRow.insurance_id = matchedInsurance.insurance_id;
+          delete newRow.insurance_name; // optional: clean up if needed
+        }
+
         return newRow;
       });
 
@@ -96,17 +136,42 @@ export default function AssetBatch() {
     }
     setData([]);
   };
+  const toISODate = (value: any): string => {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return ""; // Invalid date
+    return date.toISOString().split("T")[0]; // "YYYY-MM-DD"
+  };
 
- const handleSubmit = async () => {
-  try {
-    
-    const result = await insertMultipleAssets(data);
-   
-  } catch (error) {
-    console.error("Error in handleSubmit:", error);
-    // Optionally show an error message
-  }
-};
+  const handleSubmit = async () => {
+    try {
+      const dateFields = [
+        "purchase_date",
+        "warranty_due_date",
+        "insurance_start_date",
+        "insurance_end_date",
+      ];
+
+      const cleanedAssets = data.map((asset) => {
+        const cleaned = { ...asset };
+        dateFields.forEach((field) => {
+          if (cleaned[field]) {
+            cleaned[field] = toISODate(cleaned[field]);
+          }
+        });
+        return cleaned;
+      });
+
+      console.log("Cleaned Assets:", cleanedAssets);
+      const result = await insertMultipleAssets(cleanedAssets);
+
+      if (!Array.isArray(result)) {
+        console.error("Expected result to be an array but got:", result);
+        return;
+      }
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+    }
+  };
 
   const formatHeader = (key: string) => {
     return key
@@ -184,26 +249,139 @@ export default function AssetBatch() {
                   <tbody>
                     {data.map((row, rowIndex) => (
                       <tr key={rowIndex}>
-                        {Object.entries(row).map(([key, value], cellIndex) => (
-                          <td
-                            key={cellIndex}
-                            className="px-4 py-2 w-300px overflow-hidden whitespace-nowrap text-ellipsis"
-                          >
-                            <input
-                              type="text"
-                              className="p-1 border rounded text-sm w-[150px]"
-                              value={value}
-                              onChange={(e) => {
-                                const newData = [...data];
-                                newData[rowIndex] = {
-                                  ...newData[rowIndex],
-                                  [key]: e.target.value,
-                                };
-                                setData(newData);
-                              }}
-                            />
-                          </td>
-                        ))}
+                        {Object.entries(row).map(([key, value], cellIndex) => {
+                          const isDropdown =
+                            key === "category" ||
+                            key === "subcategory" ||
+                            key === "type" ||
+                            key === "insurance_id";
+
+                          const getOptions = () => {
+                            if (key === "category") return category;
+                            if (key === "subcategory") return subcategory;
+                            if (key === "type") return type;
+                            if (key === "insurance_id") return insurance;
+                            return [];
+                          };
+
+                          const getLabel = (id: any, key: string) => {
+                            if (!id) return "";
+                            if (key === "category") {
+                              const match = category.find(
+                                (c) => c.category_id === id
+                              );
+                              return match?.category_name ?? "";
+                            }
+                            if (key === "subcategory") {
+                              const match = subcategory.find(
+                                (s) => s.sub_category_id === id
+                              );
+                              return match?.sub_category_name ?? "";
+                            }
+                            if (key === "type") {
+                              const match = type.find((t) => t.type_id === id);
+                              return match?.type_name ?? "";
+                            }
+                            if (key === "insurance_id") {
+                              const match = insurance.find(
+                                (i) => i.insurance_id === id
+                              );
+                              return match?.insurance_name ?? "";
+                            }
+                            return "";
+                          };
+
+                          const handleDropdownChange = (
+                            e: React.ChangeEvent<HTMLSelectElement>
+                          ) => {                            const selectedId = parseInt(e.target.value);
+                            const list = getOptions();
+
+                            const selectedItem =
+                              key === "category"
+                                ? list.find((c) => c.category_id === selectedId)
+                                : key === "subcategory"
+                                ? list.find(
+                                    (s) => s.sub_category_id === selectedId
+                                  )
+                                : key === "type"
+                                ? list.find((t) => t.type_id === selectedId)
+                                : key === "insurance_id"
+                                ? list.find(
+                                    (i) => i.insurance_id === selectedId
+                                  )
+                                : null;
+
+                            const newData = [...data];
+                            newData[rowIndex] = {
+                              ...newData[rowIndex],
+                              [key]: selectedId, // Store the ID
+                            };
+                            setData(newData);
+                          };
+
+                          return (
+                            <td
+                              key={cellIndex}
+                              className="px-4 py-2 w-300px overflow-hidden whitespace-nowrap text-ellipsis"
+                            >
+                              {isDropdown ? (
+                                <select
+                                  className="p-1 border rounded text-sm w-[150px]"
+                                  value={value || ""}
+                                  onChange={handleDropdownChange}
+                                >
+                                  <option value="">Select</option>
+                                  {getOptions().map((item: any) => {
+                                    const optionValue =
+                                      key === "category"
+                                        ? item.category_id
+                                        : key === "subcategory"
+                                        ? item.sub_category_id
+                                        : key === "type"
+                                        ? item.type_id
+                                        : key === "insurance_id"
+                                        ? item.insurance_id
+                                        : "";
+
+                                    const optionLabel =
+                                      key === "category"
+                                        ? item.category_name
+                                        : key === "subcategory"
+                                        ? item.sub_category_name
+                                        : key === "type"
+                                        ? item.type_name
+                                        : key === "insurance_id"
+                                        ? item.insurance_name
+                                        : "";
+
+                                    return (
+                                      <option
+                                        key={optionValue}
+                                        value={optionValue}
+                                      >
+                                        {optionLabel}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                              ) : (
+                                <input
+                                  type="text"
+                                  className="p-1 border rounded text-sm w-[150px]"
+                                  value={value}
+                                  onChange={(e) => {
+                                    const newData = [...data];
+                                    newData[rowIndex] = {
+                                      ...newData[rowIndex],
+                                      [key]: e.target.value,
+                                    };
+                                    setData(newData);
+                                  }}
+                                />
+                              )}
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))}
                   </tbody>

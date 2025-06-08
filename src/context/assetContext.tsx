@@ -11,7 +11,8 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-
+import qs from "qs";
+import { formatDate } from "date-fns";
 interface Asset {
   asset_id: number;
   asset_name: string;
@@ -43,18 +44,15 @@ interface AssetContextType {
   internalAssets: Asset[];
   filteredAssets: Asset[];
   filteredInternalAssets: Asset[];
-  setCategoryID: Dispatch<SetStateAction<number | null>>; 
-  setSubCategoryID: Dispatch<SetStateAction<number | null>>; 
-  setTypeID: Dispatch<SetStateAction<number | null>>; 
+  setCategoryID: Dispatch<SetStateAction<number | null>>;
+  setSubCategoryID: Dispatch<SetStateAction<number | null>>;
+  setTypeID: Dispatch<SetStateAction<number | null>>;
   subCategoryID: number | null;
   typeID: number | null;
   assetID: number | null;
   setAssetID: Dispatch<SetStateAction<number | null>>;
   currentAsset: Asset | null;
-  updateAsset: (
-    asset_id: number,
-    updatedData: Partial<Asset>
-  ) => Promise<any>;
+  updateAsset: (asset_id: number, updatedData: Partial<Asset>) => Promise<any>;
   setInsurance: Dispatch<SetStateAction<any>>;
   insurance: any;
   setInsuranceDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -71,7 +69,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   const [externalAssets, setExternalAssets] = useState<Asset[]>([]);
   const [internalAssets, setInternalAssets] = useState<Asset[]>([]);
   const [assetID, setAssetID] = useState<number | null>(null);
-  const [reload ,setReload] = useState(0);
+  const [reload, setReload] = useState(0);
   const location = useLocation();
   const [insurance, setInsurance] = useState(null);
   const [isInsuranceDialogOpen, setInsuranceDialogOpen] = useState(false);
@@ -87,48 +85,74 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
       console.log(error);
     }
   };
-  
-const insertMultipleAssets = async (assets: Asset[], onSuccess?: () => void) => {
-  try {
-    const cleanedAssets = assets.map((asset) => {
-      const {
-        asset_amount,
-        insurance_date_from,
-        insurance_date_to,
-        category,
-        subcategory,
-        type,
-        ...rest
-      } = asset;
 
-      return {
-        ...rest,
-        category_id: category,
-        sub_category_id: subcategory,
-        type_id: type,
-        amount: asset_amount,
-        insurance_start_date: insurance_date_from,
-        insurance_end_date: insurance_date_to,
-      };
-    });
+  const insertMultipleAssets = async (
+    assets: Asset[],
+    onSuccess?: () => void
+  ) => {
+    try {
+      const cleanedAssets = assets
+        .filter((asset) => asset.serial_number?.trim()) // Remove assets without serial_number
+        .map((asset) => {
+          const {
+            amount,
+            insurance_start_date,
+            insurance_end_date,
+            category,
+            subcategory,
+            type,
+            purchase_date,
+            warranty_due_date,
+            ...rest
+          } = asset;
 
-    const response = await axios.post(
-      "http://localhost/itam_api/asset.php?resource=asset&batch=true",
-      JSON.stringify(cleanedAssets),
-      {
-        headers: { "Content-Type": "application/json" },
+          const safeFormat = (date: any, fieldName?: string) => {
+            if (date && isNaN(new Date(date).getTime())) {
+              console.warn(`Invalid date value for ${fieldName}:`, date);
+            }
+            return date && !isNaN(new Date(date).getTime())
+              ? formatDate(new Date(date), "yyyy-MM-dd")
+              : null;
+          };
+
+          return {
+            ...rest,
+            category_id: category,
+            sub_category_id: subcategory,
+            type_id: type || null,
+            asset_amount: amount,
+            insurance_date_from: safeFormat(insurance_start_date),
+            insurance_date_to: safeFormat(insurance_end_date),
+            purchase_date: safeFormat(purchase_date, "purchase_date"),
+            warranty_due_date: safeFormat(
+              warranty_due_date,
+              "warranty_due_date"
+            ),
+          };
+        });
+
+      if (cleanedAssets.length === 0) {
+        throw new Error(
+          "No valid assets to upload. Please check that all rows include a serial number."
+        );
       }
-    );
 
-    if (response.data) {
-      if (onSuccess) onSuccess();
-      return response.data;
+      await axios.post(
+        "http://localhost/itam_api/asset.php?resource=asset&action=batchInsert",
+        qs.stringify({ data: JSON.stringify(cleanedAssets) }),
+        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+      );
+
+      if (response.data) {
+        if (onSuccess) onSuccess();
+        return response.data;
+      }
+    } catch (error) {
+      console.error("API error:", error);
+      return []; // Fail-safe return
+      console.error("Error inserting multiple assets:", error);
     }
-  } catch (error) {
-    console.error("Error inserting multiple assets:", error);
-  }
-};
-
+  };
 
   const insertAsset = async (data: Asset) => {
     try {
@@ -139,7 +163,7 @@ const insertMultipleAssets = async (assets: Asset[], onSuccess?: () => void) => 
       });
       const response = await axios.post(url, formData);
       if (response.data) {
-        setReload(count => count=+1);
+        setReload((count) => (count = +1));
         return response.data;
       }
     } catch (error) {
@@ -159,45 +183,50 @@ const insertMultipleAssets = async (assets: Asset[], onSuccess?: () => void) => 
 
   const [currentAsset, setCurrentAsset] = useState<Asset | null>(null);
 
-useEffect(() => {
-  if (location.state?.assetId) {
-    const fetchAsset = async () => {
-      const assetData = await getAssets();
-      const singleAsset = assetData.find((asset: { asset_id: any; }) => asset.asset_id === location.state.assetId);
-      console.log(singleAsset);
-      if (singleAsset) {
-        setAssetID(singleAsset.asset_id);
-        setCurrentAsset(singleAsset);
-      }
-    };
-    fetchAsset();
-  }
-}, [location.state?.assetId]);
-
+  useEffect(() => {
+    if (location.state?.assetId) {
+      const fetchAsset = async () => {
+        const assetData = await getAssets();
+        const singleAsset = assetData.find(
+          (asset: { asset_id: any }) =>
+            asset.asset_id === location.state.assetId
+        );
+        console.log(singleAsset);
+        if (singleAsset) {
+          setAssetID(singleAsset.asset_id);
+          setCurrentAsset(singleAsset);
+        }
+      };
+      fetchAsset();
+    }
+  }, [location.state?.assetId]);
 
   useEffect(() => {
     const external = assets.filter((asset) => Number(asset.category_id) === 1);
     setExternalAssets(external);
   }, [assets]);
-  
+
   const filteredAssets: Asset[] | [] = useMemo(() => {
     let newAssets = assets;
-  
+
     if (categoryID) {
-      newAssets = newAssets.filter((asset) => Number(asset.category_id) === categoryID);
+      newAssets = newAssets.filter(
+        (asset) => Number(asset.category_id) === categoryID
+      );
     }
-  
+
     if (subCategoryID) {
-      newAssets = newAssets.filter((asset) => Number(asset.sub_category_id) === subCategoryID);
+      newAssets = newAssets.filter(
+        (asset) => Number(asset.sub_category_id) === subCategoryID
+      );
     }
-  
+
     if (typeID) {
       newAssets = newAssets.filter((asset) => Number(asset.type_id) === typeID);
     }
-  
+
     return newAssets;
   }, [categoryID, subCategoryID, typeID, assets]);
-
 
   useEffect(() => {
     const internal = assets.filter(
@@ -206,39 +235,35 @@ useEffect(() => {
     );
     setInternalAssets(internal);
   }, [assets]);
-  
+
   const filteredInternalAssets: Asset[] | [] = useMemo(() => {
     let intAssets = internalAssets;
-  
+
     if (categoryID) {
-      intAssets = intAssets.filter((asset) => Number(asset.category_id) === categoryID);
+      intAssets = intAssets.filter(
+        (asset) => Number(asset.category_id) === categoryID
+      );
     }
-  
+
     if (subCategoryID) {
-      intAssets = intAssets.filter((asset) => Number(asset.sub_category_id) === subCategoryID);
+      intAssets = intAssets.filter(
+        (asset) => Number(asset.sub_category_id) === subCategoryID
+      );
     }
-  
+
     if (typeID) {
       intAssets = intAssets.filter((asset) => Number(asset.type_id) === typeID);
     }
-  
+
     return intAssets;
   }, [categoryID, subCategoryID, typeID, internalAssets]);
 
-
-  const updateAsset = async (
-    asset_id: number,
-    updatedData: Partial<Asset>
-  ) => {
+  const updateAsset = async (asset_id: number, updatedData: Partial<Asset>) => {
     try {
-      const response = await axios.put(
-        `/api/assets/${asset_id}`,
-        updatedData,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-  
+      const response = await axios.put(`/api/assets/${asset_id}`, updatedData, {
+        headers: { "Content-Type": "application/json" },
+      });
+
       if (response.data) {
         console.log("Asset updated successfully:", response.data);
         setReload((count) => count + 1);
@@ -253,8 +278,7 @@ useEffect(() => {
     setInsurance(insuranceData);
     setInsuranceDialogOpen(false);
   };
-  
-  
+
   const value = {
     assets,
     insertAsset,
@@ -277,7 +301,7 @@ useEffect(() => {
     setInsuranceDialogOpen,
     isInsuranceDialogOpen,
     handleInsuranceSave,
-    insertMultipleAssets
+    insertMultipleAssets,
   };
   return (
     <AssetContext.Provider value={value}>{children}</AssetContext.Provider>

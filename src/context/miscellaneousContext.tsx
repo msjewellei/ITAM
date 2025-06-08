@@ -28,7 +28,6 @@ interface NewSubcategory {
   sub_category_name: string;
 }
 
-
 interface Company {
   company_id: number;
   name: string;
@@ -86,6 +85,14 @@ interface RepairUrgency {
   urgency_level: string;
 }
 
+interface Insurance {
+  insurance_id: number;
+  insurance_name: string;
+  insurance_coverage: string;
+  insurance_date_from: Date;
+  insurance_date_to: Date;
+}
+
 interface MiscContextType {
   user: User[];
   company: Company[];
@@ -118,6 +125,9 @@ interface MiscContextType {
   mappedtype: MappedType[];
   insertSubCategory: (sub: Subcategory) => void;
   insertMappedType: (type: MappedType) => void;
+  insurance: Insurance[];
+  insuranceID: number | null;
+  setInsuranceID: Dispatch<SetStateAction<number | null>>;
 }
 
 const MiscContext = createContext<MiscContextType | undefined>(undefined);
@@ -125,6 +135,8 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User[]>([]);
   const [company, setCompany] = useState<Company[]>([]);
   const [department, setDepartment] = useState<Department[]>([]);
+  const [insurance, setInsurance] = useState<Insurance[]>([]);
+  const [insuranceID, setInsuranceID] = useState<number | null>(null);
   const [unit, setUnit] = useState<Unit[]>([]);
   const [category, setCategory] = useState<Category[]>([]);
   const [subcategory, setSubcategory] = useState<Subcategory[]>([]);
@@ -154,6 +166,18 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getInsurance = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost/itam_api/insurance.php?action=getAll"
+      );
+      return res.data;
+    } catch (err) {
+      console.error("Failed to fetch insurance", err);
+      return [];
+    }
+  };
+
   useEffect(() => {
     const setup = async () => {
       const categories = await getResource("category");
@@ -163,6 +187,9 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       const statuses = await getResource("status");
       const repairUrgencies = await getResource("repairUrgency");
       const mappedtypes = await getResource("mappedtype");
+      const insurances = await getInsurance();
+      setInsurance(insurances);
+
       setCategory(categories);
       setSubcategory(subcategories);
       setType(types);
@@ -236,7 +263,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       console.log(error);
     }
   };
- const insertMappedType = async (data: MappedType) => {
+  const insertMappedType = async (data: MappedType) => {
     try {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
@@ -252,7 +279,6 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       console.log(error);
     }
   };
-  
 
   const value = {
     user,
@@ -285,7 +311,10 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     unitID,
     mappedtype,
     insertSubCategory,
-    insertMappedType
+    insertMappedType,
+    insurance,
+    insuranceID,
+    setInsuranceID,
   };
   return <MiscContext.Provider value={value}>{children}</MiscContext.Provider>;
 };
