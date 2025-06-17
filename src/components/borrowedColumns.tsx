@@ -16,6 +16,8 @@ import { Badge } from "./ui/badge";
 import { DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { BorrowUpdate } from "./borrowUpdate";
 import { useBorrow } from "@/context/borrowContext";
+import { Dialog } from "@radix-ui/react-dialog";
+import { useAsset } from "@/context/assetContext";
 
 export type BorrowedAsset = {
   borrow_transaction_id: number;
@@ -148,6 +150,7 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
     header: "Condition",
     cell: ({ row }) => {
       const { setBorrowID, setDateBorrowed } = useBorrow();
+      const { setAssetID } = useAsset();
       const { asset_condition_id, asset_condition_name } = row.original;
       const statusKey = `${asset_condition_id}`;
       const bgColor = conditionVariants[statusKey] || "bg-gray-200";
@@ -163,7 +166,9 @@ export const columns: ColumnDef<BorrowedAsset>[] = [
           <DialogTrigger
             onClick={() => {
               setBorrowID(row.original.borrow_transaction_id);
+              setAssetID(Number(row.original.asset_id) || null);
               setDateBorrowed(row.original.date_borrowed);
+              
             }}
           >
             <SquarePen className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer" />

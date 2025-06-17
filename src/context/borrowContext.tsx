@@ -41,18 +41,22 @@ interface BorrowContextType {
   setDateBorrowed: Dispatch<SetStateAction<Date | null>>;
   updateBorrow: (
     borrow_transaction_id: number,
+    asset_id: number,
     date_borrowed: Date,
     updatedData: Partial<Borrow>
   ) => Promise<any>;
+  returnedOnly: Borrow[];
 }
 const BorrowContext = createContext<BorrowContextType | undefined>(undefined);
 export const BorrowProvider = ({ children }: { children: ReactNode }) => {
   const [borrow, setBorrow] = useState<Borrow[]>([]);
   const [borrowID, setBorrowID] = useState<number | null>(null);
   const [dateBorrowed, setDateBorrowed] = useState<Date | null>(null);
-  const [reload ,setReload] = useState(0);
+  const [reload, setReload] = useState(0);
+  const [returnedOnly, setReturnedOnly] = useState<Borrow[]>([]);
 
-  let url = "http://localhost/itam_api/BorrowedAssets.php?resource=borrowed_assets";
+  let url =
+    "http://localhost/itam_api/BorrowedAssets.php?resource=borrowed_assets";
   const getTransactions = async () => {
     try {
       const response = await axios.get(url);
@@ -68,29 +72,19 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
     try {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
-      console.log(JSON.stringify(data))
-      const response = await axios.post(url, formData);  
+      console.log(JSON.stringify(data));
+      const response = await axios.post(url, formData);
       if (response.data) {
-        setReload(count => count=+1)
+        setReload((count) => count + 1);
         return response.data;
       }
     } catch (error) {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      const borrowData = await getTransactions();
-      if (borrowData) {
-        setBorrow(borrowData);
-      }
-    };
-    fetchTransactions();
-  }, [reload]);
-
   const updateBorrow = async (
     borrow_transaction_id: number,
+    asset_id: number,
     date_borrowed: Date,
     updatedData: Partial<Borrow>
   ) => {
@@ -99,6 +93,7 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
         url,
         {
           borrow_transaction_id,
+          asset_id,
           date_borrowed,
           ...updatedData,
         },
@@ -107,15 +102,33 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.data) {
         console.log("Borrow Transaction updated successfully:", response.data);
-        setReload(count => count=+1)
+        setReload((count) => count + 1);
         return response.data;
       }
     } catch (error) {
       console.error("Error updating borrow transaction:", error);
     }
   };
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      const data = await getTransactions();
+      if (data) {
+        setBorrow(data);
+        const returned = data.filter(
+          (item: Borrow) =>
+            item.return_date &&
+            item.return_date.toString().slice(0, 10) !== "0000-00-00"
+        );
+        setReturnedOnly(returned);
+      }
+    };
+    fetchTransactions();
+  }, [reload]);
+
   const value = {
     borrow,
+    returnedOnly,
     insertTransaction,
     setBorrowID,
     borrowID,
@@ -123,6 +136,7 @@ export const BorrowProvider = ({ children }: { children: ReactNode }) => {
     setDateBorrowed,
     updateBorrow,
   };
+
   return (
     <BorrowContext.Provider value={value}>{children}</BorrowContext.Provider>
   );

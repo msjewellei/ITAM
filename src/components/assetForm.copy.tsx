@@ -54,7 +54,6 @@ import InsuranceDialog from "./insuranceDialog";
 
 const formSchema = z.object({
   asset_name: z.string(),
-  category_id: z.string(),
   type_id: z.string(),
   location: z.string(),
   serial_number: z.string(),
@@ -69,11 +68,11 @@ const formSchema = z.object({
   insurance_coverage: z.string().optional(),
   insurance_date_from: z.date().optional(),
   insurance_date_to: z.date().optional(),
-  category: {
-      category_id: null,
-      sub_category_id: null,
-      type_id: null,
-    },
+  category: z.object({
+    category_id: z.number(),
+    sub_category_id: z.number().nullable(),
+    type_id: z.number().nullable(),
+  }),
 });
 
 function AssetForm() {
@@ -87,13 +86,13 @@ function AssetForm() {
     insurance,
     setInsuranceDialogOpen,
     isInsuranceDialogOpen,
+    insertAsset,
   } = useAsset();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       asset_name: "",
-      category_id: "",
       type_id: "",
       location: "",
       serial_number: "",
@@ -108,20 +107,18 @@ function AssetForm() {
       insurance_date_from: new Date(),
       insurance_date_to: new Date(),
       file: [],
-      category: z.object({
-        category_id: z.number().nullable(),
-        sub_category_id: z.number().nullable(),
-        type_id: z.number().nullable(),
-      }),
+      category: {
+        category_id: 0,
+        sub_category_id: null,
+        type_id: null,
+      },
     },
   });
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     await form.trigger();
     const errors = form.formState.errors;
 
     if (Object.keys(errors).length > 0) {
-      console.log("Form has errors:", errors);
       toast.error("Please fix the errors before submitting.");
       return;
     }
@@ -131,46 +128,20 @@ function AssetForm() {
       return;
     }
 
-    values.category_id = category.find(
-      (cat) => cat.category_name === values.category_id
-    )?.category_id;
+    const finalValues = {
+      ...values,
+      category_id: values.category?.category_id || "",
+      sub_category_id: values.category?.sub_category_id || "",
+      type_id: values.category?.type_id || "",
+      insurance_coverage: insurance.coverage || "",
+      insurance_date_from: insurance.dateFrom || "",
+      insurance_date_to: insurance.dateTo || "",
+    };
 
-    const hasSubcategory = subcategory.find(
-      (sc) => sc.sub_category_name === values.sub_category_id
-    );
+    // console.log("Final Values:", finalValues);
 
-    if (!hasSubcategory) {
-      values.sub_category_name = values.sub_category_id;
-      values.sub_category_id = null;
-    } else {
-      values.sub_category_id = hasSubcategory.sub_category_id;
-      delete values.sub_category_name;
-    }
-
-    if (values.type_id) {
-      const foundType = type.find((t) => t.type_name === values.type_id);
-
-      const mapped = mappedtype.find((m) => m.type_id === foundType?.type_id);
-
-      values.type_id = mapped?.type_id || null;
-    }
-
-    if (categoryID !== 2) {
-      values.sub_category_id = "";
-    }
-
-    if (values.sub_category_id === "") {
-      values.type_id = "";
-    }
     try {
-      const finalValues = {
-        ...values,
-        insurance_coverage: insurance.coverage || "",
-        insurance_date_from: insurance.dateFrom || "",
-        insurance_date_to: insurance.dateTo || "",
-      };
-      // const response = await insertAsset(finalValues);
-      console.log("Final Values:", finalValues);
+      const response = await insertAsset(finalValues);
 
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset successfully added! 🎉");
@@ -432,9 +403,10 @@ function AssetForm() {
 
                                                 const mapping = mappedtype.find(
                                                   (m) =>
-                                                    String(m.type_id).trim() ===
+                                                    String(m.id).trim() ===
                                                     typeId
                                                 );
+
                                                 const sub = subcategory.find(
                                                   (s) =>
                                                     s.sub_category_id ===
@@ -450,10 +422,10 @@ function AssetForm() {
                                                   type_id: item.type_id,
                                                 };
 
+                                                // console.log(newValue);
                                                 field.onChange(newValue);
                                                 setInputValue(item.type_name);
                                               }
-
                                               setOpen(false);
                                             }}
                                             className="text-sm text-black flex flex-col items-start"

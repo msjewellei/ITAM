@@ -38,13 +38,20 @@ interface RepairContextType {
   insertRepair: (repair: Repair) => void;
   setRepairID: Dispatch<SetStateAction<number | null>>;
   repairID: number | null;
-  updateRepair: (repair_request_id: number, user_id: number, updatedData: Partial<Repair>) => Promise<any>;
+  updateRepair: (
+    repair_request_id: number,
+    user_id: number,
+    updatedData: Partial<Repair>
+  ) => Promise<any>;
+  completedRepairs: Repair[];
 }
+
 const RepairContext = createContext<RepairContextType | undefined>(undefined);
 export const RepairProvider = ({ children }: { children: ReactNode }) => {
   const [repair, setRepair] = useState<Repair[]>([]);
   const [repairID, setRepairID] = useState<number | null>(null);
-  const [reload ,setReload] = useState(0);
+  const [reload, setReload] = useState(0);
+  const [completedRepairs, setCompletedRepairs] = useState<Repair[]>([]);
 
   let url =
     "http://localhost/itam_api/RepairRequest.php?resource=repair_request";
@@ -63,14 +70,39 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
     try {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
-      console.log(JSON.stringify(data));
+      // console.log(JSON.stringify(data));
       const response = await axios.post(url, formData);
       if (response.data) {
-        setReload(count => count=+1)
+        setReload((count) => (count = +1));
         return response.data;
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const getCompletedRepairs = async () => {
+    try {
+      const response = await axios.get(url);
+
+      const rawData = response.data;
+
+      if (Array.isArray(rawData)) {
+        const completed = rawData.filter(
+          (item: Repair) =>
+            item.status_id === 5 &&
+            item.repair_completion_date !== null &&
+            String(item.repair_completion_date) !== "" &&
+            String(item.repair_completion_date) !== "0000-00-00"
+        );
+        return completed;
+      } else {
+        console.warn("⚠️ response.data is not an array", rawData);
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching completed repairs:", error);
+      return [];
     }
   };
 
@@ -92,23 +124,31 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await axios.put(
         url,
-        { 
-          repair_request_id, 
-          user_id, 
-          ...updatedData 
+        {
+          repair_request_id,
+          user_id,
+          ...updatedData,
         },
         { headers: { "Content-Type": "application/json" } }
       );
-  
+
       if (response.data) {
-        console.log("Repair updated successfully:", response.data);
-        setReload(count => count=+1)
+        // console.log("Repair updated successfully:", response.data);
+        setReload((count) => (count = +1));
         return response.data;
       }
     } catch (error) {
       console.error("Error updating repair:", error);
     }
-  };  
+  };
+
+  useEffect(() => {
+    const fetchCompleted = async () => {
+      const data = await getCompletedRepairs();
+      setCompletedRepairs(data || []);
+    };
+    fetchCompleted();
+  }, [getCompletedRepairs]);
 
   const value = {
     repair,
@@ -116,7 +156,9 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
     setRepairID,
     repairID,
     updateRepair,
+    completedRepairs,
   };
+
   return (
     <RepairContext.Provider value={value}>{children}</RepairContext.Provider>
   );

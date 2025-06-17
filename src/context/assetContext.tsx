@@ -157,13 +157,31 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   const insertAsset = async (data: Asset) => {
     try {
       const formData = new FormData();
-      formData.append("data", JSON.stringify(data));
-      data.file.forEach((file) => {
-        formData.append("file[]", file);
+
+      // Flatten category object into root level
+      const flatData = {
+        ...data,
+        category_id: data.category?.category_id || "",
+        sub_category_id: data.category?.sub_category_id || "",
+        type_id: data.category?.type_id || "",
+      };
+
+      // Remove the nested category field
+      delete (flatData as any).category;
+
+      // Serialize flatData
+      formData.append("data", JSON.stringify(flatData));
+
+      // Append each file
+      data.file?.forEach((file) => {
+        if (file && file.name) {
+          formData.append("file[]", file);
+        }
       });
+
       const response = await axios.post(url, formData);
       if (response.data) {
-        setReload((count) => (count = +1));
+        setReload((count) => count + 1);
         return response.data;
       }
     } catch (error) {
@@ -191,7 +209,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
           (asset: { asset_id: any }) =>
             asset.asset_id === location.state.assetId
         );
-        console.log(singleAsset);
+        // console.log(singleAsset);
         if (singleAsset) {
           setAssetID(singleAsset.asset_id);
           setCurrentAsset(singleAsset);
@@ -265,7 +283,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (response.data) {
-        console.log("Asset updated successfully:", response.data);
+        // console.log("Asset updated successfully:", response.data);
         setReload((count) => count + 1);
         return response.data;
       }

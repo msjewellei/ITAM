@@ -65,15 +65,15 @@ export function ChartBarDefault({
       <CardContent>
         <div className="w-full max-w-sm mx-auto">
           <ChartContainer config={chartConfig}>
-            <BarChart accessibilityLayer width={300} height={200} data={data}>
+           <BarChart width={500} height={300} data={data}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey={xKey}
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
-                tickFormatter={(value) => value.slice(0, 3)}
               />
+
               <ChartTooltip
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}

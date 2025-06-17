@@ -20,7 +20,7 @@ function LineChart() {
           title="Assets by Condition"
           data={assetsByCondition}
           dataKey="count"
-          nameKey="condition"
+          nameKey="asset_condition_name"
           config={{}}
         />
       </div>

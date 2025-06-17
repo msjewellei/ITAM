@@ -114,16 +114,32 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       const borrowedRes = await axios.get(
         "http://localhost/itam_api/dashboard.php?action=getBorrowedAssetsByCompany"
       );
+
       setBorrowedByCompany(
-        Array.isArray(borrowedRes.data) ? borrowedRes.data : []
+        Array.isArray(borrowedRes.data)
+          ? borrowedRes.data.map((item) => ({
+              ...item,
+              borrowed_count: Number(item.borrowed_count ?? item.count ?? 0),
+            }))
+          : []
       );
+
       const issuedRes = await axios.get(
         "http://localhost/itam_api/dashboard.php?action=getIssuedAssetsByCompany"
       );
-      setIssuedByCompany(Array.isArray(issuedRes.data) ? issuedRes.data : []);
+
+      setIssuedByCompany(
+        Array.isArray(issuedRes.data)
+          ? issuedRes.data.map((item) => ({
+              ...item,
+              issued_count: Number(item.issued_count ?? item.count ?? 0),
+            }))
+          : []
+      );
       const overdueRes = await axios.get(
         "http://localhost/itam_api/dashboard.php?action=getOverdueBorrowedAssets"
       );
+
       setOverdueAssets(Array.isArray(overdueRes.data) ? overdueRes.data : []);
       const urgentRepairsRes = await axios.get(
         "http://localhost/itam_api/dashboard.php?action=getUrgentRepairRequests"
@@ -144,12 +160,16 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       setAssetsByCondition(
         Array.isArray(conditionRes.data) ? conditionRes.data : []
       );
-
-      console.log("Dashboard stats:", data);
     } catch (error) {
       console.error("Failed to fetch dashboard stats:", error);
     }
   };
+  useEffect(() => {
+    // console.log(issuedByCompany);
+  }, [borrowedByCompany, issuedByCompany]);
+  useEffect(() => {
+    fetchDashboardStats();
+  }, [reloadFlag]);
 
   const reloadDashboard = () => setReloadFlag((prev) => !prev);
 

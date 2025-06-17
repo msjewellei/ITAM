@@ -1,7 +1,7 @@
 import Card from "./Card";
 import LineChart from "./LineChart";
-import Tablee from "./Table";
-import BarChart from "./barchart";
+import Tablee from "./table";
+import BarChart from "./BarChart";
 
 function Dashboard() {
   return (

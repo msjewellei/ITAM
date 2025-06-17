@@ -10,7 +10,7 @@ function BarChart() {
         <ChartBarDefault
           data={borrowedByCompany}
           dataKey="borrowed_count"
-          xKey="company_alias"
+          xKey="alias"
           title="Borrowed Assets by Company"
         />
       </div>
@@ -18,7 +18,7 @@ function BarChart() {
         <ChartBarDefault
           data={issuedByCompany}
           dataKey="issued_count"
-          xKey="company_alias"
+          xKey="alias"
           title="Issued Assets by Company"
         />
       </div>

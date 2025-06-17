@@ -31,8 +31,9 @@ import { useMisc } from "@/context/miscellaneousContext";
 import { DialogFooter } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { useBorrow } from "@/context/borrowContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useAsset } from "@/context/assetContext";
 
 const formSchema = z.object({
   return_date: z.date(),
@@ -40,9 +41,13 @@ const formSchema = z.object({
   asset_condition_id: z.string(),
 });
 
-export function BorrowUpdate() {
+interface BorrowUpdateProps {
+  onClose: () => void;
+}
+export function BorrowUpdate({ onClose }: BorrowUpdateProps) {
   const { condition } = useMisc();
   const { borrowID, updateBorrow, dateBorrowed } = useBorrow();
+  const { assetID } = useAsset();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,9 +58,6 @@ export function BorrowUpdate() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    values.asset_condition_id = condition.find(
-      (cat) => cat.asset_condition_name === values.asset_condition_id
-    )?.asset_condition_id;
     if (!borrowID) {
       console.error("Missing borrowID!");
       return;
@@ -63,13 +65,26 @@ export function BorrowUpdate() {
     const adjustedDate = format(values.return_date, "yyyy-MM-dd");
 
     try {
-      const response = await updateBorrow(borrowID, dateBorrowed, {
-        ...values,
-        return_date: adjustedDate,
-      });
+      const borrowedTimestamp =
+        typeof dateBorrowed === "number"
+          ? dateBorrowed
+          : dateBorrowed instanceof Date
+          ? dateBorrowed.getTime()
+          : 0;
+
+      const response = await updateBorrow(
+        borrowID,
+        borrowedTimestamp,
+        assetID,
+        {
+          ...values,
+          return_date: adjustedDate,
+        }
+      );
 
       if (response && Object.keys(response).length > 0) {
         toast.success("Updated borrow transaction successfully!");
+        onClose(); // close dialog here on success
       } else {
         toast.error(
           `Failed to update borrow transaction: ${

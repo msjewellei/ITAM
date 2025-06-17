@@ -71,15 +71,20 @@ export function ChartLineDefault({
           className="h-[100px] md:h-[120px] w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ left: 12, right: 12 }}>
+            <LineChart
+  data={data}
+  margin={{ top: 0, bottom: 0, left: 24, right: 24 }} // Increase left/right
+>
+
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey={xKey}
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
-                tickFormatter={(value) => value.slice(0, 3)}
+                tickMargin={12} // increase this if labels look cramped
+                tickFormatter={(value) => value} // or remove .slice(0, 3)
               />
+
               <ChartTooltip
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
