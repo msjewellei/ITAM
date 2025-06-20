@@ -18,10 +18,12 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "./ui/calendar";
 import { toast } from "sonner";
+import { Input } from "./ui/input";
 
 export default function InsuranceDialog({ onSave, onClose }) {
   const formSchema = z.object({
-    insuranceCoverage: z.string().min(1, "Insurance coverage is required"),
+    insurance_name: z.string().optional(),
+    insuranceCoverage: z.string().optional(),
     insurance_date_from: z.date(),
     insurance_date_to: z.date(),
   });
@@ -29,6 +31,7 @@ export default function InsuranceDialog({ onSave, onClose }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      insurance_name: "",
       insuranceCoverage: "",
       insurance_date_from: new Date(),
       insurance_date_to: new Date(),
@@ -37,6 +40,7 @@ export default function InsuranceDialog({ onSave, onClose }) {
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     onSave({
+      name: data.insurance_name,
       coverage: data.insuranceCoverage,
       dateFrom: data.insurance_date_from,
       dateTo: data.insurance_date_to,
@@ -56,6 +60,23 @@ export default function InsuranceDialog({ onSave, onClose }) {
       <h2 className="text-center">Add Insurance</h2>
       <form onSubmit={form.handleSubmit(onSubmit, onError)}>
         <div className="flex flex-col space-y-4">
+          <FormField
+            control={form.control}
+            name="insurance_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    className="text-sm sm:text-base"
+                    placeholder="Enter insurance name here"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="insuranceCoverage"

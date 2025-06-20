@@ -125,9 +125,10 @@ interface MiscContextType {
   mappedtype: MappedType[];
   insertSubCategory: (sub: Subcategory) => void;
   insertMappedType: (type: MappedType) => void;
-  insurance: Insurance[];
+  insurancee: Insurance[];
   insuranceID: number | null;
   setInsuranceID: Dispatch<SetStateAction<number | null>>;
+  insertCategory: (data: { category_name: string }) => Promise<any>;
 }
 
 const MiscContext = createContext<MiscContextType | undefined>(undefined);
@@ -135,7 +136,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User[]>([]);
   const [company, setCompany] = useState<Company[]>([]);
   const [department, setDepartment] = useState<Department[]>([]);
-  const [insurance, setInsurance] = useState<Insurance[]>([]);
+  const [insurancee, setInsurance] = useState<Insurance[]>([]);
   const [insuranceID, setInsuranceID] = useState<number | null>(null);
   const [unit, setUnit] = useState<Unit[]>([]);
   const [category, setCategory] = useState<Category[]>([]);
@@ -166,6 +167,26 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const insertCategory = async (data: { category_name: string }) => {
+    try {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+
+      const response = await axios.post(
+        "http://localhost/itam_api/asset.php?resource=category",
+        formData
+      );
+
+      if (response.data) {
+        setReload((count) => count + 1); // Refresh data
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Failed to insert category:", error);
+      return { error: "Insert failed" };
+    }
+  };
+
   const getInsurance = async () => {
     try {
       const res = await axios.get(
@@ -173,7 +194,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       );
       return res.data;
     } catch (err) {
-      console.error("Failed to fetch insurance", err);
+      console.error("Failed to fetch insurancee", err);
       return [];
     }
   };
@@ -312,9 +333,10 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
     mappedtype,
     insertSubCategory,
     insertMappedType,
-    insurance,
+    insurancee,
     insuranceID,
     setInsuranceID,
+    insertCategory,
   };
   return <MiscContext.Provider value={value}>{children}</MiscContext.Provider>;
 };

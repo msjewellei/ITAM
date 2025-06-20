@@ -65,6 +65,7 @@ const formSchema = z.object({
   notes: z.string(),
   brand: z.string(),
   file: z.array(z.instanceof(File)).optional(),
+  insurance_name: z.string().optional(),
   insurance_coverage: z.string().optional(),
   insurance_date_from: z.date().optional(),
   insurance_date_to: z.date().optional(),
@@ -73,13 +74,23 @@ const formSchema = z.object({
     sub_category_id: z.number().nullable(),
     type_id: z.number().nullable(),
   }),
+  insurance_id: z.string().nullable().optional(),
 });
 
 function AssetForm() {
   const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
 
-  const { category, subcategory, mappedtype, type, categoryID } = useMisc();
+  const {
+    category,
+    subcategory,
+    mappedtype,
+    type,
+    categoryID,
+    insurancee,
+    setInsuranceID,
+    insuranceID,
+  } = useMisc();
 
   const {
     handleInsuranceSave,
@@ -103,10 +114,12 @@ function AssetForm() {
       purchase_date: new Date(),
       notes: "",
       brand: "",
+      insurance_name: "",
       insurance_coverage: "",
       insurance_date_from: new Date(),
       insurance_date_to: new Date(),
       file: [],
+      insurance_id: "",
       category: {
         category_id: 0,
         sub_category_id: null,
@@ -128,17 +141,33 @@ function AssetForm() {
       return;
     }
 
+    // 🧼 Sanitize critical fields
+    const sanitizedSerial = values.serial_number?.trim() || null;
+
+    if (!sanitizedSerial) {
+      toast.error("Serial number is required.");
+      return;
+    }
     const finalValues = {
       ...values,
+      serial_number: sanitizedSerial,
+      asset_name: values.asset_name?.trim() || "",
+      location: values.location?.trim() || "",
+      notes: values.notes?.trim() || "",
+      brand: values.brand?.trim() || "",
+      insurance_id: Number(values.insurance_id),
       category_id: values.category?.category_id || "",
       sub_category_id: values.category?.sub_category_id || "",
       type_id: values.category?.type_id || "",
-      insurance_coverage: insurance.coverage || "",
-      insurance_date_from: insurance.dateFrom || "",
-      insurance_date_to: insurance.dateTo || "",
+      insurance_name: insurance?.name?.trim() || "",
+      insurance_coverage: insurance?.coverage?.trim() || "",
+      insurance_date_from: insurance?.dateFrom || "",
+      insurance_date_to: insurance?.dateTo || "",
     };
 
-    // console.log("Final Values:", finalValues);
+    // 🪵 Debug output
+    console.log("📦 Final payload before sending:", finalValues);
+    console.log("🧪 Final serial_number:", finalValues.serial_number);
 
     try {
       const response = await insertAsset(finalValues);
@@ -151,9 +180,27 @@ function AssetForm() {
           `Failed to add asset: ${response?.error || "Unknown error"}`
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Unexpected error:", error);
-      toast.error("Something went wrong. Please try again.");
+
+      // ✅ This logs the full response body from the PHP backend
+      if (error.response?.data) {
+        console.log("💥 Full backend error response:", error.response.data);
+
+        // Optional: Show missing fields if present
+        if (error.response.data.missing) {
+          toast.error(
+            `Missing fields: ${error.response.data.missing.join(", ")}`
+          );
+        } else {
+          toast.error(
+            error.response.data.error ||
+              "Something went wrong. Please try again."
+          );
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     }
   }
 
@@ -592,8 +639,61 @@ function AssetForm() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="insurance_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Insurance</FormLabel>
+                        <FormControl>
+                          <Select
+                            {...field}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setInsuranceID(Number(value));
+                              console.log("Selected insurance ID:", value);
+                            }}
+                            value={field.value ? String(field.value) : ""}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select an insurance" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {insurancee.map((cat) => (
+                                <SelectItem
+                                  key={cat.insurance_id}
+                                  value={String(cat.insurance_id)}
+                                >
+                                  {cat.insurance_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   {insurance && (
                     <div className="border border-dashed border-green-500 rounded-md p-4 space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="insurance_name"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Name"
+                                className="text-sm sm:text-base"
+                                value={insurance.name || ""}
+                                disabled
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <FormField
                         control={form.control}
                         name="insurance_coverage"

@@ -35,3 +35,17 @@ export const subcategoryColumns: ColumnDef<any>[] = [
     },
   },
 ];
+
+export const categoryColumns: ColumnDef<any>[] = [
+  {
+    accessorKey: "category_name",
+    header: "Name",
+    cell: ({ row }) => row.original.category_name,
+  },
+  {
+    accessorKey: "classification",
+    header: "Classification",
+    cell: () => "Category",
+  },
+   
+];

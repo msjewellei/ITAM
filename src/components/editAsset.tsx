@@ -31,26 +31,31 @@ import { useAsset } from "@/context/assetContext";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  asset_name: z.string(),
-  serial_number: z.string(),
-  category_id: z.string(),
-  sub_category_id: z.string(),
-  type_id: z.string(),
-  location: z.string(),
-  availability_status_id: z.string(),
-  specifications: z.string(),
-  asset_amount: z.coerce.number().min(1),
-  warranty_duration: z.number(),
-  warranty_due_date: z.date(),
-  purchase_date: z.date(),
-  notes: z.string(),
-  brand: z.string(),
-  insurance_id: z.string(),
-  insurance_coverage: z.string(),
-  insurance_date_from: z.date(),
-  insurance_date_to: z.date(),
-  file: z.union([z.instanceof(File), z.string()]).optional(),
-  asset_condition_id: z.string(),
+  asset_name: z.string().optional(),
+  serial_number: z.string().optional(),
+  category_id: z.string().optional(),
+  sub_category_id: z.string().optional().nullable(),
+  type_id: z.string().optional().nullable(),
+  location: z.string().optional(),
+  availability_status_id: z.coerce.number().optional().nullable(),
+  specifications: z.string().optional(),
+  asset_amount: z.coerce.number().optional(),
+  warranty_duration: z.number().optional(),
+  warranty_due_date: z.date().optional(),
+  purchase_date: z.date().optional(),
+  notes: z.string().optional(),
+  brand: z.string().optional(),
+  // insurance_id: z.string().optional(),
+  file: z
+    .union([
+      z.string(),
+      z.instanceof(File),
+      z.array(z.instanceof(File)),
+      z.array(z.string()),
+    ])
+    .optional(),
+
+  asset_condition_id: z.coerce.number().optional().nullable(),
 });
 
 export function UpdateAsset() {
@@ -65,23 +70,24 @@ export function UpdateAsset() {
         : "",
       sub_category_id: currentAsset?.sub_category_id
         ? String(currentAsset.sub_category_id)
+        : null,
+      type_id: currentAsset?.type_id ? String(currentAsset.type_id) : null,
+      location: currentAsset?.location ? String(currentAsset.location) : "",
+      availability_status_id: currentAsset?.location
+        ? String(currentAsset.location)
         : "",
-      type_id: currentAsset?.type_id ? String(currentAsset.type_id) : "",
-      location: "",
-      availability_status_id: "",
-      specifications: "",
+      specifications: currentAsset?.specifications ?? "",
       asset_amount: 1,
       warranty_duration: 0,
       warranty_due_date: new Date(),
       purchase_date: new Date(),
       notes: "",
       brand: "",
-      insurance_id: "",
-      insurance_coverage: "",
-      insurance_date_from: new Date(),
-      insurance_date_to: new Date(),
+      // insurance_id: "",
       file: undefined,
-      asset_condition_id: "",
+      asset_condition_id: currentAsset?.asset_condition_id
+        ? String(currentAsset.asset_condition_id)
+        : "",
     },
   });
 
@@ -96,6 +102,7 @@ export function UpdateAsset() {
     subCategoryID,
     status,
     condition,
+    typeID,
     setTypeID,
   } = useMisc();
   // const { getInsuranceByAsset } = useAsset();
@@ -125,13 +132,7 @@ export function UpdateAsset() {
   }, [categoryID, subCategoryID, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Form values:", values);
-    values.category_id = category.find(
-      (cat) => cat.category_name === values.category_id
-    )?.category_id;
-    values.sub_category_id = subcategory.find(
-      (sub) => sub.sub_category_name === values.sub_category_id
-    )?.sub_category_id;
+    console.log("🚀 SUBMIT CLICKED");
 
     if (!currentAsset?.asset_id) {
       console.error("Missing asset_id!");
@@ -139,15 +140,24 @@ export function UpdateAsset() {
       return;
     }
 
-    const warrantyDueDate = format(values.warranty_due_date, "yyyy-MM-dd");
-    const purchaseDate = format(values.purchase_date, "yyyy-MM-dd");
+    const cleanedValues = {
+      ...values,
+      file: values.file, // don't delete this
+      category_id: Number(categoryID),
+      sub_category_id:
+        subCategoryID === null || subCategoryID === ""
+          ? null
+          : Number(subCategoryID),
+
+      type_id: Number(typeID) || null,
+      warranty_due_date: format(values.warranty_due_date, "yyyy-MM-dd"),
+      purchase_date: format(values.purchase_date, "yyyy-MM-dd"),
+      status_id: values.availability_status_id, // ✅ map to what backend expects
+    };
 
     try {
-      const response = await updateAsset(currentAsset.asset_id, {
-        ...values,
-        warranty_due_date: warrantyDueDate,
-        purchase_date: purchaseDate,
-      });
+      const response = await updateAsset(currentAsset.asset_id, cleanedValues);
+      console.log("🚀 response", response);
 
       if (response && Object.keys(response).length > 0) {
         toast.success("Asset updated successfully!");
@@ -158,29 +168,32 @@ export function UpdateAsset() {
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
+      console.error("🔥 Update error:", error);
     }
   }
 
   const p = form.watch("purchase_date");
   const w = form.watch("warranty_due_date");
 
-
   return (
     <div className="flex flex-col ml-[calc(7rem+10px)] mt-15px mr-[calc(2.5rem)] h-full ">
       <div className="flex flex-row items-center justify-between">
         <p className="pl-1 pt-5 mb-4 text-lg">Update Asset</p>
-        <Link to="/assets">
-          <Button variant="link">
-            <ChevronLeft />
-            <p>Back</p>
-          </Button>
-        </Link>
+        <Button
+          variant="link"
+          onClick={() => {
+            window.location.href = "/assets";
+          }}
+        >
+          <ChevronLeft />
+          <p>Back</p>
+        </Button>
       </div>
       <div className="w-[calc(100vw-10rem)] rounded-xl bg-white min-h-[calc(100vh-13.10rem)] h-auto p-5 mb-5">
         <Form {...form}>
           <form
-            className="space-y-4"
             onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
             encType="multipart/form-data"
           >
             <div className="grid grid-cols-2 gap-4">
@@ -199,6 +212,19 @@ export function UpdateAsset() {
                           className="text-sm sm:text-base"
                           {...field}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Brand</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter brand" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -233,12 +259,11 @@ export function UpdateAsset() {
                           {...field}
                           onValueChange={(value) => {
                             field.onChange(value);
-                            setCategoryID(Number(value)); // Update the categoryID state
-                            // Reset the subcategory when category changes
-                            form.setValue("sub_category_id", ""); // Clear the subcategory on category change
-                            setSubCategoryID(null); // Reset subcategory ID
+                            setCategoryID(Number(value));
+                            form.setValue("sub_category_id", null);
+                            setSubCategoryID(null);
                           }}
-                          value={field.value}
+                          value={field.value ?? ""}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select a category" />
@@ -259,7 +284,6 @@ export function UpdateAsset() {
                     </FormItem>
                   )}
                 />
-
                 {categoryID === 2 && (
                   <FormField
                     control={form.control}
@@ -272,9 +296,9 @@ export function UpdateAsset() {
                             {...field}
                             onValueChange={(value) => {
                               field.onChange(value);
-                              setSubCategoryID(Number(value)); // Update the subcategory ID
+                              setSubCategoryID(Number(value));
                             }}
-                            value={field.value}
+                            value={field.value ?? ""}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select a subcategory" />
@@ -296,7 +320,6 @@ export function UpdateAsset() {
                     )}
                   />
                 )}
-
                 {categoryID === 2 && subCategoryID === 5 && (
                   <FormField
                     control={form.control}
@@ -311,7 +334,7 @@ export function UpdateAsset() {
                               field.onChange(value);
                               setTypeID(Number(value)); // Update the type ID
                             }}
-                            value={field.value}
+                            value={field.value ?? ""}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select a type" />
@@ -333,7 +356,6 @@ export function UpdateAsset() {
                     )}
                   />
                 )}
-
                 {categoryID === 1 && (
                   <FormField
                     control={form.control}
@@ -356,24 +378,6 @@ export function UpdateAsset() {
                 )}
                 <FormField
                   control={form.control}
-                  name="brand"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Brand</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          {...field}
-                          className="text-sm sm:text-base"
-                          placeholder="Ex. Dell"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="asset_condition_id"
                   render={({ field }) => (
                     <FormItem>
@@ -381,7 +385,7 @@ export function UpdateAsset() {
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
-                          value={field.value}
+                          value={field.value ?? ""}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select status" />
@@ -419,104 +423,7 @@ export function UpdateAsset() {
                     </FormItem>
                   )}
                 />
-               {/* {insuranceId && (
-                  <div className="border border-dashed border-green-500 rounded-md p-4 space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="insurance_coverage"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel>Coverage</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Coverage"
-                              className="text-sm sm:text-base"
-                              value={insurance?.coverage || ""}
-
-                              disabled
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex items-end gap-2">
-                      <div className="flex-1">
-                        <FormField
-                          control={form.control}
-                          name="insurance_date_from"
-                          render={() => (
-                            <FormItem>
-                              <FormLabel>Date From</FormLabel>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  className={cn(
-                                    "w-full justify-start text-left font-normal text-sm",
-                                    !insurance?.dateFrom &&
-                                      "text-muted-foreground",
-                                    "cursor-default"
-                                  )}
-                                  disabled
-                                >
-                                  <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
-                                  {insurance?.dateFrom ? (
-                                    new Date(
-                                      insurance.dateFrom
-                                    ).toLocaleDateString()
-                                  ) : (
-                                    <span className="text-[#737373]">
-                                      Choose Date
-                                    </span>
-                                  )}
-                                </Button>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="w-6 text-center text-lg pb-1">-</div>
-                      <div className="flex-1">
-                        <FormField
-                          control={form.control}
-                          name="insurance_date_to"
-                          render={() => (
-                            <FormItem>
-                              <FormLabel>Date To</FormLabel>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  className={cn(
-                                    "w-full justify-start text-left font-normal text-sm",
-                                    !insurance?.dateTo &&
-                                      "text-muted-foreground",
-                                    "cursor-default"
-                                  )}
-                                  disabled
-                                >
-                                  <CalendarIcon className="mr-2 h-4 w-4 text-[#737373]" />
-                                  {insurance?.dateTo ? (
-                                    new Date(
-                                      insurance.dateTo
-                                    ).toLocaleDateString()
-                                  ) : (
-                                    <span className="text-[#737373]">
-                                      Choose Date
-                                    </span>
-                                  )}
-                                </Button>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )} */}
               </div>
-
               <div className="flex flex-col gap-4">
                 <FormField
                   control={form.control}
@@ -617,7 +524,6 @@ export function UpdateAsset() {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="warranty_due_date"
@@ -723,7 +629,13 @@ export function UpdateAsset() {
                               id="picture"
                               type="file"
                               accept="image/*"
-                              onChange={(e) => onChange(e.target.files?.[0])}
+                              multiple
+                              onChange={(e) => {
+                                const files = e.target.files;
+                                if (files && files.length > 0) {
+                                  onChange(Array.from(files));
+                                }
+                              }}
                               {...rest}
                             />
                           </FormControl>
@@ -743,7 +655,6 @@ export function UpdateAsset() {
                                 />
                               </>
                             )}
-
                           {filesArray.length > 0 && (
                             <div className="mt-2">
                               <p className="text-sm text-gray-600 mb-1">
