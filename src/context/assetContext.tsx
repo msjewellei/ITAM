@@ -157,42 +157,13 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   const insertAsset = async (data: Asset) => {
     try {
       const formData = new FormData();
-
-      // Flatten category object
-      const flatData = {
-        ...data,
-        category_id: data.category?.category_id || "",
-        sub_category_id: data.category?.sub_category_id || "",
-        type_id: data.category?.type_id || "",
-      };
-
-      // Delete nested category
-      delete (flatData as any).category;
-
-      Object.entries(flatData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          if (value instanceof Date) {
-            formData.append(key, value.toISOString().split("T")[0]); // format: YYYY-MM-DD
-          } else {
-            formData.append(key, String(value));
-          }
-        }
+      formData.append("data", JSON.stringify(data));
+      data.file.forEach((file) => {
+        formData.append("file[]", file);
       });
-
-      // Attach files
-      data.file?.forEach((file) => {
-        if (file && file.name) {
-          formData.append("file[]", file);
-        }
-      });
-
-      const response = await axios.post(
-        "http://localhost/itam_api/asset.php?resource=asset",
-        formData
-      );
-
+      const response = await axios.post(url, formData);
       if (response.data) {
-        setReload((count) => count + 1);
+        setReload((count) => (count = +1));
         return response.data;
       }
     } catch (error) {
