@@ -270,8 +270,6 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
           }
         });
       }
-
-      // Remove `file` from updatedData to avoid duplication
       const { file, ...dataWithoutFile } = updatedData;
 
       // Append the rest of the data as JSON
