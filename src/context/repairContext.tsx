@@ -148,7 +148,7 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
       setCompletedRepairs(data || []);
     };
     fetchCompleted();
-  }, [getCompletedRepairs]);
+  }, []);
 
   const value = {
     repair,
