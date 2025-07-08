@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, XAxis } from "recharts";
 
 import {
   Card,
@@ -27,6 +27,16 @@ interface ChartBarDefaultProps {
   title?: string;
   description?: string;
 }
+const COLORS = [
+  "#4E79A7", // muted blue
+  "#F28E2B", // orange
+  "#E15759", // soft red
+  "#76B7B2", // teal
+  "#59A14F", // green
+  "#EDC949", // mustard
+];
+
+const getBarColor = (index: number) => COLORS[index % COLORS.length];
 
 const defaultData = [
   { month: "January", desktop: 186 },
@@ -65,7 +75,7 @@ export function ChartBarDefault({
       <CardContent>
         <div className="w-full max-w-sm mx-auto">
           <ChartContainer config={chartConfig}>
-           <BarChart width={500} height={300} data={data}>
+            <BarChart width={500} height={300} data={data}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey={xKey}
@@ -78,7 +88,11 @@ export function ChartBarDefault({
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
-              <Bar dataKey={dataKey} fill="var(--color-desktop)" radius={8} />
+              <Bar dataKey={dataKey} radius={8}>
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getBarColor(index)} />
+                ))}
+              </Bar>
             </BarChart>
           </ChartContainer>
         </div>

@@ -129,9 +129,6 @@ function SettingsPage() {
           </div>
         </CollapsiblePanel>
 
-        <CollapsiblePanel title="Image Management">
-          <ImageManagementForm />
-        </CollapsiblePanel>
       </div>
     </Dialog>
   );

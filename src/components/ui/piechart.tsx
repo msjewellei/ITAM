@@ -30,7 +30,16 @@ interface PieChartProps {
   };
   innerRadius?: number;
 }
-const colors = ["#283444", "#3a4a5c", "#1f2b3a", "#425269", "#55627b"];
+const COLORS = [
+  "#4E79A7", // muted blue
+  "#F28E2B", // orange
+  "#E15759", // soft red
+  "#76B7B2", // teal
+  "#59A14F", // green
+  "#EDC949", // mustard
+];
+
+
 
 export function PieCharts({
   title,
@@ -69,7 +78,7 @@ export function PieCharts({
               {data.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={colors[index % colors.length]}
+                  fill={COLORS[index % COLORS.length]}
                 />
               ))}
             </Pie>
