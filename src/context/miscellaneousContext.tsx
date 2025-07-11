@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, {
+import {
   createContext,
   useState,
   useContext,
@@ -21,11 +21,6 @@ interface User {
   unit_id: number | null;
   first_name: string;
   last_name: string;
-}
-
-interface NewSubcategory {
-  category_id: number;
-  sub_category_name: string;
 }
 
 interface Company {
@@ -155,6 +150,12 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
   const [mappedtype, setMappedType] = useState<MappedType[]>([]);
   const [reload, setReload] = useState(0);
 
+  type InsertMappedTypeResponse = {
+  success?: boolean;
+  error?: string;
+  [key: string]: any;
+};
+
   let url = "http://localhost/itam_api/asset.php?resource=";
   const getResource = async (resource: string) => {
     try {
@@ -178,7 +179,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       );
 
       if (response.data) {
-        setReload((count) => count + 1); // Refresh data
+        setReload((count) => count + 1);
         return response.data;
       }
     } catch (error) {
@@ -224,7 +225,7 @@ export const MiscProvider = ({ children }: { children: ReactNode }) => {
       setMappedType(mappedtypes);
     };
     setup();
-  }, []);
+  }, [reload]);
 
   const filteredSubcategories: Subcategory[] | [] = useMemo(() => {
     if (!categoryID) return [];

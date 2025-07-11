@@ -49,7 +49,7 @@ const IssuanceContext = createContext<IssuanceContextType | undefined>(
   undefined
 );
 export const IssuanceProvider = ({ children }: { children: ReactNode }) => {
-  const { user, userID } = useMisc();
+  const { userID } = useMisc();
   const [issuance, setIssuance] = useState<Issuance[]>([]);
   const [issuanceID, setIssuanceID] = useState<number | null>(null);
   const [reload ,setReload] = useState(0);
@@ -74,7 +74,7 @@ export const IssuanceProvider = ({ children }: { children: ReactNode }) => {
       console.log(JSON.stringify(data));
       const response = await axios.post(url, formData);
       if (response.data) {
-        setReload(count => count=+1)
+        setReload((count) => count + 1);
         return response.data;
       }
     } catch (error) {
@@ -128,7 +128,8 @@ export const IssuanceProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.data) {
         console.log("Issuance updated successfully:", response.data);
-        setReload(count => count=+1)
+        setReload((count) => count + 1);
+
         return response.data;
       }
     } catch (error) {

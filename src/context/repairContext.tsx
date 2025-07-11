@@ -73,7 +73,7 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
       // console.log(JSON.stringify(data));
       const response = await axios.post(url, formData);
       if (response.data) {
-        setReload((count) => (count = +1));
+        setReload((count) => count + 1);
         return response.data;
       }
     } catch (error) {
@@ -90,7 +90,7 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
       if (Array.isArray(rawData)) {
         const completed = rawData.filter(
           (item: Repair) =>
-            item.status_id === 5 &&
+            Number(item.status_id) === 5 &&
             item.repair_completion_date !== null &&
             String(item.repair_completion_date) !== "" &&
             String(item.repair_completion_date) !== "0000-00-00"
@@ -134,7 +134,8 @@ export const RepairProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.data) {
         // console.log("Repair updated successfully:", response.data);
-        setReload((count) => (count = +1));
+        setReload((count) => count + 1);
+
         return response.data;
       }
     } catch (error) {

@@ -1,5 +1,4 @@
 import axios from "axios";
-import { count } from "console";
 import { useLocation } from "react-router-dom";
 import {
   createContext,
@@ -92,7 +91,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     try {
       const cleanedAssets = assets
-        .filter((asset) => asset.serial_number?.trim()) // Remove assets without serial_number
+        .filter((asset) => asset.serial_number?.trim())
         .map((asset) => {
           const {
             amount,
@@ -137,7 +136,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
         );
       }
 
-      await axios.post(
+      const response = await axios.post(
         "http://localhost/itam_api/asset.php?resource=asset&action=batchInsert",
         qs.stringify({ data: JSON.stringify(cleanedAssets) }),
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
@@ -163,7 +162,7 @@ export const AssetProvider = ({ children }: { children: ReactNode }) => {
       });
       const response = await axios.post(url, formData);
       if (response.data) {
-        setReload((count) => (count = +1));
+        setReload((count) => count + 1);
         return response.data;
       }
     } catch (error) {
